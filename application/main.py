@@ -6,7 +6,7 @@ from PIL import Image
 from PIL.ImageQt import ImageQt, toqpixmap
 from utils import *
 import skvideo.io
-    
+import cv2
 
 class MainWindow(QtWidgets.QMainWindow):
 
@@ -16,12 +16,29 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.cap = None
         self.vid_opened = False
+        
+        self.signalSetup()
         # uic.loadUi("mainwindow.ui", self)
         im = Image.open("picasso.jpg")
         pixImg = toqpixmap(im)
         self.ui.l_video.setPixmap(pixImg)
         self.openVideo("a.mp4")
-        self.nextFrame().show()
+        img = self.nextFrame()
+        p = toqpixmap(img)
+        #self.ui.l_video.setPixmap(toqpixmap(self.nextFrame()))
+
+
+    def signalSetup(self):
+        """
+        Setup for signal connections
+        """
+        self.ui.b_video_right.clicked.connect(self.changeVideoToNextFrame)
+
+    
+    def changeVideoToNextFrame(self):
+        print("Hello")
+        self.ui.l_video.setPixmap(toqpixmap(self.nextFrame()))
+
     
     def openVideo(self, vid_path):
         """Opens the video and stores it's iterator in self.cap
@@ -41,18 +58,16 @@ class MainWindow(QtWidgets.QMainWindow):
         assert self.vid_opened, ("Calling nextFrame before opening the video")
         return Image.fromarray(next(self.cap.nextFrame()))
     
-    def closeVideo(self):
+    def __del__(self):
         """
+        Destructor:
         Closes the video if it was opened
         """
         if self.vid_opened:
             self.cap.close()
-        
 
 
 app = QtWidgets.QApplication(sys.argv)
 window = MainWindow()
-
 window.show()
-window.closeVideo()
 sys.exit(app.exec_())
