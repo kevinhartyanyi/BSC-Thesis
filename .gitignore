@@ -1,6 +1,9 @@
 *.jpg
 *.png
 .vscode/
+*.mp4
+*.mkv
+*.avi
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
