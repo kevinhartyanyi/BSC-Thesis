@@ -4,6 +4,7 @@
 *.mp4
 *.mkv
 *.avi
+env/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
