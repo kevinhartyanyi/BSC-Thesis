@@ -63,6 +63,9 @@
        </layout>
       </item>
       <item>
+       <widget class="QWidget" name="widget" native="true"/>
+      </item>
+      <item>
        <widget class="QLabel" name="l_video">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
