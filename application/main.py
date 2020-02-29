@@ -71,3 +71,21 @@ app = QtWidgets.QApplication(sys.argv)
 window = MainWindow()
 window.show()
 sys.exit(app.exec_())
+
+
+"""
+
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        self.cap = None
+        self.vid_opened = False
+        
+        self.signalSetup()
+        #im = Image.open("picasso.jpg")
+        im = Image.open(app.get_resource("picasso.jpg"))
+        pixImg = toqpixmap(im)
+        self.ui.l_video.setPixmap(pixImg)
+        self.openVideo(app.get_resource("a.mp4"))
+        img = self.nextFrame()
+        p = toqpixmap(img)
+"""

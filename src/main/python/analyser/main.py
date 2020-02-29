@@ -2,19 +2,19 @@ from fbs_runtime.application_context.PyQt5 import ApplicationContext
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+# https://github.com/pypa/setuptools/issues/1963
 from mywindow import Ui_MainWindow
 from PIL import Image
 from PIL.ImageQt import ImageQt, toqpixmap
 from utils import *
 import skvideo.io
-import cv2
-
 import sys
 
 class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, app, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        #self.ui.l_video.setPixmap(toqpixmap(self.nextFrame()))
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.cap = None
@@ -28,7 +28,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.openVideo(app.get_resource("a.mp4"))
         img = self.nextFrame()
         p = toqpixmap(img)
-        #self.ui.l_video.setPixmap(toqpixmap(self.nextFrame()))
 
 
     def signalSetup(self):
@@ -61,9 +60,8 @@ class MainWindow(QtWidgets.QMainWindow):
         assert self.vid_opened, ("Calling nextFrame before opening the video")
         return Image.fromarray(next(self.cap.nextFrame()))
     
-    def __del__(self):
+    def closeVid(self):
         """
-        Destructor:
         Closes the video if it was opened
         """
         if self.vid_opened:
@@ -77,4 +75,5 @@ if __name__ == '__main__':
     window = MainWindow(app=appctxt)
     window.show()
     exit_code = appctxt.app.exec_()
+    window.closeVid()
     sys.exit(exit_code)
