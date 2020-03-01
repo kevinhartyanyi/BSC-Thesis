@@ -14,7 +14,10 @@ class Worker(QObject):
 
     @pyqtSlot()
     def startCounting(self): # A slot takes no params
-        while(self.current_idx < self.end_idx and self.running):
+        """
+        Start counting by fps and return signal to update video
+        """
+        while(self.current_idx < self.end_idx - 1 and self.running):
             print(self.current_idx)
             self.intReady.emit()
             time.sleep(self.wait)
@@ -23,4 +26,7 @@ class Worker(QObject):
         self.finished.emit()
     
     def stop(self):
+        """
+        Stops the counting
+        """
         self.running = False
