@@ -4,11 +4,11 @@ class vidData:
         super().__init__()
         self.current_idx = None
         self.end_idx = None
-        self.fps = None
         self.end_idx = None
         self.height = None
         self.width = None
         self.channels = None
+        self.fps = 30
 
     def setup(self, vid_shape):
         """
@@ -23,8 +23,7 @@ class vidData:
         self.channels = channels
 
         self.current_idx = 0
-        self.end_idx = frames
-        self.fps = 30
+        self.end_idx = frames        
     
     def getStartData(self):
         """

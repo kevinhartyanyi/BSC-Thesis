@@ -66,7 +66,11 @@ class MainWindow(QtWidgets.QMainWindow):
         check = re.search("[1-9][0-9]*", self.ui.t_fps.text())
         if check:
             num = check.group()
-            self.vid_data.fps = int(num)
+            fps = int(num)
+            if fps > 50:
+                print("Warning: Too big number for fps. Falling back to 50 fps.")
+                fps = 50
+            self.vid_data.fps = fps
             self.ui.t_fps.setText(num)
         else:
             print("Wrong Input For Fps")
@@ -135,9 +139,12 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         if self.vid_data.current_idx < self.vid_data.end_idx - 1:
             self.ui.l_video.setPixmap(toqpixmap(self.nextFrame()))
-            
 
     def changeVideoToPrevFrame(self):
+        """
+        Change video to previous frame.
+        If there are images left in prev_frame then use them, otherwise jump to the previous frame.
+        """
         cur = self.vid_data.current_idx
         print("Cur Frame",cur)
         if cur - 1 > 0:
@@ -150,7 +157,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 print("No more elements are left in frameHolder. Reopening video.")
                 self.jumpToFrame(cur, self.mv)
 
-    def jumpToFrame(self, n_frame, video):    
+    def jumpToFrame(self, n_frame, video):  
+        """
+        Open video and jump to the specified frame
+        
+        Arguments:
+            n_frame {int} -- frame number to jump to
+            video {string} -- video path
+        """
         print("Jumping to frame: {0}".format(n_frame))    
         if self.vid_opened:
             self.closeVid()
@@ -159,23 +173,18 @@ class MainWindow(QtWidgets.QMainWindow):
             self.nextFrame()
         self.ui.l_video.setPixmap(toqpixmap(self.nextFrame()))
     
-    def openVideo(self, vid_path, overrite_vid_data = True):
+    def openVideo(self, vid_path):
         """
-        Opens the video and stores it's iterator in self.cap
-        Loads video data into self.vid_data if overrite_vid_data is True 
+        Opens the video and stores it's iterator in self.cap 
         
         Arguments:
             vid_path {string} -- path to video
-        
-        Keyword Arguments:
-            overrite_vid_data {bool} -- overrite self.vid_data (default: {True})
         """
         if self.vid_opened:
             print("Warning: Trying to open video that has already been opened")
             self.closeVid()
         self.cap = skvideo.io.FFmpegReader(vid_path)
         self.vid_opened = True
-        #if overrite_vid_data:
         self.vid_data.setup(self.cap.getShape())
         self.prev_frames.reset()
     
