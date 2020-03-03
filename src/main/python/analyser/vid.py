@@ -11,9 +11,10 @@ class vidData:
         self.fps = 30
     
     def setupWithList(self, img_list):
+        width, height = Image.open(img_list[0]).size
+        
         self.height = height
         self.width = width
-        print(Image.open(img_list[0]).size)
 
         self.current_idx = 0
         self.end_idx = len(img_list) 

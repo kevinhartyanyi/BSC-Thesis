@@ -11,6 +11,8 @@ import utils
 import worker
 import vid
 import frameHolder
+import imageHolder
+import cycleVid
 import skvideo.io
 import sys
 import time
@@ -30,13 +32,22 @@ class MainWindow(QtWidgets.QMainWindow):
         self.thread = None
         self.vid_opened = False
         self.vid_running = False
+        self.images = None
+        self.cycle_vid = cycleVid.cycleVid()
         self.vid_data = vid.vidData()
         self.prev_frames = frameHolder.frameHolder(self.MAX_LEN)        
+        self.image_holder = imageHolder.imageHolder(self.MAX_LEN)
+        #self.ui.l_video.setScaledContents(True)
 
         self.signalSetup()
-        self.mv = app.get_resource("data/vid_0001/Pictures")
-        self.images = utils.readImg(self.mv)
-        #self.openVideo(self.mv) 
+        #self.mv = app.get_resource("data/vid_0001/Pictures")
+        #self.openVideo_new(self.mv)
+        self.mv = app.get_resource("data/vid_0001/2011_09_26_drive_0001.mp4")
+        self.of = app.get_resource("data/vid_0001/pwc.mp4")
+        self.cycle_vid.add("original", self.mv)
+        self.cycle_vid.add("opticalFlow", self.of)
+
+        self.openVideo(self.mv) 
 
 
     def signalSetup(self):
@@ -47,6 +58,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.b_video_left.clicked.connect(self.changeVideoToPrevFrame)
         self.ui.actionPlay.triggered.connect(self.startVideo)
         self.ui.t_fps.textChanged.connect(self.changeFps)
+        self.ui.b_video_up.clicked.connect(self.cycleUp)
+        self.ui.b_video_down.clicked.connect(self.cycleDown)
 
     def changeFps(self):
         """
@@ -65,43 +78,15 @@ class MainWindow(QtWidgets.QMainWindow):
             print("Wrong Input For Fps")
             self.ui.t_fps.setText("")
 
-    def startVideo_new(self): 
-        """
-        Starts video playing, or stops it if it is running.
-        Starts video from the beginning if it is at it's end.
-        Creates new worker thread for video playing.
-        """    
-        if self.vid_running:
-            self.stopVideo()
-        else:
-            if self.vid_data.current_idx >= self.vid_data.end_idx - 1:
-                print("Reopen video from start")
-                self.closeVid()
-                self.openVideo(self.mv)
-            print("Start Video")
-            print("Disable nextFrame Button")
-            print("Disable prevFrame Button")
-            self.vid_running = True
-            self.ui.b_video_left.setEnabled(False)
-            self.ui.b_video_right.setEnabled(False)
-            # 1 - create Worker and Thread inside the Form
-            self.worker = worker.Worker(*self.vid_data.getStartData())  # no parent!
-            self.thread = QThread()  # no parent!
+    def cycleUp(self):
+        vid = self.cycle_vid.up()
+        self.closeVid()
+        self.openVideo(vid)
 
-            # 2 - Connect Worker`s Signals to Form method slots to post data.
-            self.worker.intReady.connect(self.changeVideoToNextFrame)
-
-            # 3 - Move the Worker object to the Thread object
-            self.worker.moveToThread(self.thread)
-
-            # 4 - Connect Worker Signals to the Thread slots
-            self.worker.finished.connect(self.stopVideo)
-
-            # 5 - Connect Thread started signal to Worker operational slot method
-            self.thread.started.connect(self.worker.startCounting)
-
-            # 6 - Start the thread
-            self.thread.start()
+    def cycleDown(self):
+        vid = self.cycle_vid.down()
+        self.closeVid()
+        self.openVideo(vid)
 
     def startVideo(self): 
         """
@@ -159,7 +144,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.actionPlay.setEnabled(True)
             self.ui.b_video_left.setEnabled(True)
             self.ui.b_video_right.setEnabled(True)
-    
+
     def changeVideoToNextFrame(self):
         """
         Display the next frame of the video
@@ -214,7 +199,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vid_opened = True
         self.vid_data.setup(self.cap.getShape())
         self.prev_frames.reset()
-    
+        self.changeVideoToNextFrame()
+
     def nextFrame(self):
         """
         Returns the next frame in the video as a PIL Image, resized into the size of the image holder
@@ -249,6 +235,101 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.vid_opened:
             self.vid_opened = False
             self.cap.close()
+
+    def startVideo_new(self): 
+        """
+        Starts video playing, or stops it if it is running.
+        Starts video from the beginning if it is at it's end.
+        Creates new worker thread for video playing.
+        """    
+        if self.vid_running:
+            self.stopVideo()
+        else:
+            if self.vid_data.current_idx >= self.vid_data.end_idx - 1:
+                print("Reopen video from start")
+                self.openVideo_new(self.mv)
+            print("Start Video")
+            print("Disable nextFrame Button")
+            print("Disable prevFrame Button")
+            self.vid_running = True
+            self.ui.b_video_left.setEnabled(False)
+            self.ui.b_video_right.setEnabled(False)
+            # 1 - create Worker and Thread inside the Form
+            self.worker = worker.Worker(*self.vid_data.getStartData())  # no parent!
+            self.thread = QThread()  # no parent!
+
+            # 2 - Connect Worker`s Signals to Form method slots to post data.
+            self.worker.intReady.connect(self.changeVideoToNextFrame_new)
+
+            # 3 - Move the Worker object to the Thread object
+            self.worker.moveToThread(self.thread)
+
+            # 4 - Connect Worker Signals to the Thread slots
+            self.worker.finished.connect(self.stopVideo)
+
+            # 5 - Connect Thread started signal to Worker operational slot method
+            self.thread.started.connect(self.worker.startCounting)
+
+            # 6 - Start the thread
+            self.thread.start()
+
+    def openVideo_new(self, img_dir):
+        if self.vid_opened:
+            print("Warning: Trying to open video that has already been opened")
+        self.vid_opened = True
+        self.images = utils.readImg(img_dir)
+        self.image_holder.setup(self.images)
+        self.vid_data.setupWithList(self.images)
+
+    def prevFrame_new(self):
+        self.vid_data.current_idx -= 1
+        img = Image.open(self.images[self.vid_data.current_idx - 1])
+        width = self.ui.l_video.width()
+        height = self.ui.l_video.height()
+        img = utils.resizeImg(img, width)
+        img = utils.fillImg(img, size=(width, height))
+
+        return img
+
+    def nextFrame_new(self):
+        """
+        Returns the next frame in the video as a PIL Image, resized into the size of the image holder
+        keeping aspect ratios and filling the remaining place with some colour
+        
+        Returns:
+            PIL Image -- The next frame of the video
+        """
+        assert self.vid_opened, ("Calling nextFrame before opening the video")
+        assert self.vid_data.current_idx < self.vid_data.end_idx - 1, ("Calling nextFrame at the end of video")
+
+        self.vid_data.current_idx += 1
+        img = self.image_holder.nextI()
+        width = self.ui.l_video.width()
+        height = self.ui.l_video.height()
+        img = utils.resizeImg(img, width)
+        img = utils.fillImg(img, size=(width, height))
+
+        return img
+
+    def changeVideoToNextFrame_new(self):
+        """
+        Display the next frame of the video
+        """
+        if self.vid_data.current_idx < self.vid_data.end_idx - 1:
+            self.ui.l_video.setPixmap(toqpixmap(self.nextFrame_new()))
+
+    def changeVideoToPrevFrame_new(self):
+        """
+        Change video to previous frame.
+        If there are images left in prev_frame then use them, otherwise jump to the previous frame.
+        """
+        cur = self.vid_data.current_idx
+        print("Cur Frame",cur)
+        if cur - 1 > 0:
+            cur -= 1
+            self.vid_data.current_idx = cur
+            img = self.prevFrame_new()
+            self.ui.l_video.setPixmap(toqpixmap(img))
 
 
 if __name__ == '__main__':
