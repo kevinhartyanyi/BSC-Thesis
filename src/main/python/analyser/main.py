@@ -15,15 +15,13 @@ import skvideo.io
 import sys
 import time
 import re
-
-
+#from speed import speed_vectors
 
 
 class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, app, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        #self.ui.l_video.setPixmap(toqpixmap(self.nextFrame()))
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.MAX_LEN = 20
@@ -33,21 +31,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vid_opened = False
         self.vid_running = False
         self.vid_data = vid.vidData()
-        self.prev_frames = frameHolder.frameHolder(self.MAX_LEN)
-
-        #self.ui.l_video.setScaledContents(True)
-
-
-
-        #self.player = QtMultimedia.QMediaPlayer(None, QtMultimedia.QMediaPlayer.VideoSurface)
-        #self.player.setMedia(QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(app.get_resource("a.mp4"))))
-        #self.player.setVideoOutput(self.ui.widget)
-        #self.player.play()
-        
+        self.prev_frames = frameHolder.frameHolder(self.MAX_LEN)        
 
         self.signalSetup()
-        self.mv = app.get_resource("b.mp4")
-        self.openVideo(self.mv) 
+        self.mv = app.get_resource("data/vid_0001/Pictures")
+        self.images = utils.readImg(self.mv)
+        #self.openVideo(self.mv) 
 
 
     def signalSetup(self):
@@ -75,6 +64,44 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             print("Wrong Input For Fps")
             self.ui.t_fps.setText("")
+
+    def startVideo_new(self): 
+        """
+        Starts video playing, or stops it if it is running.
+        Starts video from the beginning if it is at it's end.
+        Creates new worker thread for video playing.
+        """    
+        if self.vid_running:
+            self.stopVideo()
+        else:
+            if self.vid_data.current_idx >= self.vid_data.end_idx - 1:
+                print("Reopen video from start")
+                self.closeVid()
+                self.openVideo(self.mv)
+            print("Start Video")
+            print("Disable nextFrame Button")
+            print("Disable prevFrame Button")
+            self.vid_running = True
+            self.ui.b_video_left.setEnabled(False)
+            self.ui.b_video_right.setEnabled(False)
+            # 1 - create Worker and Thread inside the Form
+            self.worker = worker.Worker(*self.vid_data.getStartData())  # no parent!
+            self.thread = QThread()  # no parent!
+
+            # 2 - Connect Worker`s Signals to Form method slots to post data.
+            self.worker.intReady.connect(self.changeVideoToNextFrame)
+
+            # 3 - Move the Worker object to the Thread object
+            self.worker.moveToThread(self.thread)
+
+            # 4 - Connect Worker Signals to the Thread slots
+            self.worker.finished.connect(self.stopVideo)
+
+            # 5 - Connect Thread started signal to Worker operational slot method
+            self.thread.started.connect(self.worker.startCounting)
+
+            # 6 - Start the thread
+            self.thread.start()
 
     def startVideo(self): 
         """

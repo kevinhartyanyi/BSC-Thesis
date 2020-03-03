@@ -1,14 +1,22 @@
+from PIL import Image
 
 class vidData:
     def __init__(self):
         super().__init__()
         self.current_idx = None
         self.end_idx = None
-        self.end_idx = None
         self.height = None
         self.width = None
         self.channels = None
         self.fps = 30
+    
+    def setupWithList(self, img_list):
+        self.height = height
+        self.width = width
+        print(Image.open(img_list[0]).size)
+
+        self.current_idx = 0
+        self.end_idx = len(img_list) 
 
     def setup(self, vid_shape):
         """
