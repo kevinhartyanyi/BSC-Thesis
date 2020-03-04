@@ -40,23 +40,23 @@ class MainWindow(QtWidgets.QMainWindow):
         #self.ui.l_video.setScaledContents(True)
 
         self.signalSetup()
-        #self.mv = app.get_resource("data/vid_0001/Pictures")
-        #self.openVideo_new(self.mv)
-        self.mv = app.get_resource("data/vid_0001/2011_09_26_drive_0001.mp4")
+        self.mv = app.get_resource("data/vid_0001/Pictures")
+        self.openVideo_new(self.mv)
+        #self.mv = app.get_resource("data/vid_0001/2011_09_26_drive_0001.mp4")
         self.of = app.get_resource("data/vid_0001/pwc.mp4")
         self.cycle_vid.add("original", self.mv)
         self.cycle_vid.add("opticalFlow", self.of)
 
-        self.openVideo(self.mv) 
+        #self.openVideo(self.mv)
 
 
     def signalSetup(self):
         """
         Setup for signal connections
         """
-        self.ui.b_video_right.clicked.connect(self.changeVideoToNextFrame)
-        self.ui.b_video_left.clicked.connect(self.changeVideoToPrevFrame)
-        self.ui.actionPlay.triggered.connect(self.startVideo)
+        self.ui.b_video_right.clicked.connect(self.changeVideoToNextFrame_new)
+        self.ui.b_video_left.clicked.connect(self.changeVideoToPrevFrame_new)
+        self.ui.actionPlay.triggered.connect(self.startVideo_new)
         self.ui.t_fps.textChanged.connect(self.changeFps)
         self.ui.b_video_up.clicked.connect(self.cycleUp)
         self.ui.b_video_down.clicked.connect(self.cycleDown)
@@ -278,7 +278,9 @@ class MainWindow(QtWidgets.QMainWindow):
             print("Warning: Trying to open video that has already been opened")
         self.vid_opened = True
         self.images = utils.readImg(img_dir)
-        self.image_holder.setup(self.images)
+        width = self.ui.l_video.width()
+        height = self.ui.l_video.height()
+        self.image_holder.setup(self.images, 2000, 1000)
         self.vid_data.setupWithList(self.images)
 
     def prevFrame_new(self):
@@ -303,11 +305,9 @@ class MainWindow(QtWidgets.QMainWindow):
         assert self.vid_data.current_idx < self.vid_data.end_idx - 1, ("Calling nextFrame at the end of video")
 
         self.vid_data.current_idx += 1
-        img = self.image_holder.nextI()
         width = self.ui.l_video.width()
         height = self.ui.l_video.height()
-        img = utils.resizeImg(img, width)
-        img = utils.fillImg(img, size=(width, height))
+        img = self.image_holder.nextI(2000, 1000)        
 
         return img
 
