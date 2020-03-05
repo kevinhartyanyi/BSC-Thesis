@@ -6,18 +6,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from multiprocessing import Pool
-from queue import Queue
-
-
-
-
-def loadImg(img_path):
-    img_p, ids, width, height = img_path
-    img = Image.open(img_p)
-    img = utils.resizeImg(img, width)
-    img = utils.fillImg(img, size=(width, height))
-    return img, ids
-
+import time
 
 
 
@@ -27,13 +16,11 @@ class imageHolder:
         self.images = deque(maxlen=maxSize)
         self.maxLen = maxSize
         self.vidLen = None
-        self.idx = -1
         self.list_idx = 0
         self.img_list = None
         self.width = 0
         self.height = 0
-        self.dict = {}
-        self.que = Queue()
+        self.img_dict = {}
         self.threadpool = QThreadPool()
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
 
@@ -43,102 +30,25 @@ class imageHolder:
         self.list_idx = 0
         self.width = width
         self.height = height
-        self.load2()
+        self.img_dict.clear() #?
+        self.load()
 
-    def loadImgQt(self, img_path, ids):
+    def loadImg(self, img_path, idx):
         img = Image.open(img_path)
         img = utils.resizeImg(img, self.width)
         img = utils.fillImg(img, size=(self.width, self.height))
-        self.que.put((img, ids))
-        return img, ids
+        print("Added: ", idx)
+        self.img_dict[idx] = (img, idx)
 
-    def load2(self):
-        start = self.list_idx
-        self.start = start
+    def load(self):        
+        start = self.list_idx if self.list_idx < self.maxLen else self.list_idx - self.maxLen
         load_len = self.maxLen + start if self.maxLen + start < self.vidLen + start else self.vidLen + start
-        #print("Start:",start, "End: ", load_len)
-        
-        self.images.clear()
+        self.list_idx = start
         print("Loading...", start, load_len)
         for i in range(start, load_len):
-            worker = imageLoader.Worker(self.loadImgQt, self.img_list[i], i - start) # Any other args, kwargs are passed to the run function
-            worker.signals.result.connect(self.added)
+            worker = imageLoader.Worker(self.loadImg, self.img_list[self.list_idx], self.list_idx % self.maxLen) # Any other args, kwargs are passed to the run function
             self.threadpool.start(worker) 
-        self.idx = 0
-        print("Start2:",start)       
-        
-        # Execute
-
-    def load3(self):
-        start = self.list_idx
-        print("Start:",start)
-        load_len = self.maxLen + start if self.maxLen + start < self.vidLen + start else self.vidLen + start
-        self.idx = 0
-        self.images.clear()
-        print("Loading...", start, load_len)
-
-        with Pool(6) as p:
-            # schedule one map/worker for each row in the original data
-            q = p.map(loadImg, [(self.img_list[i], i, self.width, self.height) for i in range(start, load_len)])
-        for o in q:
-            print(o[1])
-            self.images.append(o[0])
             self.list_idx += 1
-        print("Start2:",start)
-    
-    def added(self, img):
-        print("Added in:", img[1])
-        self.dict[img[1]] = (img[0], img[1])
-        self.list_idx += 1
-        #self.images.append(img[0])
-        
-        
-    
-    def load(self):
-        start = self.list_idx
-        print("Start:",start)
-        load_len = self.maxLen + start if self.maxLen + start < self.vidLen + start else self.vidLen + start
-        self.idx = 0
-        self.images.clear()
-        print("Loading...", start, load_len)
-        for i in range(start, load_len):
-            img = Image.open(self.img_list[i])
-            img = utils.resizeImg(img, self.width)
-            img = utils.fillImg(img, size=(self.width, self.height))
-            self.images.append(img)
-            self.list_idx += 1
-        print("Start2:",start)
-
-
-    def nextI_old(self, width, height):
-        """
-        Returns a tuple of: (next image, True) if next image was attainable
-                            (None, False)      if it was not.
-        
-        Returns:
-            (PIL Image, Boolean) -- tuple of the next image and True, or None and False if there was no next image
-        """
-        img = None
-        self.idx += 1
-
-        if width != self.width or height != self.height:
-            self.load3()
-            self.width = width
-            self.height = height
-
-        print(len(self.images), self.idx, self.list_idx)
-        if self.idx < len(self.images):  
-            print("NEXT")
-        else:
-            print("NO NEXT => Load more")
-            self.load3()
-
-        img = self.images[self.idx]
-        print("2:",len(self.images), self.idx, self.list_idx)
-
-
-        return img
-    
 
     def reset(self):
         """
@@ -149,7 +59,7 @@ class imageHolder:
         self.vidLen = None
         self.img_list = None
     
-    def prev(self):
+    def prevImg(self):
         """
         Returns a tuple of: (previous image, True) if previous image was attainable
                             (None, False)          if it was not.
@@ -168,52 +78,29 @@ class imageHolder:
         print(len(self.images), self.idx)
         return img, success
 
-    def nextI(self, width, height):
-        """
-        Returns a tuple of: (next image, True) if next image was attainable
-                            (None, False)      if it was not.
-        
-        Returns:
-            (PIL Image, Boolean) -- tuple of the next image and True, or None and False if there was no next image
-        """
+    def nextImg(self, width, height):
+
         img = None
-        self.idx += 1
 
         if width != self.width or height != self.height:
-            self.load2()
             self.width = width
             self.height = height
-
-        print(len(self.images), self.idx, self.list_idx)
-        if self.idx < len(self.images):  
-            print("NEXT")
-        else:
-            print("NO NEXT => Load more")
-            #self.load2()
-
-        print("Queue size: ", self.que.qsize())
+            self.load()
+            time.sleep(1)
 
         cur = self.list_idx % self.maxLen
 
-        #print("2:",len(self.images), self.idx, self.list_idx)
-        img2 = self.que.get()
-        #img = img2[0]
-        #print("Current: ", self.dict[self.idx][1], img2[1])
-        print("Current: ", self.list_idx, cur, len(self.img_list))
-        img = self.dict[cur][0]
+        print("Current: ", self.list_idx, cur, self.img_dict[cur][1])
+        img = self.img_dict[cur][0]        
 
-        i = self.list_idx
-        if self.list_idx < len(self.img_list):
-            worker = imageLoader.Worker(self.loadImgQt, self.img_list[i], cur) # Any other args, kwargs are passed to the run function
-            worker.signals.result.connect(self.added)
+        if self.list_idx < len(self.img_list): # Load new image
+            worker = imageLoader.Worker(self.loadImg, self.img_list[self.list_idx], cur) # Any other args, kwargs are passed to the run function
             self.threadpool.start(worker) 
+            self.list_idx += 1
         else:
             self.list_idx += 1
 
-
-        return img
-    
-
+        return img    
 
 
 

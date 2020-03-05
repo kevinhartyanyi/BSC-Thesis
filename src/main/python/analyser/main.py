@@ -26,7 +26,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__(*args, **kwargs)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.MAX_LEN = 20
+        self.MAX_LEN = 10
         self.cap = None
         self.worker = None
         self.thread = None
@@ -41,8 +41,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.signalSetup()
         self.mv = app.get_resource("data/vid_0001/Pictures")
+        self.mv2 = app.get_resource("data/vid_0001/2011_09_26_drive_0001.mp4")
         self.openVideo_new(self.mv)
-        #self.mv = app.get_resource("data/vid_0001/2011_09_26_drive_0001.mp4")
         self.of = app.get_resource("data/vid_0001/pwc.mp4")
         self.cycle_vid.add("original", self.mv)
         self.cycle_vid.add("opticalFlow", self.of)
@@ -280,7 +280,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.images = utils.readImg(img_dir)
         width = self.ui.l_video.width()
         height = self.ui.l_video.height()
-        self.image_holder.setup(self.images, 2000, 1000)
+        self.image_holder.setup(self.images, width, height)
         self.vid_data.setupWithList(self.images)
 
     def prevFrame_new(self):
@@ -307,7 +307,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vid_data.current_idx += 1
         width = self.ui.l_video.width()
         height = self.ui.l_video.height()
-        img = self.image_holder.nextI(2000, 1000)        
+        img = self.image_holder.nextImg(width, height)        
 
         return img
 
