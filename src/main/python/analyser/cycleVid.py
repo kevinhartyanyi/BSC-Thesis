@@ -14,13 +14,16 @@ class cycleVid:
 
     def add(self, name, vid_path):
         self.container.append((name, vid_path))
+
+    def current(self):
+        return self.container[self.idx][1]
     
     def down(self):
         if self.idx > 0:
             self.idx -= 1
         else:
-            self.idx = len(self.container)
-        
+            self.idx = len(self.container) - 1
+            
         return self.container[self.idx][1]
 
     def up(self):
