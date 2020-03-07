@@ -50,15 +50,47 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.t_fps.setText(str(self.fps_limit))
         #self.vid_player.setScaledContents(True)
 
-        self.signalSetup()     
+        self.signalSetup()  
+        self.disableSetup()
 
-        self.showDialog()
+    def disableSetup(self):
+        self.ui.b_video_left.setEnabled(False)
+        self.ui.b_video_right.setEnabled(False)
+        self.ui.b_video_up.setEnabled(False)
+        self.ui.b_video_down.setEnabled(False)
+        self.ui.actionPlay.setEnabled(False)
+        self.ui.b_jump.setEnabled(False)
+        self.ui.b_plot_left.setEnabled(False)
+        self.ui.b_plot_right.setEnabled(False)
+        self.ui.t_frame.setEnabled(False)
+        self.ui.t_fps.setEnabled(False)
+
+    def enableSetup(self):
+        self.ui.b_video_left.setEnabled(True)
+        self.ui.b_video_right.setEnabled(True)
+        self.ui.b_video_up.setEnabled(True)
+        self.ui.b_video_down.setEnabled(True)
+        self.ui.actionPlay.setEnabled(True)
+        self.ui.b_jump.setEnabled(True)
+        self.ui.b_plot_left.setEnabled(True)
+        self.ui.b_plot_right.setEnabled(True)
+        self.ui.t_frame.setEnabled(True)
+        self.ui.t_fps.setEnabled(True)
+
     def showDialog(self):
         widget = Dialog(app=self.app, parent=self)
         widget.baseDirChange.connect(self.baseDirChange)
+        widget.rejected.connect(self.dialogExit)
+        widget.accepted.connect(self.dialogAccept)
         widget.exec_()
-        
+
+    def dialogAccept(self):
         self.startSetup()
+        self.enableSetup()
+
+    def dialogExit(self):
+        print("Exit")
+        self.close()
 
     def startSetup(self):
         self.img_dir = os.path.join(self.base_dir, "Images") 
@@ -124,10 +156,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vid_player.setPixmap(toqpixmap(img))
 
     def resizeVideo(self, width, height):
-        #img = self.image_holder.current
-        #img = self.image_holder.prepareImg(img)
-        img = self.image_holder.resize(width, height)
-        self.changeFrameTo(img)
+        if self.vid_opened:
+            img = self.image_holder.resize(width, height)
+            self.changeFrameTo(img)
 
     def cycleUp(self):
         self.openVideo(self.cycle_vid.up(), self.image_holder.cur_idx)
