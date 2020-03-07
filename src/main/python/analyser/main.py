@@ -32,7 +32,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("Analyser")
         self.MAX_LEN = 10
         self.worker = None
-        self.base_dir = None
+        self.user = None
         self.vid_player = videoPlayer.VideoPlayer()
         self.ui.layout_vid.insertWidget(1, self.vid_player) # Insert video player into layout
         self.thread = None
@@ -79,7 +79,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def showDialog(self):
         widget = Dialog(app=self.app, parent=self)
-        widget.baseDirChange.connect(self.baseDirChange)
+        widget.sendUser.connect(self.changeUser)
         widget.rejected.connect(self.dialogExit)
         widget.accepted.connect(self.dialogAccept)
         widget.exec_()
@@ -93,18 +93,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.close()
 
     def startSetup(self):
-        self.img_dir = os.path.join(self.base_dir, "Images") 
-        self.of_dir = os.path.join(self.base_dir, "Of") 
-        self.depth_dir = os.path.join(self.base_dir, "Depth") 
+        self.img_dir = os.path.join(self.user["Save"], "Images") 
+        self.of_dir = os.path.join(self.user["Save"], "Of") 
+        self.depth_dir = os.path.join(self.user["Save"], "Depth") 
 
         self.cycle_vid.add("original", self.img_dir)
         self.cycle_vid.add("of", self.of_dir)
         self.cycle_vid.add("depth", self.depth_dir)
         self.openVideo(self.img_dir)
 
-    def baseDirChange(self, base_dir):
-        self.base_dir = base_dir
-        print("Changed Base Dir To:", self.base_dir)
+    def changeUser(self, user):
+        self.user = user
+        print("Changed Base Dir To:", self.user)
 
     def signalSetup(self):
         """
@@ -243,7 +243,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.images = utils.readImg(img_dir)
         width = self.vid_player.width()
         height = self.vid_player.height()
-        img = self.image_holder.setup(self.images, width, height, self.fps_limit, n_frame)
+        img = self.image_holder.setup(self.images, width, height, self.fps_limit, colour=self.user["Colour"], n_frame=n_frame)
         self.changeFrameTo(img)
 
     def jumpToFrame(self):

@@ -27,10 +27,12 @@ class imageHolder:
         self.threadpool = QThreadPool()
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
 
-    def setup(self, img_list, width, height, fps, n_frame=None):
+    def setup(self, img_list, width, height, fps, colour, n_frame=None):
         self.img_list = img_list
         self.vidLen = len(img_list)
         self.list_idx = 0
+        colour = colour.lstrip('#')
+        self.colour = tuple(int(colour[i:i+2], 16) for i in (0, 2, 4))
         self.fps = fps
         self.cur_idx = -1
         self.width = width
@@ -87,7 +89,7 @@ class imageHolder:
     
     def prepareImg(self, img):
         img = utils.resizeImg(img, self.width)
-        img = utils.fillImg(img, size=(self.width, self.height))
+        img = utils.fillImg(img, fill_colour=self.colour, size=(self.width, self.height))
         return img
 
     def loadImg(self, img_path, idx):

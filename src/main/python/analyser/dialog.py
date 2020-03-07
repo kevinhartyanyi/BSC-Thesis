@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QFileDialog
+from PyQt5.QtWidgets import QDialog, QFileDialog, QColorDialog
 from PyQt5.QtCore import pyqtSignal
 from dialogUI import Ui_Dialog
 import platform
@@ -8,7 +8,7 @@ import os
 
 
 class Dialog(QDialog, Ui_Dialog):
-    baseDirChange = pyqtSignal(str)
+    sendUser = pyqtSignal(object)
 
     def __init__(self, app, parent=None):
         super(Dialog, self).__init__(parent)
@@ -37,6 +37,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.b_of.clicked.connect(self.openOf)
         self.ui.b_depth.clicked.connect(self.openDepth)
         self.ui.b_run.clicked.connect(self.startRun)
+        self.ui.b_colour.clicked.connect(self.pickColour)
     
     def splitPath(self, path):
         sep = "/"
@@ -48,12 +49,12 @@ class Dialog(QDialog, Ui_Dialog):
     def openSave(self):
         save_dir = QFileDialog.getExistingDirectory(self, "Select a folder", self.user["Save"], QFileDialog.ShowDirsOnly)
         self.user["Save"] = save_dir
-        self.ui.l_vid.setText("Save to: " + save_dir)
+        self.ui.l_save.setText("Save to: " + save_dir)
         self.checkFiles()
 
     def checkFiles(self):
         self.of_exist = True if os.path.exists(os.path.join(self.user["Save"], "Of")) else False
-        self.img_exist = True if os.path.exists(os.path.join(self.user["Save"], "Pictures")) else False
+        self.img_exist = True if os.path.exists(os.path.join(self.user["Save"], "Images")) else False
         self.depth_exist = True if os.path.exists(os.path.join(self.user["Save"], "Depth")) else False
 
         if self.runRequirements():
@@ -71,6 +72,7 @@ class Dialog(QDialog, Ui_Dialog):
                 (self.user["Depth"] != "" and self.of_exist         and self.user["Video"] != "") or\
                 (self.user["Depth"] != "" and self.user["Of"] != "" and self.user["Video"] != "")
         return ready
+
     def openVideo(self):
         fname = self.openFile(self.user["Video"])
         self.user["Video"] = fname
@@ -117,8 +119,12 @@ class Dialog(QDialog, Ui_Dialog):
             print("Found User File")
             with open(self.user_file, "r") as json_file:
                 self.user = json.load(json_file)
+            self.of_exist = True
+            self.depth_exist = True
+            self.img_exist = True
+            self.ui.l_colour.setText(self.user["Colour"])
         else:
-            self.user = {"Save":"","Of":"","Depth":"","Video":""}
+            self.user = {"Save":"","Of":"","Depth":"","Video":"", "Colour":"#1a1a1b"}
             self.saveUser()
 
     def saveUser(self):
@@ -127,7 +133,7 @@ class Dialog(QDialog, Ui_Dialog):
 
     def startRun(self):
         self.saveUser()
-        self.baseDirChange.emit(self.user["Save"])
+        self.sendUser.emit(self.user)
         self.createDirs()
         self.accept()
 
@@ -141,3 +147,9 @@ class Dialog(QDialog, Ui_Dialog):
             self.createDir("Of")
         if not self.depth_exist:
             self.createDir("Depth")
+
+    def pickColour(self):
+        colour = QColorDialog.getColor()
+        if colour.isValid():
+            self.user["Colour"] = colour.name()
+            self.ui.l_colour.setText(self.user["Colour"])

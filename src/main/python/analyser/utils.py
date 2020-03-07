@@ -25,22 +25,25 @@ def resizeImg(img, new_width):
     img = img.resize((width,height), Image.ANTIALIAS)
     return img
 
-def fillImg(img, fill_color=(26,26,27,255), size=(1920, 1080)):
+def fillImg(img, fill_colour=(26,26,27,255), size=(1920, 1080)):
     """
-    Creates new image with fill_color and pastes the given onto it, returned image is size sized.
+    Creates new image with fill_colour and pastes the given onto it, returned image is size sized.
     
     Arguments:
         img {[type]} -- [description]
     
     Keyword Arguments:
-        fill_color {tuple} -- [description] (default: {(26,26,27,255)})
+        fill_colour {tuple} -- [description] (default: {(26,26,27,255)})
         size {tuple} -- [description] (default: {(1920, 1080)})
     
     Returns:
         [type] -- [description]
     """
     w, h = img.size
-    fd_img = Image.new('RGBA', size, fill_color)
+    if len(fill_colour) == 3:
+        A = 255
+        fill_colour = fill_colour + (A,)
+    fd_img = Image.new('RGBA', size, fill_colour)
     fd_img.paste(img, ((int((size[0] - w) / 2), int((size[1] - h) / 2))))
     return fd_img
 
