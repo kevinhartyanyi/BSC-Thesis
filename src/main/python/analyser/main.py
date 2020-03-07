@@ -18,6 +18,7 @@ import skvideo.io
 import sys
 import time
 import re
+import os
 from dialog import Dialog
 #from speed import speed_vectors
 
@@ -39,6 +40,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vid_running = False
         self.fps_limit = 30
         self.images = None
+        self.img_dir = None
+        self.of_dir = None
+        self.depth_dir = None
         self.app = app
         self.cycle_vid = cycleVid.cycleVid()
         self.prev_frames = frameHolder.frameHolder(self.MAX_LEN)        
@@ -46,21 +50,25 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.t_fps.setText(str(self.fps_limit))
         #self.vid_player.setScaledContents(True)
 
-        self.signalSetup()
-        self.mv = app.get_resource("data/vid_0001/Pictures")
-        self.of = app.get_resource("data/vid_0001/Pwc")
-        self.openVideo(self.mv)
-        self.cycle_vid.add("original", self.mv)
-        self.cycle_vid.add("opticalFlow", self.of)
-        
+        self.signalSetup()     
+
         self.showDialog()
-
-        #self.openVideo(self.mv)
-
     def showDialog(self):
         widget = Dialog(app=self.app, parent=self)
         widget.baseDirChange.connect(self.baseDirChange)
         widget.exec_()
+        
+        self.startSetup()
+
+    def startSetup(self):
+        self.img_dir = os.path.join(self.base_dir, "Images") 
+        self.of_dir = os.path.join(self.base_dir, "Of") 
+        self.depth_dir = os.path.join(self.base_dir, "Depth") 
+
+        self.cycle_vid.add("original", self.img_dir)
+        self.cycle_vid.add("of", self.of_dir)
+        self.cycle_vid.add("depth", self.depth_dir)
+        self.openVideo(self.img_dir)
 
     def baseDirChange(self, base_dir):
         self.base_dir = base_dir

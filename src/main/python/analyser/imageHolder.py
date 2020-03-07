@@ -110,6 +110,9 @@ class imageHolder:
                 return
             load_len = start + self.maxLen + 1 if start + self.maxLen + 1 < self.vidLen else self.vidLen
         self.list_idx = start
+        img = Image.open(self.img_list[start])
+        img = self.prepareImg(img)
+        self.current = img
         print("Loading...", start, load_len)
         for i in range(start, load_len):
             worker = imageLoader.Worker(self.loadImg, self.img_list[self.list_idx], self.list_idx % self.maxLen) # Any other args, kwargs are passed to the run function
@@ -137,6 +140,9 @@ class imageHolder:
     def nextImg(self):
         self.cur_idx += 1
         cur = self.list_idx % self.maxLen
+        if cur not in self.img_dict:
+            print("Warning: Not in dictionary. Returning previous image")
+            return self.current
         print("Current: ", self.list_idx, cur, self.img_dict[cur][1])
         img = self.img_dict[cur][0]    
         self.current = img    
