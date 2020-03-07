@@ -18,6 +18,7 @@ import skvideo.io
 import sys
 import time
 import re
+from dialog import Dialog
 #from speed import speed_vectors
 
 
@@ -27,9 +28,10 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__(*args, **kwargs)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.setWindowTitle("Analyser")
         self.MAX_LEN = 10
-        self.cap = None
         self.worker = None
+        self.base_dir = None
         self.vid_player = videoPlayer.VideoPlayer()
         self.ui.layout_vid.insertWidget(1, self.vid_player) # Insert video player into layout
         self.thread = None
@@ -37,6 +39,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vid_running = False
         self.fps_limit = 30
         self.images = None
+        self.app = app
         self.cycle_vid = cycleVid.cycleVid()
         self.prev_frames = frameHolder.frameHolder(self.MAX_LEN)        
         self.image_holder = imageHolder.imageHolder(self.MAX_LEN)
@@ -49,9 +52,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.openVideo(self.mv)
         self.cycle_vid.add("original", self.mv)
         self.cycle_vid.add("opticalFlow", self.of)
+        
+        self.showDialog()
 
         #self.openVideo(self.mv)
 
+    def showDialog(self):
+        widget = Dialog(app=self.app, parent=self)
+        widget.baseDirChange.connect(self.baseDirChange)
+        widget.exec_()
+
+    def baseDirChange(self, base_dir):
+        self.base_dir = base_dir
+        print("Changed Base Dir To:", self.base_dir)
 
     def signalSetup(self):
         """
@@ -65,6 +78,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.b_video_down.clicked.connect(self.cycleDown)
         self.ui.t_frame.textChanged.connect(self.changeFrameText)
         self.ui.b_jump.clicked.connect(self.jumpToFrame)
+        self.ui.b_rerun.clicked.connect(self.showDialog)
         self.vid_player.resizeSignal.connect(self.resizeVideo)
 
     def changeFrameText(self):
@@ -139,6 +153,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.actionPlay.setEnabled(True)
             self.ui.b_video_left.setEnabled(True)
             self.ui.b_video_right.setEnabled(True)
+            self.ui.b_jump.setEnabled(True)
+            self.ui.b_rerun.setEnabled(True)
+            self.ui.b_plot_left.setEnabled(True)
+            self.ui.b_plot_right.setEnabled(True)
 
     def startVideo(self): 
         """
@@ -158,6 +176,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.vid_running = True
             self.ui.b_video_left.setEnabled(False)
             self.ui.b_video_right.setEnabled(False)
+            self.ui.b_jump.setEnabled(False)
+            self.ui.b_rerun.setEnabled(False)
+            self.ui.b_plot_left.setEnabled(False)
+            self.ui.b_plot_right.setEnabled(False)
             # 1 - create Worker and Thread inside the Form
             self.worker = worker.Worker(*self.image_holder.getStartData())  # no parent!
             self.thread = QThread()  # no parent!
