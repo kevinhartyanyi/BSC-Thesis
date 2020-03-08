@@ -18,7 +18,6 @@ class Worker(QObject):
         Start counting by fps and return signal to update video
         """
         while(self.current_idx < self.end_idx - 1 and self.running):
-            print(self.current_idx)
             self.intReady.emit()
             time.sleep(self.wait)
             self.current_idx += 1

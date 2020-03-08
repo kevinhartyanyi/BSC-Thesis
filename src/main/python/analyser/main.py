@@ -16,7 +16,6 @@ import imageHolder
 import cycleVid
 import skvideo.io
 import sys
-import time
 import re
 import os
 from dialog import Dialog
@@ -46,7 +45,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.app = app
         self.cycle_vid = cycleVid.cycleVid()
         self.prev_frames = frameHolder.frameHolder(self.MAX_LEN)        
-        self.image_holder = imageHolder.imageHolder(self.MAX_LEN)
+        self.image_holder = imageHolder.imageHolder(self.MAX_LEN, self.fps_limit)
         self.ui.t_fps.setText(str(self.fps_limit))
         #self.vid_player.setScaledContents(True)
 
@@ -146,7 +145,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if fps > self.fps_limit:
                 print("Warning: Too big number for fps. Falling back to {} fps.".format(self.fps_limit))
                 fps = self.fps_limit
-            self.image_holder.fps = fps
+            self.image_holder.changeFps(fps)
             self.ui.t_fps.setText(str(fps))
         else:
             print("Wrong Input For Fps")
@@ -196,6 +195,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.b_rerun.setEnabled(True)
             self.ui.b_plot_left.setEnabled(True)
             self.ui.b_plot_right.setEnabled(True)
+            self.ui.t_fps.setEnabled(True)
 
     def startVideo(self): 
         """
@@ -219,6 +219,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.b_rerun.setEnabled(False)
             self.ui.b_plot_left.setEnabled(False)
             self.ui.b_plot_right.setEnabled(False)
+            self.ui.t_fps.setEnabled(False)
+
             # 1 - create Worker and Thread inside the Form
             self.worker = worker.Worker(*self.image_holder.getStartData())  # no parent!
             self.thread = QThread()  # no parent!
@@ -243,7 +245,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.images = utils.readImg(img_dir)
         width = self.vid_player.width()
         height = self.vid_player.height()
-        img = self.image_holder.setup(self.images, width, height, self.fps_limit, colour=self.user["Colour"], n_frame=n_frame)
+        img = self.image_holder.setup(self.images, width, height, colour=self.user["Colour"], n_frame=n_frame)
         self.changeFrameTo(img)
 
     def jumpToFrame(self):
@@ -281,7 +283,9 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         Display the next frame of the video
         """
+        print("Checking: ", self.image_holder.cur_idx)
         if self.image_holder.cur_idx < self.image_holder.vidLen - 1:
+            print("Success")
             self.vid_player.setPixmap(toqpixmap(self.nextFrame()))
 
     def changeVideoToPrevFrame(self):
@@ -290,8 +294,9 @@ class MainWindow(QtWidgets.QMainWindow):
         If there are images left in prev_frame then use them, otherwise jump to the previous frame.
         """
         cur = self.image_holder.cur_idx
-        print("Cur Frame",cur)
+        print("Checking: ", self.image_holder.cur_idx)
         if cur - 1 >= 0:
+            print("Success")
             img = self.prevFrame()
             self.changeFrameTo(img)
 

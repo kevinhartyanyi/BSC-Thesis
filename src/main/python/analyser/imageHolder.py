@@ -12,14 +12,14 @@ import time
 
 class imageHolder:
 
-    def __init__(self, maxSize):
+    def __init__(self, maxSize, fps):
         super().__init__()
         self.maxLen = maxSize
         self.vidLen = None
         self.img_list = None
         self.current = None
         self.list_idx = 0
-        self.fps = 0
+        self.fps = fps
         self.width = 0
         self.height = 0
         self.cur_idx = -1
@@ -27,13 +27,12 @@ class imageHolder:
         self.threadpool = QThreadPool()
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
 
-    def setup(self, img_list, width, height, fps, colour, n_frame=None):
+    def setup(self, img_list, width, height, colour, n_frame=None):
         self.img_list = img_list
         self.vidLen = len(img_list)
         self.list_idx = 0
         colour = colour.lstrip('#')
         self.colour = tuple(int(colour[i:i+2], 16) for i in (0, 2, 4))
-        self.fps = fps
         self.cur_idx = -1
         self.width = width
         self.height = height
@@ -64,7 +63,9 @@ class imageHolder:
         self.cur_idx += 1
         self.list_idx += 1
 
-    
+    def changeFps(self, fps):
+        self.fps = fps
+
     def getStartData(self):
         """
         Returns the current index, end index and fps in a tuple.
@@ -144,6 +145,9 @@ class imageHolder:
         cur = self.list_idx % self.maxLen
         if cur not in self.img_dict:
             print("Warning: Not in dictionary. Returning previous image")
+            worker = imageLoader.Worker(self.loadImg, self.img_list[self.list_idx], cur) # Any other args, kwargs are passed to the run function
+            self.threadpool.start(worker) 
+            self.list_idx += 1
             return self.current
         print("Current: ", self.list_idx, cur, self.img_dict[cur][1])
         img = self.img_dict[cur][0]    
