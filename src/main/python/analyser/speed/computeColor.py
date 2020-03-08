@@ -15,7 +15,7 @@ import sys
 import numpy as np
 import argparse
 
-import readFlowFile
+import speed.readFlowFile as readFlowFile
 
 
 def makeColorwheel():

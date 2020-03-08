@@ -10,10 +10,10 @@ import tqdm
 
 from natsort import natsorted # Run with python3
 
-import readFlowFile
-import computeColor
+import speed.readFlowFile as readFlowFile
+import speed.computeColor as computeColor
 
-import utils
+import speed.utils as utils
 
 import matplotlib.image as mpimg
 from PIL import Image
@@ -85,11 +85,13 @@ class Video():
         if self.back_pwc is None:
             raise ValueError('Wrong video number or missing back_pwc')
 
-OUT_PATH = '/home/kevin/Programming/School/semester_6/BSC-Thesis/src/main/resources/base/results'
-OTHER_DIR = '/other'
-VL_DIR = '/velocity'
-NP_DIR = '/numbers'
-MASK_DIR = '/mask'
+OUT_PATH = '/home/kevin/Programming/School/semester_6/BSC-Thesis/'
+
+RESULTS = 'results'
+OTHER_DIR = os.path.join(RESULTS, 'other')
+VL_DIR = os.path.join(RESULTS, 'velocity')
+NP_DIR = os.path.join(RESULTS, 'numbers')
+MASK_DIR = os.path.join(RESULTS, 'mask')
 
 DATA = '/home/kevin/workspace/pipeline_zero/test2/'
 
@@ -121,16 +123,38 @@ VIDEOS = []
 TRAIN_VIDEOS = ['0001', '0002', '0005', '0009', '0014', '0019', '0027']
 
 
+def run(img_dir, depth_dir, of_dir, of_back_dir, save_dir, speed_gt=None, high=1, low=0.309):
 
-
-for i, video in enumerate(os.listdir(KITTI_PATH)):
-    base, number = video.rsplit('_', 1)
-    print(video)
-    VIDEOS.append(str(number))
-
-def run():
-    #video = Video("0001")
-    #main(img_dir= DATA + 'origin', disp_dir=DATA + 'monodepth', flow_dir=DATA + 'pwc', label_dir=DATA + 'boruvka', visualize = True)
+    
+    main("Video", img_dir=img_dir, disp_dir=depth_dir, disp2_dir=None, test_number = 6, back_flow_dir=of_back_dir, flow_dir=of_dir, out_dir=save_dir, label_dir=img_dir,
+    high=high, low=low, visualize = True)
+    
+    
+    #speeds_dir = utils.list_directory(OUT_PATH, extension='speed.npy')
+    #speeds_dir = natsorted(speeds_dir)
+    #speeds = []
+    #for s in speeds_dir:
+    #    speeds.append(np.load(s))
+    #
+    #speeds_mask = utils.list_directory(OUT_PATH, extension='mask.npy')
+    #speeds_mask = natsorted(speeds_mask)
+    #masks = []
+#
+    #for s in speeds_mask:
+    #    masks.append(np.load(s))
+#
+    #print(len(speeds))
+    #print(speed_gt.shape)
+    #_ = utils.error_comparison_Speed_Vecors(speeds,speed_gt[1:],csv=OUT_PATH+str(vid_id)+'_error_Simple_OF.csv')
+    #if flow == "pwc":
+    #    utils.create_speed_video_Speed_Vectors(vid.video, str(vid_id)+'_video.mp4', speeds, speed_gt, masks,
+    #            vid.pwc_video, vid.back_pwc_video, vid.mono_video)
+    #else:
+    #    utils.create_speed_video_Speed_Vectors(vid.video, str(vid_id)+'_video.mp4', speeds, speed_gt, masks,
+    #            vid.hd3_video, vid.back_hd3_video, vid.mono_video, hd3=True)
+    #
+    ##video = Video("0001")
+    ##main(img_dir= DATA + 'origin', disp_dir=DATA + 'monodepth', flow_dir=DATA + 'pwc', label_dir=DATA + 'boruvka', visualize = True)
     
     #main(img_dir= IMAGES, disp_dir=DISP1, disp2_dir=DISP2, flow_dir=FLOW_DIR, label_dir=SLIC_OUT_TRAIN, visualize = True, back_flow_dir=None)
     #main(img_dir= IMAGES, disp_dir=MD_OUT_TRAIN, disp2_dir=None, test_number = 2, back_flow_dir=BACKOF, flow_dir=PWC_OUT_TRAIN, label_dir=BORUVKA_OUT_TRAIN, visualize = True)
@@ -207,7 +231,7 @@ def run():
     assert 1 == 2
     """
     
-    #for vid_id in TRAIN_VIDEOS:
+    """#for vid_id in TRAIN_VIDEOS:
     #    vid = Video(vid_id)
     vid_id = '0001'
     vid_name = '/' + vid_id
@@ -258,7 +282,7 @@ def run():
     for s in speeds_dir:
         os.remove(s)
     for s in speeds_mask:
-        os.remove(s)
+        os.remove(s)"""
     
     #speed = np.load(OUT_PATH + '37' + '_speed.npy')
     #print("GT: " + str(video.gt[36]))
@@ -485,8 +509,8 @@ class VelocityCalculator(object):
             velocity[inaccurate_mono] = 0
 
             # Save the results
-            base_fn = self.out_dir + self.vid_name
-            img_num = '/' + os.path.splitext(os.path.basename(self.flow_fn))[0]
+            base_fn = self.out_dir# + self.vid_name
+            img_num = os.path.splitext(os.path.basename(self.flow_fn))[0]
             #np.save(base_fn + '_vel.npy', velocity)
             #np.save(base_fn + '_ori.npy', orientation)
 
@@ -496,21 +520,21 @@ class VelocityCalculator(object):
             #speed, speed_mask = utils.vector_speedOF4Side(velocity, 0) # Speed calculation
             
             speed, speed_mask = utils.vector_speedOF_Simple(velocity,low=self.low,high=self.high) # Speed calculation
-            np.save(base_fn + NP_DIR + img_num + '_speed.npy', speed)
-            np.save(base_fn + NP_DIR + img_num + '_mask.npy', speed_mask)
+            np.save(os.path.join(base_fn, NP_DIR, img_num + '_speed.npy'), speed)
+            np.save(os.path.join(base_fn, NP_DIR, img_num + '_mask.npy'), speed_mask)
 
             image = velocity.copy()
             #image = image + abs(image.min())
             #image *= 255.0/image.max()
-            plt.imsave(base_fn + VL_DIR + img_num + '_velocity.png', image.astype('uint8'))
+            plt.imsave(os.path.join(base_fn, VL_DIR, img_num + '_velocity.png'), image.astype('uint8'))
             #utils.save_as_image(base_fn + '_velocity.png', image, min_val=0, max_val=utils.max_depth) 
 
 
             # Visualize the results if needed
             if self.visualize_results:
-                utils.save_as_image(base_fn + OTHER_DIR + img_num + '_snd_mono_2.png', snd_mono_2, min_val=0, max_val=utils.max_depth) 
-                utils.save_as_image(base_fn + OTHER_DIR + img_num + '_back.png', back, min_val=0, max_val=utils.max_depth) 
-                utils.save_as_image(base_fn + OTHER_DIR + img_num + '_fst_zeros.png', fst_zeros, min_val=0, max_val=utils.max_depth) 
+                utils.save_as_image(os.path.join(base_fn, OTHER_DIR, img_num + '_snd_mono_2.png'), snd_mono_2, min_val=0, max_val=utils.max_depth) 
+                utils.save_as_image(os.path.join(base_fn, OTHER_DIR, img_num + '_back.png'), back, min_val=0, max_val=utils.max_depth) 
+                utils.save_as_image(os.path.join(base_fn, OTHER_DIR, img_num + '_fst_zeros.png'), fst_zeros, min_val=0, max_val=utils.max_depth) 
                 #velocity[velocity > utils.max_velocity] = utils.max_velocity
                 #velocity[velocity < -utils.max_velocity] = -utils.max_velocity
                 
@@ -518,7 +542,7 @@ class VelocityCalculator(object):
                 #masked_speed = speed
                 #masked_speed[~speed_mask] = 0
                 
-                utils.save_as_image(base_fn + MASK_DIR + img_num + '_speed_masked.png', speed_mask*50, min_val=0, max_val=utils.max_depth) 
+                utils.save_as_image(os.path.join(base_fn, MASK_DIR, img_num + '_speed_masked.png'), speed_mask*50, min_val=0, max_val=utils.max_depth) 
                 return #! Doesn't work after this
                 utils.save_as_image(base_fn + OTHER_DIR + img_num + '_speed.png', speed, min_val=0, max_val=utils.max_depth) 
                 

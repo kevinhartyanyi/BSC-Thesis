@@ -4,7 +4,14 @@ from dialogUI import Ui_Dialog
 import platform
 import json
 import os
+import shutil
+import speed.speed_vectors as speed
 
+RESULTS = 'results'
+OTHER_DIR = os.path.join(RESULTS, 'other')
+VL_DIR = os.path.join(RESULTS, 'velocity')
+NP_DIR = os.path.join(RESULTS, 'numbers')
+MASK_DIR = os.path.join(RESULTS, 'mask')
 
 
 class Dialog(QDialog, Ui_Dialog):
@@ -21,6 +28,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.img_exist = False
         self.of_exist = False
         self.depth_exist = False
+        self.vid_name = None
         
         self.app = app
 
@@ -78,6 +86,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.user["Video"] = fname
         name = self.splitPath(fname)[-1]
         self.ui.l_vid.setText("Load: " + name)
+        self.vid_name = name.split(".")[0]
         self.checkFiles()
 
     def openOf(self):
@@ -119,9 +128,8 @@ class Dialog(QDialog, Ui_Dialog):
             print("Found User File")
             with open(self.user_file, "r") as json_file:
                 self.user = json.load(json_file)
-            self.of_exist = True
-            self.depth_exist = True
-            self.img_exist = True
+            self.checkFiles()
+            self.vid_name = self.splitPath(self.user["Video"])[-1]
             self.ui.l_colour.setText(self.user["Colour"])
         else:
             self.user = {"Save":"","Of":"","Depth":"","Video":"", "Colour":"#1a1a1b"}
@@ -135,18 +143,38 @@ class Dialog(QDialog, Ui_Dialog):
         self.saveUser()
         self.sendUser.emit(self.user)
         self.createDirs()
+        print("Start Run")
+        speed.run(self.savePathJoin("Images"), self.savePathJoin("Depth"),
+        self.savePathJoin("Of"), self.savePathJoin("Back_Of"), self.user["Save"])
         self.accept()
+
+    def savePathJoin(self, path):
+        return os.path.join(self.user["Save"], path)
 
     def createDir(self, dir_name):
         os.mkdir(os.path.join(self.user["Save"], dir_name))
 
     def createDirs(self):
+        print("Creating Directories")
+
         if not self.img_exist:
             self.createDir("Images")
         if not self.of_exist:
             self.createDir("Of")
         if not self.depth_exist:
             self.createDir("Depth")
+
+        self.reCreateDir(RESULTS)        
+        self.reCreateDir(OTHER_DIR)
+        self.reCreateDir(VL_DIR)
+        self.reCreateDir(NP_DIR)
+        self.reCreateDir(MASK_DIR)
+
+    def reCreateDir(self, name):
+        path = self.savePathJoin(name)
+        if os.path.exists(path):
+            shutil.rmtree(path)
+        os.makedirs(path)
 
     def pickColour(self):
         colour = QColorDialog.getColor()

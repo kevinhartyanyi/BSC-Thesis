@@ -6,11 +6,11 @@ import tqdm
 import tables
 from scipy import ndimage
 import pandas
-import readFlowFile
+import speed.readFlowFile as readFlowFile
 import math
 import matplotlib.pyplot as plt
 from PIL import Image
-import computeColor
+import speed.computeColor as computeColor
 import imageio
 from natsort import natsorted
 
