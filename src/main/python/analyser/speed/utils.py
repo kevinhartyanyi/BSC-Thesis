@@ -16,6 +16,11 @@ from natsort import natsorted
 
 TMP_IMG = '/home/kevin/workspace/pipeline_zero/tmp_img/'
 
+RESULTS = 'results'
+OTHER_DIR = os.path.join(RESULTS, 'other')
+VL_DIR = os.path.join(RESULTS, 'velocity')
+NP_DIR = os.path.join(RESULTS, 'numbers')
+MASK_DIR = os.path.join(RESULTS, 'mask')
 
 width_to_focal = dict()
 width_to_focal[1242] = 721.5377
@@ -29,6 +34,10 @@ baseline = 0.54
 min_depth = 1e-3
 max_depth = 80
 max_velocity = 60
+
+def getResultDirs():
+    results = {"Velocity": VL_DIR, "Mask": MASK_DIR}
+    return results
 
 def calculate_shifted_labels(labels, avg_flow):
     """

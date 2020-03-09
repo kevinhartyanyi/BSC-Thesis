@@ -1,11 +1,16 @@
-from PyQt5.QtWidgets import QDialog, QFileDialog, QColorDialog
+from PyQt5.QtWidgets import QDialog, QFileDialog, QColorDialog, QProgressBar, QLabel
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtGui import QFont
+from PyQt5.QtCore import Qt, QThread
 from dialogUI import Ui_Dialog
 import platform
 import json
+import calcRunner
 import os
 import shutil
 import speed.speed_vectors as speed
+from speed.utils import list_directory
+
 
 RESULTS = 'results'
 OTHER_DIR = os.path.join(RESULTS, 'other')
@@ -25,10 +30,17 @@ class Dialog(QDialog, Ui_Dialog):
         self.dir = os.path.dirname(os.path.realpath(__file__))
         self.user_file = os.path.join(self.dir, ".userInfo.json") 
         self.user = None
+        self.thread = None
+        self.progressBar = None
+        self.progressAllBar = None
+        self.progressLabel = None
         self.img_exist = False
         self.of_exist = False
+        self.back_of_exist = False
         self.depth_exist = False
         self.vid_name = None
+        self.all_run = 4
+        self.run_count = 1
         
         self.app = app
 
@@ -62,6 +74,7 @@ class Dialog(QDialog, Ui_Dialog):
 
     def checkFiles(self):
         self.of_exist = True if os.path.exists(os.path.join(self.user["Save"], "Of")) else False
+        self.back_of_exist = True if os.path.exists(os.path.join(self.user["Save"], "Back_Of")) else False
         self.img_exist = True if os.path.exists(os.path.join(self.user["Save"], "Images")) else False
         self.depth_exist = True if os.path.exists(os.path.join(self.user["Save"], "Depth")) else False
 
@@ -71,14 +84,15 @@ class Dialog(QDialog, Ui_Dialog):
             self.ui.b_run.setEnabled(False)
     
     def runRequirements(self):
-        ready = (self.depth_exist         and self.of_exist         and self.img_exist)           or\
+        ready = ((self.depth_exist         and self.of_exist         and self.img_exist)           or\
                 (self.user["Depth"] != "" and self.of_exist         and self.img_exist)           or\
                 (self.depth_exist         and self.user["Of"] != "" and self.img_exist)           or\
                 (self.depth_exist         and self.of_exist         and self.user["Video"] != "") or\
                 (self.user["Depth"] != "" and self.user["Of"] != "" and self.img_exist)           or\
                 (self.depth_exist         and self.user["Of"] != "" and self.user["Video"] != "") or\
                 (self.user["Depth"] != "" and self.of_exist         and self.user["Video"] != "") or\
-                (self.user["Depth"] != "" and self.user["Of"] != "" and self.user["Video"] != "")
+                (self.user["Depth"] != "" and self.user["Of"] != "" and self.user["Video"] != "")) and\
+                ((self.back_of_exist and self.of_exist) or self.user["Of"] != "")
         return ready
 
     def openVideo(self):
@@ -140,13 +154,83 @@ class Dialog(QDialog, Ui_Dialog):
             json.dump(self.user, json_file, indent=4)
 
     def startRun(self):
+        self.disableButtons()
         self.saveUser()
         self.sendUser.emit(self.user)
         self.createDirs()
         print("Start Run")
-        speed.run(self.savePathJoin("Images"), self.savePathJoin("Depth"),
-        self.savePathJoin("Of"), self.savePathJoin("Back_Of"), self.user["Save"])
+        self.showProgressBar()
+        self.startCalcThread()
+        
+    
+    def startCalcThread(self):
+        # 1 - create Worker and Thread inside the Form
+        self.worker = calcRunner.CalculationRunner(self.savePathJoin("Images"),
+            self.savePathJoin("Depth"), self.savePathJoin("Of"), self.savePathJoin("Back_Of"),
+            self.user["Save"], None, 1, 0.309)  # no parent!
+        self.thread = QThread()  # no parent!
+
+        self.worker.labelUpdate.connect(self.labelUpdate)
+
+        self.worker.update.connect(self.progressUpdate)
+        self.worker.updateFin.connect(self.progressAllUpdate)
+
+        self.worker.finished.connect(self.finishThread)
+
+        self.worker.moveToThread(self.thread)
+        #self.worker.finished.connect(self.stopVideo)
+        self.thread.started.connect(self.worker.startThread)
+        # 6 - Start the thread
+        self.thread.start()
+
+    def progressUpdate(self, value):
+        self.progressBar.setValue(value)
+
+    def finishThread(self):
+        print("Fin Thread")
+        self.worker.stop()
+        self.thread.quit()
+        self.thread.wait()
         self.accept()
+
+    def progressAllUpdate(self):
+        self.run_count += 1
+        self.progressAllBar.setValue(self.run_count)
+
+    def labelUpdate(self, text):
+        self.progressBar.reset()
+        self.progressBar.setMinimum(1)
+        self.progressBar.setMaximum(len(list_directory(self.savePathJoin("Images"))))
+        self.progressLabel.setText(text)
+
+
+    def showProgressBar(self):
+        print("Show progress bar")
+        self.progressLabel = QLabel(self)
+        font = QFont()
+        font.setFamily("GE Inspira")
+        font.setPointSize(20)
+        self.progressLabel.setFont(font)
+        self.progressLabel.setAlignment(Qt.AlignCenter)
+        self.progressLabel.setText("Hello")
+        self.ui.layout_v.addWidget(self.progressLabel)
+
+        self.progressBar = QProgressBar(self) # Progress bar created
+        self.ui.layout_v.addWidget(self.progressBar)
+
+        self.progressAllBar = QProgressBar(self) # Progress bar created
+        self.progressAllBar.setMinimum(1)
+        self.progressAllBar.setMaximum(self.all_run)
+        self.ui.layout_v.addWidget(self.progressAllBar)
+        self.progressAllBar.setValue(1)
+
+    def disableButtons(self):
+        self.ui.b_run.setEnabled(False)
+        self.ui.b_colour.setEnabled(False)
+        self.ui.b_depth.setEnabled(False)
+        self.ui.b_of.setEnabled(False)
+        self.ui.b_vid.setEnabled(False)
+        self.ui.b_save.setEnabled(False)
 
     def savePathJoin(self, path):
         return os.path.join(self.user["Save"], path)

@@ -9,9 +9,9 @@ from PIL import Image
 from PIL.ImageQt import ImageQt, toqpixmap
 import videoPlayer
 import utils
+import speed.utils as sutils
 import worker
 import vid
-import frameHolder
 import imageHolder
 import cycleVid
 import skvideo.io
@@ -41,14 +41,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.images = None
         self.img_dir = None
         self.of_dir = None
+        self.back_of_dir = None
         self.depth_dir = None
         self.app = app
-        self.cycle_vid = cycleVid.cycleVid()
-        self.prev_frames = frameHolder.frameHolder(self.MAX_LEN)        
+        self.cycle_vid = cycleVid.cycleVid()      
         self.image_holder = imageHolder.imageHolder(self.MAX_LEN, self.fps_limit)
         self.ui.t_fps.setText(str(self.fps_limit))
-        #self.vid_player.setScaledContents(True)
-
+        #self.vid_player.setScaledContents(True)        
         self.signalSetup()  
         self.disableSetup()
 
@@ -94,11 +93,19 @@ class MainWindow(QtWidgets.QMainWindow):
     def startSetup(self):
         self.img_dir = os.path.join(self.user["Save"], "Images") 
         self.of_dir = os.path.join(self.user["Save"], "Of") 
-        self.depth_dir = os.path.join(self.user["Save"], "Depth") 
+        self.back_of_dir = os.path.join(self.user["Save"], "Back_Of") 
+        self.depth_dir = os.path.join(self.user["Save"], "Depth")
+        
+        results = sutils.getResultDirs()
+        velocity = os.path.join(self.user["Save"], results["Velocity"])
+        mask = os.path.join(self.user["Save"], results["Mask"])
 
         self.cycle_vid.add("original", self.img_dir)
         self.cycle_vid.add("of", self.of_dir)
+        self.cycle_vid.add("back_of", self.back_of_dir)
         self.cycle_vid.add("depth", self.depth_dir)
+        self.cycle_vid.add("velocity", velocity)
+        self.cycle_vid.add("mask", mask)
         self.openVideo(self.img_dir)
 
     def changeUser(self, user):
