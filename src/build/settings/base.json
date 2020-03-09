@@ -1,0 +1,8 @@
+{
+    "app_name": "Analyser",
+    "author": "Kevin Attila Hartyányi",
+    "main_module": "src/main/python/analyser/main.py",
+    "hidden_imports": ["pkg_resources.py2_warn"], 
+    "hiddenimports": ["pywt._extensions._cwt"],
+    "version": "0.0.0"
+}
