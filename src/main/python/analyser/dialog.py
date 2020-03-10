@@ -11,6 +11,8 @@ import shutil
 import speed.speed_vectors as speed
 from speed.utils import list_directory
 
+import speed.pwc.run as pwc
+
 
 RESULTS = 'results'
 OTHER_DIR = os.path.join(RESULTS, 'other')
@@ -169,7 +171,7 @@ class Dialog(QDialog, Ui_Dialog):
         # 1 - create Worker and Thread inside the Form
         self.worker = calcRunner.CalculationRunner(self.savePathJoin("Images"),
             self.savePathJoin("Depth"), self.savePathJoin("Of"), self.savePathJoin("Back_Of"),
-            self.user["Save"], None, 1, 0.309, self.run_dict)  # no parent!
+            self.user["Save"], None, 1, 0.309, self.run_dict, self.app.get_resource("network-default.pytorch"))  # no parent!
         self.thread = QThread()  # no parent!
 
         self.worker.labelUpdate.connect(self.labelUpdate)

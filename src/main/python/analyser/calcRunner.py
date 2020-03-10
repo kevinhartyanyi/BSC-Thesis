@@ -6,7 +6,10 @@ from speed.speed_vectors import calculate_velocity_and_orientation_wrapper
 import itertools
 import tqdm
 import multiprocessing
-import speed.pytorch_pwc.run as pwc
+import speed.pwc.run as pwc
+import os
+import flowiz as fz
+from PIL import Image
 
 
 class CalculationRunner(QObject):
@@ -88,18 +91,33 @@ class CalculationRunner(QObject):
 
     @pyqtSlot()
     def startOf(self): # A slot takes no params
-        print("Save to:",self.out_dir)
-        img_list = utils.list_directory(self.img_dir)
-        prev_img = img_list[0]
-        for i, img in enumerate(img_list[1:]):
-            print(prev_img, img)
-            prev_img = img
-            #pwc.setupArguments(model="/home/kevin/Programming/BSC-Thesis/network-default.pytorch", first_img="/home/kevin/Programming/BSC-Thesis/first.png",
-            #second_img="/home/kevin/Programming/BSC-Thesis/second.png", save_path="/home/kevin/Programming/BSC-Thesis/flow.flo")
-            #pwc.run()
-        print(self.of_model) 
+        #img_list = utils.list_directory(self.img_dir)
+        #prev_img = img_list[0]
+        #for i, img in enumerate(img_list[1:]):
+        #    flo_file = os.path.join(self.flow_dir,"{0}.flo".format(i))
+        #    pwc.setupArguments(self.of_model,
+        #    img_list[i],
+        #    img_list[i+1], 
+        #    flo_file)
+        #    pwc.run()
+        #    flow = fz.convert_from_file(flo_file)
+        #    Image.fromarray(flow).save(os.path.join(self.flow_dir,"{0}.png".format(i)))
+        #    prev_img = img
+        #print("Done")
 
-        #self.update.emit(3)
+        img_list = utils.list_directory(self.img_dir)
+        for ind in range(len(img_list) - 1):
+            print("Running optical flow on:", img_list[ind], img_list[ind+1])
+            flo_file = os.path.join(self.flow_dir,"{0}.flo".format(ind))
+            pwc.setupArguments(model=self.of_model, first_img=img_list[ind],
+            second_img=img_list[ind+1], save_path=flo_file)
+            pwc.run()
+
+            # Transform from flo to png
+            flow = fz.convert_from_file(flo_file)
+            Image.fromarray(flow).save(os.path.join(self.flow_dir,"{0}.png".format(ind)))
+            self.update.emit(ind)
+        
 
     @pyqtSlot()
     def startDepth(self): # A slot takes no params

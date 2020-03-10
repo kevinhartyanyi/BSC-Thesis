@@ -9,11 +9,12 @@ import os
 import PIL
 import PIL.Image
 import sys
+from speed.pwc.correlation import correlation
 
-try:
-	from correlation import correlation # the custom cost volume layer
-except:
-	sys.path.insert(0, './correlation'); import correlation # you should consider upgrading python
+#try:
+#	from pytorch_pwc.correlation import correlation # the custom cost volume layer
+#except:
+#	sys.path.insert(0, './correlation'); import correlation # you should consider upgrading python
 # end
 
 ##########################################################
@@ -39,11 +40,14 @@ for strOption, strArgument in getopt.getopt(sys.argv[1:], '', [ strParameter[2:]
 # end
 
 def setupArguments(model, first_img, second_img, save_path):
+	global arguments_strModel
 	arguments_strModel = model
+	global arguments_strFirst
 	arguments_strFirst = first_img
+	global arguments_strSecond
 	arguments_strSecond = second_img
+	global arguments_strOut
 	arguments_strOut = save_path
-	
 
 ##########################################################
 
@@ -263,7 +267,8 @@ class Network(torch.nn.Module):
 
 		self.moduleRefiner = Refiner()
 
-		self.load_state_dict(torch.load('./network-' + arguments_strModel + '.pytorch'))
+		#self.load_state_dict(torch.load('./network-' + arguments_strModel + '.pytorch'))
+		self.load_state_dict(torch.load(arguments_strModel))
 	# end
 
 	def forward(self, tensorFirst, tensorSecond):
@@ -280,19 +285,20 @@ class Network(torch.nn.Module):
 	# end
 # end
 
-moduleNetwork = Network().cuda().eval()
+#moduleNetwork = Network().cuda().eval()
 
 ##########################################################
 
 def estimate(tensorFirst, tensorSecond):
+	moduleNetwork = Network().cuda().eval()
 	assert(tensorFirst.size(1) == tensorSecond.size(1))
 	assert(tensorFirst.size(2) == tensorSecond.size(2))
 
 	intWidth = tensorFirst.size(2)
 	intHeight = tensorFirst.size(1)
 
-	assert(intWidth == 1024) # remember that there is no guarantee for correctness, comment this line out if you acknowledge this and want to continue
-	assert(intHeight == 436) # remember that there is no guarantee for correctness, comment this line out if you acknowledge this and want to continue
+	#assert(intWidth == 1024) # remember that there is no guarantee for correctness, comment this line out if you acknowledge this and want to continue
+	#assert(intHeight == 436) # remember that there is no guarantee for correctness, comment this line out if you acknowledge this and want to continue
 
 	tensorPreprocessedFirst = tensorFirst.cuda().view(1, 3, intHeight, intWidth)
 	tensorPreprocessedSecond = tensorSecond.cuda().view(1, 3, intHeight, intWidth)
@@ -312,6 +318,22 @@ def estimate(tensorFirst, tensorSecond):
 # end
 
 ##########################################################
+
+def run():
+	
+	tensorFirst = torch.FloatTensor(numpy.array(PIL.Image.open(arguments_strFirst))[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (1.0 / 255.0))
+	tensorSecond = torch.FloatTensor(numpy.array(PIL.Image.open(arguments_strSecond))[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (1.0 / 255.0))
+
+	tensorOutput = estimate(tensorFirst, tensorSecond)
+
+	objectOutput = open(arguments_strOut, 'wb')
+
+	numpy.array([ 80, 73, 69, 72 ], numpy.uint8).tofile(objectOutput)
+	numpy.array([ tensorOutput.size(2), tensorOutput.size(1) ], numpy.int32).tofile(objectOutput)
+	tensorOutput = tensorOutput.detach() #! Change
+	numpy.array(tensorOutput.numpy().transpose(1, 2, 0), numpy.float32).tofile(objectOutput)
+
+	objectOutput.close()
 
 if __name__ == '__main__':
 	tensorFirst = torch.FloatTensor(numpy.array(PIL.Image.open(arguments_strFirst))[:, :, ::-1].transpose(2, 0, 1).astype(numpy.float32) * (1.0 / 255.0))
