@@ -39,8 +39,9 @@ class Dialog(QDialog, Ui_Dialog):
         self.back_of_exist = False
         self.depth_exist = False
         self.vid_name = None
-        self.all_run = 4
+        self.all_run = 1
         self.run_count = 1
+        self.run_dict = {}
         
         self.app = app
 
@@ -159,6 +160,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.sendUser.emit(self.user)
         self.createDirs()
         print("Start Run")
+        self.createRunDict()
         self.showProgressBar()
         self.startCalcThread()
         
@@ -167,7 +169,7 @@ class Dialog(QDialog, Ui_Dialog):
         # 1 - create Worker and Thread inside the Form
         self.worker = calcRunner.CalculationRunner(self.savePathJoin("Images"),
             self.savePathJoin("Depth"), self.savePathJoin("Of"), self.savePathJoin("Back_Of"),
-            self.user["Save"], None, 1, 0.309)  # no parent!
+            self.user["Save"], None, 1, 0.309, self.run_dict)  # no parent!
         self.thread = QThread()  # no parent!
 
         self.worker.labelUpdate.connect(self.labelUpdate)
@@ -185,6 +187,8 @@ class Dialog(QDialog, Ui_Dialog):
 
     def progressUpdate(self, value):
         self.progressBar.setValue(value)
+        self.run_count += 1
+        self.progressAllBar.setValue(self.run_count)
 
     def finishThread(self):
         print("Fin Thread")
@@ -194,14 +198,15 @@ class Dialog(QDialog, Ui_Dialog):
         self.accept()
 
     def progressAllUpdate(self):
-        self.run_count += 1
-        self.progressAllBar.setValue(self.run_count)
+        pass
+        #self.run_count += 1
+        #self.progressAllBar.setValue(self.run_count)
 
-    def labelUpdate(self, text):
+    def labelUpdate(self, run_dict):
         self.progressBar.reset()
         self.progressBar.setMinimum(1)
-        self.progressBar.setMaximum(len(list_directory(self.savePathJoin("Images"))))
-        self.progressLabel.setText(text)
+        self.progressBar.setMaximum(run_dict["Progress"])
+        self.progressLabel.setText(run_dict["Text"])
 
 
     def showProgressBar(self):
@@ -218,11 +223,18 @@ class Dialog(QDialog, Ui_Dialog):
         self.progressBar = QProgressBar(self) # Progress bar created
         self.ui.layout_v.addWidget(self.progressBar)
 
+        all_run = sum([self.run_dict[key]["Progress"] for key in self.run_dict if self.run_dict[key]["Run"]])
+
         self.progressAllBar = QProgressBar(self) # Progress bar created
         self.progressAllBar.setMinimum(1)
-        self.progressAllBar.setMaximum(self.all_run)
+        self.progressAllBar.setMaximum(all_run)
         self.ui.layout_v.addWidget(self.progressAllBar)
         self.progressAllBar.setValue(1)
+
+    def createRunDict(self):
+        self.run_dict["Of"] = {"Run": not self.of_exist, "Progress":len(list_directory(self.savePathJoin("Images"))), "Text":"Running optical flow"}
+        self.run_dict["Depth"] = {"Run": not self.of_exist, "Progress":len(list_directory(self.savePathJoin("Images"))), "Text":"Running depth estimation"}
+        self.run_dict["Speed"] = {"Run": True, "Progress":len(list_directory(self.savePathJoin("Images"))), "Text":"Running speed estimation"}
 
     def disableButtons(self):
         self.ui.b_run.setEnabled(False)

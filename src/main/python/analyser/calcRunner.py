@@ -15,10 +15,10 @@ class CalculationRunner(QObject):
     depthStart = pyqtSignal()
     runStart = pyqtSignal()
     updateFin = pyqtSignal()
-    labelUpdate = pyqtSignal(str)
+    labelUpdate = pyqtSignal(object)
     update = pyqtSignal(int)
 
-    def __init__(self, img_dir, depth_dir, of_dir, back_of_dir, save_dir, label_dir, high, low):
+    def __init__(self, img_dir, depth_dir, of_dir, back_of_dir, save_dir, label_dir, high, low, run_dict):
         super(CalculationRunner, self).__init__()
         self.running = True
         self.use_slic = False
@@ -26,6 +26,7 @@ class CalculationRunner(QObject):
         self.high = high
         self.low = low
         self.n_sps = 100
+        self.run_dict = run_dict
         self.out_dir = save_dir
         self.label_dir = label_dir
         self.vid_name = "Video"
@@ -108,15 +109,17 @@ class CalculationRunner(QObject):
     
     @pyqtSlot()
     def startThread(self): # A slot takes no params
-        #self.labelUpdate.emit("Running optical flow")
-        #self.startOf()
-        #self.updateFin.emit()
-        #self.labelUpdate.emit("Running depth estimation")
-        #self.startDepth()
-        #self.updateFin.emit()
-        #self.labelUpdate.emit("Running speed estimation")
-        #self.startCalc()
-        #self.updateFin.emit()
+        if self.run_dict["Of"]["Run"]:
+            self.labelUpdate.emit(self.run_dict["Of"])
+            self.startOf()
+            self.updateFin.emit()
+        if self.run_dict["Depth"]["Run"]:
+            self.labelUpdate.emit(self.run_dict["Depth"])
+            self.startDepth()
+            self.updateFin.emit()
+        self.labelUpdate.emit(self.run_dict["Speed"])
+        self.startCalc()
+        self.updateFin.emit()
 
         self.finished.emit()
 
