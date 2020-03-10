@@ -6,6 +6,7 @@ from speed.speed_vectors import calculate_velocity_and_orientation_wrapper
 import itertools
 import tqdm
 import multiprocessing
+import speed.pytorch_pwc.run as pwc
 
 
 class CalculationRunner(QObject):
@@ -18,7 +19,8 @@ class CalculationRunner(QObject):
     labelUpdate = pyqtSignal(object)
     update = pyqtSignal(int)
 
-    def __init__(self, img_dir, depth_dir, of_dir, back_of_dir, save_dir, label_dir, high, low, run_dict):
+    def __init__(self, img_dir, depth_dir, of_dir, back_of_dir, save_dir, label_dir, high, low, run_dict,
+                of_model):
         super(CalculationRunner, self).__init__()
         self.running = True
         self.use_slic = False
@@ -30,6 +32,7 @@ class CalculationRunner(QObject):
         self.out_dir = save_dir
         self.label_dir = label_dir
         self.vid_name = "Video"
+        self.of_model = of_model
         self.img_dir = img_dir
         self.disp_dir = depth_dir
         self.flow_dir = of_dir
@@ -85,15 +88,18 @@ class CalculationRunner(QObject):
 
     @pyqtSlot()
     def startOf(self): # A slot takes no params
-        time.sleep(1)
-        print("Emit")
-        self.update.emit(1)
-        time.sleep(1)
-        print("Emit")
-        self.update.emit(2)
-        time.sleep(1)
-        print("Emit")
-        self.update.emit(3)
+        print("Save to:",self.out_dir)
+        img_list = utils.list_directory(self.img_dir)
+        prev_img = img_list[0]
+        for i, img in enumerate(img_list[1:]):
+            print(prev_img, img)
+            prev_img = img
+            #pwc.setupArguments(model="/home/kevin/Programming/BSC-Thesis/network-default.pytorch", first_img="/home/kevin/Programming/BSC-Thesis/first.png",
+            #second_img="/home/kevin/Programming/BSC-Thesis/second.png", save_path="/home/kevin/Programming/BSC-Thesis/flow.flo")
+            #pwc.run()
+        print(self.of_model) 
+
+        #self.update.emit(3)
 
     @pyqtSlot()
     def startDepth(self): # A slot takes no params
@@ -109,19 +115,20 @@ class CalculationRunner(QObject):
     
     @pyqtSlot()
     def startThread(self): # A slot takes no params
-        if self.run_dict["Of"]["Run"]:
-            self.labelUpdate.emit(self.run_dict["Of"])
-            self.startOf()
-            self.updateFin.emit()
-        if self.run_dict["Depth"]["Run"]:
-            self.labelUpdate.emit(self.run_dict["Depth"])
-            self.startDepth()
-            self.updateFin.emit()
-        self.labelUpdate.emit(self.run_dict["Speed"])
-        self.startCalc()
-        self.updateFin.emit()
+        self.startOf()
+        ##if self.run_dict["Of"]["Run"]:
+        #    self.labelUpdate.emit(self.run_dict["Of"])
+        #    self.startOf()
+        #    self.updateFin.emit()
+        ##if self.run_dict["Depth"]["Run"]:
+        #    self.labelUpdate.emit(self.run_dict["Depth"])
+        #    self.startDepth()
+        #    self.updateFin.emit()
+        #self.labelUpdate.emit(self.run_dict["Speed"])
+        #self.startCalc()
+        #self.updateFin.emit()
 
-        self.finished.emit()
+        #self.finished.emit()
 
     def stop(self):
         """

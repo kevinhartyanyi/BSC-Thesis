@@ -257,6 +257,8 @@ class Dialog(QDialog, Ui_Dialog):
             self.createDir("Images")
         if not self.of_exist:
             self.createDir("Of")
+        if not self.back_of_exist:
+            self.createDir("Back_Of")
         if not self.depth_exist:
             self.createDir("Depth")
 
