@@ -91,19 +91,6 @@ class CalculationRunner(QObject):
 
     @pyqtSlot()
     def startOf(self): # A slot takes no params
-        #img_list = utils.list_directory(self.img_dir)
-        #prev_img = img_list[0]
-        #for i, img in enumerate(img_list[1:]):
-        #    flo_file = os.path.join(self.flow_dir,"{0}.flo".format(i))
-        #    pwc.setupArguments(self.of_model,
-        #    img_list[i],
-        #    img_list[i+1], 
-        #    flo_file)
-        #    pwc.run()
-        #    flow = fz.convert_from_file(flo_file)
-        #    Image.fromarray(flow).save(os.path.join(self.flow_dir,"{0}.png".format(i)))
-        #    prev_img = img
-        #print("Done")
 
         img_list = utils.list_directory(self.img_dir)
         for ind in range(len(img_list) - 1):
