@@ -127,9 +127,9 @@ class Dialog(QDialog, Ui_Dialog):
     
     def userSetup(self):
         if self.user["Save"] == "":
-            self.ui.b_vid.setEnabled(False)
-            self.ui.b_of.setEnabled(False)
-            self.ui.b_depth.setEnabled(False)
+            #self.ui.b_vid.setEnabled(False)
+            #self.ui.b_of.setEnabled(False)
+            #self.ui.b_depth.setEnabled(False)
             self.ui.b_run.setEnabled(False)
         else:
             self.ui.l_save.setText(self.user["Save"])
@@ -235,7 +235,7 @@ class Dialog(QDialog, Ui_Dialog):
 
     def createRunDict(self):
         self.run_dict["Of"] = {"Run": not self.of_exist, "Progress":len(list_directory(self.savePathJoin("Images"))), "Text":"Running optical flow"}
-        self.run_dict["Depth"] = {"Run": not self.of_exist, "Progress":len(list_directory(self.savePathJoin("Images"))), "Text":"Running depth estimation"}
+        self.run_dict["Depth"] = {"Run": not self.depth_exist, "Progress":len(list_directory(self.savePathJoin("Images"))), "Text":"Running depth estimation"}
         self.run_dict["Speed"] = {"Run": True, "Progress":len(list_directory(self.savePathJoin("Images"))), "Text":"Running speed estimation"}
 
     def disableButtons(self):

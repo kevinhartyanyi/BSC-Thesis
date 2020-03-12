@@ -120,20 +120,19 @@ class CalculationRunner(QObject):
     
     @pyqtSlot()
     def startThread(self): # A slot takes no params
-        self.startOf()
-        ##if self.run_dict["Of"]["Run"]:
-        #    self.labelUpdate.emit(self.run_dict["Of"])
-        #    self.startOf()
-        #    self.updateFin.emit()
-        ##if self.run_dict["Depth"]["Run"]:
-        #    self.labelUpdate.emit(self.run_dict["Depth"])
-        #    self.startDepth()
-        #    self.updateFin.emit()
-        #self.labelUpdate.emit(self.run_dict["Speed"])
-        #self.startCalc()
-        #self.updateFin.emit()
+        if self.run_dict["Of"]["Run"]:
+            self.labelUpdate.emit(self.run_dict["Of"])
+            self.startOf()
+            self.updateFin.emit()
+        if self.run_dict["Depth"]["Run"]:
+            self.labelUpdate.emit(self.run_dict["Depth"])
+            self.startDepth()
+            self.updateFin.emit()
+        self.labelUpdate.emit(self.run_dict["Speed"])
+        self.startCalc()
+        self.updateFin.emit()
 
-        #self.finished.emit()
+        self.finished.emit()
 
     def stop(self):
         """
