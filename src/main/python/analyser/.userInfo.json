@@ -1,7 +1,7 @@
 {
     "Save": "/home/kevin/Programming/BSC-Thesis/data/test",
     "Of": "/home/kevin/Programming/BSC-Thesis/opticalflow.py",
-    "Depth": "",
+    "Depth": "/home/kevin/Programming/BSC-Thesis/opticalflow.py",
     "Video": "",
     "Colour": "#fce94f"
 }

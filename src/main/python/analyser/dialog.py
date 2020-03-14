@@ -40,9 +40,13 @@ class Dialog(QDialog, Ui_Dialog):
         self.of_exist = False
         self.back_of_exist = False
         self.depth_exist = False
+        self.create_of_vid = False
+        self.create_back_of_vid = False
+        self.create_depth_vid = False
         self.vid_name = None
         self.all_run = 1
         self.run_count = 1
+        self.fps = 30
         self.run_dict = {}
         
         self.app = app
@@ -57,11 +61,31 @@ class Dialog(QDialog, Ui_Dialog):
         """
         self.ui.b_save.clicked.connect(self.openSave)
         self.ui.b_vid.clicked.connect(self.openVideo)
-        self.ui.b_of.clicked.connect(self.openOf)
-        self.ui.b_depth.clicked.connect(self.openDepth)
+        #self.ui.b_of.clicked.connect(self.openOf)
+        #self.ui.b_depth.clicked.connect(self.openDepth)
         self.ui.b_run.clicked.connect(self.startRun)
         self.ui.b_colour.clicked.connect(self.pickColour)
+
+        self.ui.t_fps.textChanged(self.changeFps)
     
+    def changeFps(self):
+        """
+        Change fps for the created videos
+        """
+        check = re.search("[1-9][0-9]*", self.ui.t_fps.text())
+        if check:
+            num = check.group()
+            fps = int(num)
+            if fps > self.fps_limit:
+                print("Warning: Too big number for fps. Falling back to {} fps.".format(self.fps_limit))
+                fps = self.fps_limit
+            self.image_holder.changeFps(fps)
+            self.ui.t_fps.setText(str(fps))
+        else:
+            print("Wrong Input For Fps")
+            self.ui.t_fps.setText("")
+
+
     def splitPath(self, path):
         sep = "/"
         if platform.system() == "Windows": 
@@ -86,16 +110,20 @@ class Dialog(QDialog, Ui_Dialog):
         else:
             self.ui.b_run.setEnabled(False)
     
+    #def runRequirements_old(self):
+    #    ready = ((self.depth_exist         and self.of_exist         and self.img_exist)           or\
+    #            (self.user["Depth"] != "" and self.of_exist         and self.img_exist)           or\
+    #            (self.depth_exist         and self.user["Of"] != "" and self.img_exist)           or\
+    #            (self.depth_exist         and self.of_exist         and self.user["Video"] != "") or\
+    #            (self.user["Depth"] != "" and self.user["Of"] != "" and self.img_exist)           or\
+    #            (self.depth_exist         and self.user["Of"] != "" and self.user["Video"] != "") or\
+    #            (self.user["Depth"] != "" and self.of_exist         and self.user["Video"] != "") or\
+    #            (self.user["Depth"] != "" and self.user["Of"] != "" and self.user["Video"] != "")) and\
+    #            ((self.back_of_exist and self.of_exist) or self.user["Of"] != "")
+    #    return ready
+
     def runRequirements(self):
-        ready = ((self.depth_exist         and self.of_exist         and self.img_exist)           or\
-                (self.user["Depth"] != "" and self.of_exist         and self.img_exist)           or\
-                (self.depth_exist         and self.user["Of"] != "" and self.img_exist)           or\
-                (self.depth_exist         and self.of_exist         and self.user["Video"] != "") or\
-                (self.user["Depth"] != "" and self.user["Of"] != "" and self.img_exist)           or\
-                (self.depth_exist         and self.user["Of"] != "" and self.user["Video"] != "") or\
-                (self.user["Depth"] != "" and self.of_exist         and self.user["Video"] != "") or\
-                (self.user["Depth"] != "" and self.user["Of"] != "" and self.user["Video"] != "")) and\
-                ((self.back_of_exist and self.of_exist) or self.user["Of"] != "")
+        ready = (self.user["Save"] != "" and self.user["Video"]) or self.img_exist
         return ready
 
     def openVideo(self):
@@ -133,10 +161,10 @@ class Dialog(QDialog, Ui_Dialog):
             self.ui.b_run.setEnabled(False)
         else:
             self.ui.l_save.setText(self.user["Save"])
-            if self.user["Of"] != "":
-                self.ui.l_of.setText(self.user["Of"])
-            if self.user["Depth"] != "":
-                self.ui.l_depth.setText(self.user["Depth"])
+            #if self.user["Of"] != "":
+            #    self.ui.l_of.setText(self.user["Of"])
+            #if self.user["Depth"] != "":
+            #    self.ui.l_depth.setText(self.user["Depth"])
             if self.user["Video"] != "":
                 self.ui.l_vid.setText(self.user["Video"])
     
@@ -171,7 +199,8 @@ class Dialog(QDialog, Ui_Dialog):
         # 1 - create Worker and Thread inside the Form
         self.worker = calcRunner.CalculationRunner(self.savePathJoin("Images"),
             self.savePathJoin("Depth"), self.savePathJoin("Of"), self.savePathJoin("Back_Of"),
-            self.user["Save"], None, 1, 0.309, self.run_dict, self.app.get_resource("network-default.pytorch"))  # no parent!
+            self.user["Save"], None, 1, 0.309, self.run_dict, self.app.get_resource(os.path.join("of_models", "network-default.pytorch")),
+            self.app.get_resource(os.path.join("depth_models", "model_city2kitti.meta")))  # no parent!
         self.thread = QThread()  # no parent!
 
         self.worker.labelUpdate.connect(self.labelUpdate)
@@ -234,9 +263,16 @@ class Dialog(QDialog, Ui_Dialog):
         self.progressAllBar.setValue(1)
 
     def createRunDict(self):
-        self.run_dict["Of"] = {"Run": not self.of_exist, "Progress":len(list_directory(self.savePathJoin("Images"))), "Text":"Running optical flow"}
-        self.run_dict["Depth"] = {"Run": not self.depth_exist, "Progress":len(list_directory(self.savePathJoin("Images"))), "Text":"Running depth estimation"}
-        self.run_dict["Speed"] = {"Run": True, "Progress":len(list_directory(self.savePathJoin("Images"))), "Text":"Running speed estimation"}
+        ori_images = len(list_directory(self.savePathJoin("Images")))
+        self.run_dict["Of"] = {"Run": not self.of_exist, "Progress":ori_images, "Text":"Running optical flow"}
+        self.run_dict["Back_Of"] = {"Run": not self.back_of_exist, "Progress":ori_images, "Text":"Running back optical flow"}
+        self.run_dict["Depth"] = {"Run": not self.depth_exist, "Progress":ori_images, "Text":"Running depth estimation"}
+        self.run_dict["Speed"] = {"Run": True, "Progress":ori_images, "Text":"Running speed estimation"}
+
+        self.run_dict["Of_Vid"] = {"Run": self.create_of_vid, "Progress":ori_images, "Text":"Running speed estimation"}
+        self.run_dict["Back_Of_Vid"] = {"Run": self.create_back_of_vid, "Progress":ori_images, "Text":"Running speed estimation"}
+        self.run_dict["Depth_Vid"] = {"Run": self.create_depth_vid, "Progress":ori_images, "Text":"Running speed estimation"}
+
 
     def disableButtons(self):
         self.ui.b_run.setEnabled(False)

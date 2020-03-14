@@ -22,19 +22,33 @@ import tensorflow.contrib.slim as slim
 import scipy.misc
 import matplotlib.pyplot as plt
 
-from monodepth_model import *
-from monodepth_dataloader import *
-from average_gradients import *
+from speed.monodepth.monodepth_model import *
+from speed.monodepth.monodepth_dataloader import *
+from speed.monodepth.average_gradients import *
 
-parser = argparse.ArgumentParser(description='Monodepth TensorFlow implementation.')
+#parser = argparse.ArgumentParser(description='Monodepth TensorFlow implementation.')
+#
+#parser.add_argument('--encoder',          type=str,   help='type of encoder, vgg or resnet50', default='vgg')
+#parser.add_argument('--image_path',       type=str,   help='path to the image', required=True)
+#parser.add_argument('--checkpoint_path',  type=str,   help='path to a specific checkpoint to load', required=True)
+#parser.add_argument('--input_height',     type=int,   help='input height', default=256)
+#parser.add_argument('--input_width',      type=int,   help='input width', default=512)
 
-parser.add_argument('--encoder',          type=str,   help='type of encoder, vgg or resnet50', default='vgg')
-parser.add_argument('--image_path',       type=str,   help='path to the image', required=True)
-parser.add_argument('--checkpoint_path',  type=str,   help='path to a specific checkpoint to load', required=True)
-parser.add_argument('--input_height',     type=int,   help='input height', default=256)
-parser.add_argument('--input_width',      type=int,   help='input width', default=512)
+#args = parser.parse_args()
 
-args = parser.parse_args()
+####!
+
+class ARGS:
+    def __init__(self, image_path, checkpoint_path, save_path):
+        self.image_path = image_path
+        self.checkpoint_path = checkpoint_path
+        self.save_path = save_path
+
+        self.encoder = "vgg"
+        self.input_height = 256
+        self.input_width = 512
+
+####!
 
 def post_process_disparity(disp):
     _, h, w = disp.shape
@@ -46,7 +60,7 @@ def post_process_disparity(disp):
     r_mask = np.fliplr(l_mask)
     return r_mask * l_disp + l_mask * r_disp + (1.0 - l_mask - r_mask) * m_disp
 
-def test_simple(params):
+def test_simple(params, args):
     """Test function."""
 
     left  = tf.placeholder(tf.float32, [2, args.input_height, args.input_width, 3])
@@ -78,7 +92,7 @@ def test_simple(params):
     disp = sess.run(model.disp_left_est[0], feed_dict={left: input_images})
     disp_pp = post_process_disparity(disp.squeeze()).astype(np.float32)
 
-    output_directory = os.path.dirname(args.image_path)
+    output_directory = os.path.dirname(args.save_path)
     output_name = os.path.splitext(os.path.basename(args.image_path))[0]
 
     np.save(os.path.join(output_directory, "{}_disp.npy".format(output_name)), disp_pp)
@@ -87,7 +101,11 @@ def test_simple(params):
 
     print('done!')
 
-def main(_):
+def run(image_path, checkpoint_path, save_path):
+
+    args = ARGS(image_path, checkpoint_path, save_path)
+
+    #tf.app.run()
 
     params = monodepth_parameters(
         encoder=args.encoder,
@@ -104,7 +122,7 @@ def main(_):
         lr_loss_weight=0,
         full_summary=False)
 
-    test_simple(params)
+    test_simple(params, args)
 
-if __name__ == '__main__':
-    tf.app.run()
+#if __name__ == '__main__':
+#    tf.app.run()

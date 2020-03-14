@@ -6,7 +6,7 @@ class VideoPlayer(QtWidgets.QLabel):
     resizeSignal = QtCore.pyqtSignal(int, int)
     def __init__(self):
         super().__init__()  
-        self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self.setText("")
 
     def resizeEvent(self, event):

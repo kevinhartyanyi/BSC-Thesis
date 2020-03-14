@@ -4,7 +4,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets, QtMultimedia
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot, QObject
 
 # https://github.com/pypa/setuptools/issues/1963
-from mywindow import Ui_MainWindow
+from mainwindowUI import Ui_MainWindow
 from PIL import Image
 from PIL.ImageQt import ImageQt, toqpixmap
 import videoPlayer
