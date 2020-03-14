@@ -10,6 +10,7 @@ import os
 import shutil
 import speed.speed_vectors as speed
 from speed.utils import list_directory
+import re
 
 import speed.pwc.run as pwc
 
@@ -47,6 +48,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.all_run = 1
         self.run_count = 1
         self.fps = 30
+        self.fps_limit = 60
         self.run_dict = {}
         
         self.app = app
@@ -66,8 +68,16 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.b_run.clicked.connect(self.startRun)
         self.ui.b_colour.clicked.connect(self.pickColour)
 
-        self.ui.t_fps.textChanged(self.changeFps)
+        self.ui.t_fps.textChanged.connect(self.changeFps)
+        self.ui.c_of.stateChanged.connect(self.checkVideoCreation)
+        self.ui.c_back_of.stateChanged.connect(self.checkVideoCreation)
+        self.ui.c_depth.stateChanged.connect(self.checkVideoCreation)
     
+    def checkVideoCreation(self):
+        self.create_of_vid = True if self.ui.c_of.isChecked() else False
+        self.create_back_of_vid = True if self.ui.c_back_of.isChecked() else False
+        self.create_depth_vid = True if self.ui.c_depth.isChecked() else False
+
     def changeFps(self):
         """
         Change fps for the created videos
@@ -79,7 +89,7 @@ class Dialog(QDialog, Ui_Dialog):
             if fps > self.fps_limit:
                 print("Warning: Too big number for fps. Falling back to {} fps.".format(self.fps_limit))
                 fps = self.fps_limit
-            self.image_holder.changeFps(fps)
+            self.fps = fps
             self.ui.t_fps.setText(str(fps))
         else:
             print("Wrong Input For Fps")
@@ -269,16 +279,16 @@ class Dialog(QDialog, Ui_Dialog):
         self.run_dict["Depth"] = {"Run": not self.depth_exist, "Progress":ori_images, "Text":"Running depth estimation"}
         self.run_dict["Speed"] = {"Run": True, "Progress":ori_images, "Text":"Running speed estimation"}
 
-        self.run_dict["Of_Vid"] = {"Run": self.create_of_vid, "Progress":ori_images, "Text":"Running speed estimation"}
-        self.run_dict["Back_Of_Vid"] = {"Run": self.create_back_of_vid, "Progress":ori_images, "Text":"Running speed estimation"}
-        self.run_dict["Depth_Vid"] = {"Run": self.create_depth_vid, "Progress":ori_images, "Text":"Running speed estimation"}
+        self.run_dict["Of_Vid"] = {"Run": self.create_of_vid, "Progress":ori_images, "Text":"Creating optical flow video"}
+        self.run_dict["Back_Of_Vid"] = {"Run": self.create_back_of_vid, "Progress":ori_images, "Text":"Creating backward optical flow video"}
+        self.run_dict["Depth_Vid"] = {"Run": self.create_depth_vid, "Progress":ori_images, "Text":"Creating depth estimation video"}
 
 
     def disableButtons(self):
         self.ui.b_run.setEnabled(False)
         self.ui.b_colour.setEnabled(False)
-        self.ui.b_depth.setEnabled(False)
-        self.ui.b_of.setEnabled(False)
+        #self.ui.b_depth.setEnabled(False)
+        #self.ui.b_of.setEnabled(False)
         self.ui.b_vid.setEnabled(False)
         self.ui.b_save.setEnabled(False)
 

@@ -41,8 +41,8 @@ class CalculationRunner(QObject):
         self.img_dir = img_dir
         self.depth_dir = depth_dir
         self.depth_model = depth_model
-        self.flow_dir = of_dir
-        self.back_flow_dir = back_of_dir
+        self.of_dir = of_dir
+        self.back_of_dir = back_of_dir
 
     @pyqtSlot()
     def startCalc(self):
@@ -51,8 +51,8 @@ class CalculationRunner(QObject):
 
         disp_fns = utils.list_directory(self.depth_dir, extension='.npy')
         fst_disp_fns, snd_disp_fns = disp_fns, disp_fns
-        flow_fns = utils.list_directory(self.flow_dir, extension='.flo')
-        back_flow = utils.list_directory(self.back_flow_dir, extension='.flo')
+        flow_fns = utils.list_directory(self.of_dir, extension='.flo')
+        back_flow = utils.list_directory(self.back_of_dir, extension='.flo')
         calculate_velocity = calculate_velocity_and_orientation_wrapper
 
         if self.label_dir != None:
@@ -72,7 +72,7 @@ class CalculationRunner(QObject):
         assert len(fst_img_fns) == len(snd_img_fns) 
         #assert len(flow_fns) == len(fst_disp_fns)
         assert len(fst_disp_fns) == len(snd_disp_fns) 
-        if self.back_flow_dir != None:
+        if self.back_of_dir != None:
             assert len(flow_fns) == len(back_flow)
         label_fns = fst_img_fns # So it doesn't quit too early
         
@@ -98,14 +98,14 @@ class CalculationRunner(QObject):
         img_list = utils.list_directory(self.img_dir)
         for ind in range(len(img_list) - 1):
             print("Running optical flow on:", img_list[ind], img_list[ind+1])
-            flo_file = os.path.join(self.flow_dir,"{0}.flo".format(ind))
+            flo_file = os.path.join(self.of_dir,"{0}.flo".format(ind))
             pwc.setupArguments(model=self.of_model, first_img=img_list[ind],
             second_img=img_list[ind+1], save_path=flo_file)
             pwc.run()
 
             # Transform from flo to png
             flow = fz.convert_from_file(flo_file)
-            Image.fromarray(flow).save(os.path.join(self.flow_dir,"{0}.png".format(ind)))
+            Image.fromarray(flow).save(os.path.join(self.of_dir,"{0}.png".format(ind)))
             self.update.emit(ind)
 
     @pyqtSlot()
@@ -114,14 +114,14 @@ class CalculationRunner(QObject):
         img_list = utils.list_directory(self.img_dir)
         for ind in reversed(range(len(img_list) - 1)):
             print("Running back optical flow on:", img_list[ind], img_list[ind-1])
-            back_flo_file = os.path.join(self.back_flow_dir,"{0}.flo".format(ind))
+            back_flo_file = os.path.join(self.back_of_dir,"{0}.flo".format(ind))
             pwc.setupArguments(model=self.of_model, first_img=img_list[ind],
             second_img=img_list[ind-1], save_path=back_flo_file)
             pwc.run()
 
             # Transform from flo to png
             flow = fz.convert_from_file(back_flo_file)
-            Image.fromarray(flow).save(os.path.join(self.back_flow_dir,"{0}.png".format(ind)))
+            Image.fromarray(flow).save(os.path.join(self.back_of_dir,"{0}.png".format(ind)))
             self.update.emit(abs(ind - len(img_list)))
         
 
@@ -141,14 +141,16 @@ class CalculationRunner(QObject):
         #self.labelUpdate.emit(self.run_dict["Speed"])
         #self.startCalc()
         #self.updateFin.emit()
-        self.createVid(images_path=self.img_dir, save_path=self.out_dir, vid_name="test.mp4")
+        self.checkRun("Of_Vid", self.createVid, self.of_dir, self.out_dir, "of.mp4")
+        self.checkRun("Back_Of_Vid", self.createVid, self.back_of_dir, self.out_dir, "back_of.mp4")
+        self.checkRun("Depth_Vid", self.createVid, self.depth_dir, self.out_dir, "depth.mp4")
         self.finished.emit()
 
     @pyqtSlot()
-    def checkRun(self, run_item, run_function):
+    def checkRun(self, run_item, run_function, *args, **kwargs):
         if self.run_dict[run_item]["Run"]:
             self.labelUpdate.emit(self.run_dict[run_item])
-            run_function()
+            run_function(*args, **kwargs)
             self.updateFin.emit()
 
     def createVid(self, images_path, save_path, vid_name, fps=30):
@@ -156,7 +158,7 @@ class CalculationRunner(QObject):
 
         frame = cv2.imread(images[0])
         height, width, layers = frame.shape
-        out = cv2.VideoWriter(os.path.join(save_path, vid_name),cv2.VideoWriter_fourcc(*'MP4V'), fps, (width, height))
+        out = cv2.VideoWriter(os.path.join(save_path, vid_name),cv2.VideoWriter_fourcc(*"mp4v"), fps, (width, height))
         for i in range(len(images)):
             print("Writing frame: {0}".format(i))
             # writing to a image array
