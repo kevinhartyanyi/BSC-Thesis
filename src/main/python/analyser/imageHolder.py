@@ -92,7 +92,7 @@ class imageHolder:
         return self.prepareImg(self.getCurrent())
     
     def prepareImg(self, img):
-        img = utils.resizeImg(img, self.width)
+        img = utils.resizeImg(img, self.width, self.height)
         img = utils.fillImg(img, fill_colour=self.colour, size=(self.width, self.height))
         return img
 
@@ -103,7 +103,7 @@ class imageHolder:
         self.img_dict[idx] = (img, idx)
 
     def load(self, begin=None, end=None):
-        #self.img_dict.clear()
+        self.img_dict.clear()
         if begin == None:        
             start = self.list_idx if self.list_idx < self.maxLen else self.list_idx - self.maxLen
             load_len = self.maxLen + start if self.maxLen + start < self.vidLen else self.vidLen
@@ -114,8 +114,9 @@ class imageHolder:
             #    return
             if self.list_idx >= self.vidLen:
                 print("Skip Load", self.list_idx, self.vidLen, start)
-                self.list_idx = start + self.maxLen + 1
-                return
+                #self.list_idx = start + self.maxLen + 1
+
+                #return
             load_len = start + self.maxLen + 1 if start + self.maxLen + 1 < self.vidLen else self.vidLen
         self.list_idx = start
         img = Image.open(self.img_list[start])
@@ -149,16 +150,17 @@ class imageHolder:
 
     def nextImg(self):
         self.cur_idx += 1
-        cur = self.list_idx % self.maxLen
-        if cur not in self.img_dict:
+        cur = self.cur_idx % self.maxLen
+        if self.cur_idx >= self.vidLen:
+            return self.current
+        elif cur not in self.img_dict:
             print("Warning: Not in dictionary. Returning previous image")
             worker = imageLoader.Worker(self.loadImg, self.img_list[self.list_idx], cur) # Any other args, kwargs are passed to the run function
             self.threadpool.start(worker) 
             self.list_idx += 1
             return self.current
-        elif self.cur_idx >= self.vidLen:
-            return self.current
-        print("Current: ", self.list_idx, cur, self.img_dict[cur][1])
+        
+        print("Current: ", self.list_idx, cur, self.img_dict[cur][1], self.cur_idx)
         img = self.img_dict[cur][0]    
         self.current = img    
 
@@ -166,8 +168,8 @@ class imageHolder:
             worker = imageLoader.Worker(self.loadImg, self.img_list[self.list_idx], cur) # Any other args, kwargs are passed to the run function
             self.threadpool.start(worker) 
             self.list_idx += 1
-        else:
-            self.list_idx += 1
+        #else:
+        #    self.list_idx += 1
 
         return img    
 

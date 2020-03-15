@@ -21,6 +21,7 @@ VL_DIR = os.path.join(RESULTS, 'velocity')
 NP_DIR = os.path.join(RESULTS, 'numbers')
 MASK_DIR = os.path.join(RESULTS, 'mask')
 PLOT_SPEED_DIR = os.path.join(RESULTS, 'plot_speed')
+PLOT_ERROR_DIR = os.path.join(RESULTS, 'plot_error')
 
 
 class Dialog(QDialog, Ui_Dialog):
@@ -202,7 +203,12 @@ class Dialog(QDialog, Ui_Dialog):
         with open(self.user_file, "w+") as json_file:
             json.dump(self.user, json_file, indent=4)
 
+    def errorChecks(self):
+        if(not os.path.isfile(self.user["GT"])):
+            self.user["GT"] = ""
+
     def startRun(self):
+        self.errorChecks()
         self.disableButtons()
         self.saveUser()
         self.sendUser.emit(self.user)
@@ -220,7 +226,7 @@ class Dialog(QDialog, Ui_Dialog):
             self.savePathJoin("Depth"), self.savePathJoin("Of"), self.savePathJoin("Back_Of"),
             self.user["Save"], None, 1, 0.309, self.run_dict, self.app.get_resource(os.path.join("of_models", "network-default.pytorch")),
             self.app.get_resource(os.path.join("depth_models", "model_city2kitti.meta")), PLOT_SPEED_DIR,
-            NP_DIR)  # no parent!
+            NP_DIR, PLOT_ERROR_DIR, speed_gt=self.user["GT"])  # no parent!
         self.thread = QThread()  # no parent!
 
         self.worker.labelUpdate.connect(self.labelUpdate)
@@ -336,6 +342,8 @@ class Dialog(QDialog, Ui_Dialog):
         #self.reCreateDir(NP_DIR)
         #self.reCreateDir(MASK_DIR)
         #self.reCreateDir(PLOT_SPEED_DIR)
+        if self.user["GT"] != "":
+            self.reCreateDir(PLOT_ERROR_DIR)
 
     def reCreateDir(self, name):
         path = self.savePathJoin(name)

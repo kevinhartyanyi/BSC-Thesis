@@ -6,7 +6,7 @@ import tqdm
 from natsort import natsorted
 
 
-def resizeImg(img, new_width):
+def resizeImg(img, new_width, new_height):
     """
     Resize image while keeping aspect ratio
     
@@ -21,6 +21,10 @@ def resizeImg(img, new_width):
     width = new_width
     pwidth = (new_width/float(w))
     height = int((float(h)*float(pwidth)))
+    if(height > new_height):
+        height = new_height
+        pheight = (height/float(h))
+        width = int((float(w)*float(pheight)))
     #image.resize((width,hsize), Image.BICUBIC).show()
     img = img.resize((width,height), Image.ANTIALIAS)
     return img

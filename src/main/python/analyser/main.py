@@ -124,7 +124,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         plot_dir = None
         if self.created != None:
-            plot_dir = self.cycle_plot.up()
+            plot_dir = self.cycle_plot.current()
         print("Plot Dir", plot_dir)
         self.openVideo(self.img_dir, plot_dir=plot_dir)
 
@@ -145,6 +145,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.b_jump.clicked.connect(self.jumpToFrame)
         self.ui.b_rerun.clicked.connect(self.showDialog)
         self.vid_player.resizeSignal.connect(self.resizeVideo)
+        self.plot_player.resizeSignal.connect(self.resizePlotVideo)
 
     def changeFrameText(self):
         check = re.search("[1-9][0-9]*", self.ui.t_frame.text())
@@ -178,7 +179,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.t_fps.setText("")
 
     def changeFrameTo(self, img, plot_img=None):
-        self.vid_player.setPixmap(toqpixmap(img))
+        if img != None:
+            self.vid_player.setPixmap(toqpixmap(img))
         if plot_img != None:
             print("Change plot")
             self.plot_player.setPixmap(toqpixmap(plot_img))
@@ -187,6 +189,12 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.vid_opened:
             img = self.image_holder.resize(width, height)
             self.changeFrameTo(img)
+    
+    def resizePlotVideo(self, width, height):
+        if self.vid_opened:
+            print(width, height)
+            plot_img = self.plot_holder.resize(width, height)
+            self.changeFrameTo(None, plot_img=plot_img)
 
     def cycleUp(self):
         self.openVideo(self.cycle_vid.up(), self.image_holder.cur_idx)
@@ -237,7 +245,10 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             if self.image_holder.cur_idx >= self.image_holder.vidLen - 1:
                 print("Reopen video from start")
-                self.openVideo(self.cycle_vid.current())
+                plot_dir = None
+                if self.created != None:
+                    plot_dir = self.cycle_plot.current()
+                self.openVideo(self.cycle_vid.current(), plot_dir=plot_dir)
             print("Start Video")
             print("Disable nextFrame Button")
             print("Disable prevFrame Button")

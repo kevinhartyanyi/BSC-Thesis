@@ -28,16 +28,18 @@ class CalculationRunner(QObject):
     update = pyqtSignal(int)
 
     def __init__(self, img_dir, depth_dir, of_dir, back_of_dir, save_dir, label_dir, high, low, run_dict,
-                of_model, depth_model, plot_speed_dir, numbers_dir):
+                of_model, depth_model, plot_speed_dir, numbers_dir, plot_error_dir, speed_gt=""):
         super(CalculationRunner, self).__init__()
         self.running = True
         self.use_slic = False
         self.visualize = True
         self.high = high
+        self.speed_gt = speed_gt 
         self.low = low
         self.n_sps = 100
         self.run_dict = run_dict
         self.out_dir = save_dir
+        self.plot_error_dir = plot_error_dir
         self.numbers_dir = numbers_dir
         self.label_dir = label_dir
         self.vid_name = "Video"
@@ -95,7 +97,7 @@ class CalculationRunner(QObject):
                     self.update.emit(count)
                     pbar.update()
                     count += 1
-            
+        
 
     @pyqtSlot()
     def startOf(self): # A slot takes no params
@@ -152,6 +154,15 @@ class CalculationRunner(QObject):
         #self.checkRun("Depth_Vid", self.createVid, self.depth_dir, self.out_dir, "depth.mp4")
 
         #self.checkRun("Speed_Plot", self.createPlot)
+
+        speeds_dir = utils.list_directory(os.path.join(self.out_dir, self.numbers_dir), extension='speed.npy')
+        speeds_dir = natsorted(speeds_dir)
+        speeds = []
+        for i, s in enumerate(speeds_dir):
+            speeds.append(np.load(s))
+        self.speed_gt = np.load(self.speed_gt)
+        _ = utils.error_comparison_Speed_Vecors(speeds,self.speed_gt[1:],csv=os.path.join(self.out_dir, self.plot_error_dir, '_error_Simple_OF.csv'))
+
 
         self.finished.emit()
 
