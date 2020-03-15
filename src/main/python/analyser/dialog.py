@@ -20,10 +20,12 @@ OTHER_DIR = os.path.join(RESULTS, 'other')
 VL_DIR = os.path.join(RESULTS, 'velocity')
 NP_DIR = os.path.join(RESULTS, 'numbers')
 MASK_DIR = os.path.join(RESULTS, 'mask')
+PLOT_SPEED_DIR = os.path.join(RESULTS, 'plot_speed')
 
 
 class Dialog(QDialog, Ui_Dialog):
     sendUser = pyqtSignal(object)
+    sendCreated = pyqtSignal(object)
 
     def __init__(self, app, parent=None):
         super(Dialog, self).__init__(parent)
@@ -32,6 +34,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.setWindowTitle("Process Video")
         self.dir = os.path.dirname(os.path.realpath(__file__))
         self.user_file = os.path.join(self.dir, ".userInfo.json") 
+        self.created = {}
         self.user = None
         self.thread = None
         self.progressBar = None
@@ -41,9 +44,6 @@ class Dialog(QDialog, Ui_Dialog):
         self.of_exist = False
         self.back_of_exist = False
         self.depth_exist = False
-        self.create_of_vid = False
-        self.create_back_of_vid = False
-        self.create_depth_vid = False
         self.vid_name = None
         self.all_run = 1
         self.run_count = 1
@@ -67,16 +67,21 @@ class Dialog(QDialog, Ui_Dialog):
         #self.ui.b_depth.clicked.connect(self.openDepth)
         self.ui.b_run.clicked.connect(self.startRun)
         self.ui.b_colour.clicked.connect(self.pickColour)
+        self.ui.b_ground_truth.clicked.connect(self.openGroundTruth)
 
         self.ui.t_fps.textChanged.connect(self.changeFps)
-        self.ui.c_of.stateChanged.connect(self.checkVideoCreation)
-        self.ui.c_back_of.stateChanged.connect(self.checkVideoCreation)
-        self.ui.c_depth.stateChanged.connect(self.checkVideoCreation)
+        #self.ui.c_of.stateChanged.connect(self.checkVideoCreation)
+        #self.ui.c_back_of.stateChanged.connect(self.checkVideoCreation)
+        #self.ui.c_depth.stateChanged.connect(self.checkVideoCreation)
     
-    def checkVideoCreation(self):
-        self.create_of_vid = True if self.ui.c_of.isChecked() else False
-        self.create_back_of_vid = True if self.ui.c_back_of.isChecked() else False
-        self.create_depth_vid = True if self.ui.c_depth.isChecked() else False
+
+    def openGroundTruth(self):
+        gt_dir = name = self.openFile(self.user["GT"], title="Load Ground Truth Data", 
+        file_filter="Numpy Files (*.npy);;All files (*)")
+        if gt_dir != "":
+            self.user["GT"] = gt_dir
+            self.ui.l_ground_truth.setText("Load: " + self.splitPath(gt_dir)[-1])
+        
 
     def changeFps(self):
         """
@@ -105,9 +110,10 @@ class Dialog(QDialog, Ui_Dialog):
 
     def openSave(self):
         save_dir = QFileDialog.getExistingDirectory(self, "Select a folder", self.user["Save"], QFileDialog.ShowDirsOnly)
-        self.user["Save"] = save_dir
-        self.ui.l_save.setText("Save to: " + save_dir)
-        self.checkFiles()
+        if save_dir != "":
+            self.user["Save"] = save_dir
+            self.ui.l_save.setText("Save to: " + save_dir)
+            self.checkFiles()
 
     def checkFiles(self):
         self.of_exist = True if os.path.exists(os.path.join(self.user["Save"], "Of")) else False
@@ -138,11 +144,12 @@ class Dialog(QDialog, Ui_Dialog):
 
     def openVideo(self):
         fname = self.openFile(self.user["Video"])
-        self.user["Video"] = fname
-        name = self.splitPath(fname)[-1]
-        self.ui.l_vid.setText("Load: " + name)
-        self.vid_name = name.split(".")[0]
-        self.checkFiles()
+        if fname != "":
+            self.user["Video"] = fname
+            name = self.splitPath(fname)[-1]
+            self.ui.l_vid.setText("Load: " + name)
+            self.vid_name = name.split(".")[0]
+            self.checkFiles()
 
     def openOf(self):
         fname = self.openFile(self.user["Of"], file_filter="Python files (*.py);;All files (*)")
@@ -158,8 +165,8 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.l_depth.setText("Load: " + name)
         self.checkFiles()
 
-    def openFile(self, folder, file_filter="Video Files (*.mp4 *.avi *.mkv);;All files (*)"):
-        fname = QFileDialog.getOpenFileName(self, "Open Video", folder, file_filter)   
+    def openFile(self, folder, title="Open Video", file_filter="Video Files (*.mp4 *.avi *.mkv);;All files (*)"):
+        fname = QFileDialog.getOpenFileName(self, title, folder, file_filter)   
         
         return fname[0]
     
@@ -186,8 +193,9 @@ class Dialog(QDialog, Ui_Dialog):
             self.checkFiles()
             self.vid_name = self.splitPath(self.user["Video"])[-1]
             self.ui.l_colour.setText(self.user["Colour"])
+            self.ui.l_ground_truth.setText(self.splitPath(self.user["GT"])[-1])
         else:
-            self.user = {"Save":"","Of":"","Depth":"","Video":"", "Colour":"#1a1a1b"}
+            self.user = {"Save":"","Of":"","Depth":"","Video":"", "Colour":"#1a1a1b", "GT":""}
             self.saveUser()
 
     def saveUser(self):
@@ -198,9 +206,10 @@ class Dialog(QDialog, Ui_Dialog):
         self.disableButtons()
         self.saveUser()
         self.sendUser.emit(self.user)
+        self.buildCreatedDict()
         self.createDirs()
         print("Start Run")
-        self.createRunDict()
+        self.buildRunDict()
         self.showProgressBar()
         self.startCalcThread()
         
@@ -210,7 +219,8 @@ class Dialog(QDialog, Ui_Dialog):
         self.worker = calcRunner.CalculationRunner(self.savePathJoin("Images"),
             self.savePathJoin("Depth"), self.savePathJoin("Of"), self.savePathJoin("Back_Of"),
             self.user["Save"], None, 1, 0.309, self.run_dict, self.app.get_resource(os.path.join("of_models", "network-default.pytorch")),
-            self.app.get_resource(os.path.join("depth_models", "model_city2kitti.meta")))  # no parent!
+            self.app.get_resource(os.path.join("depth_models", "model_city2kitti.meta")), PLOT_SPEED_DIR,
+            NP_DIR)  # no parent!
         self.thread = QThread()  # no parent!
 
         self.worker.labelUpdate.connect(self.labelUpdate)
@@ -272,21 +282,31 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.layout_v.addWidget(self.progressAllBar)
         self.progressAllBar.setValue(1)
 
-    def createRunDict(self):
+    def buildCreatedDict(self):
+        self.created = {}
+        self.created["Speed_Plot"] = self.savePathJoin(PLOT_SPEED_DIR)
+        self.sendCreated.emit(self.created)
+
+
+    def buildRunDict(self):
         ori_images = len(list_directory(self.savePathJoin("Images")))
         self.run_dict["Of"] = {"Run": not self.of_exist, "Progress":ori_images, "Text":"Running optical flow"}
         self.run_dict["Back_Of"] = {"Run": not self.back_of_exist, "Progress":ori_images, "Text":"Running back optical flow"}
         self.run_dict["Depth"] = {"Run": not self.depth_exist, "Progress":ori_images, "Text":"Running depth estimation"}
         self.run_dict["Speed"] = {"Run": True, "Progress":ori_images, "Text":"Running speed estimation"}
 
-        self.run_dict["Of_Vid"] = {"Run": self.create_of_vid, "Progress":ori_images, "Text":"Creating optical flow video"}
-        self.run_dict["Back_Of_Vid"] = {"Run": self.create_back_of_vid, "Progress":ori_images, "Text":"Creating backward optical flow video"}
-        self.run_dict["Depth_Vid"] = {"Run": self.create_depth_vid, "Progress":ori_images, "Text":"Creating depth estimation video"}
+        self.run_dict["Of_Vid"] = {"Run": self.ui.c_of.isChecked(), "Progress":ori_images, "Text":"Creating optical flow video"}
+        self.run_dict["Back_Of_Vid"] = {"Run": self.ui.c_back_of.isChecked(), "Progress":ori_images, "Text":"Creating backward optical flow video"}
+        self.run_dict["Depth_Vid"] = {"Run": self.ui.c_depth.isChecked(), "Progress":ori_images, "Text":"Creating depth estimation video"}
+
+        self.run_dict["Speed_Plot"] = {"Run": True, "Progress":ori_images, "Text":"Creating plot for speed values"}
+
 
 
     def disableButtons(self):
         self.ui.b_run.setEnabled(False)
         self.ui.b_colour.setEnabled(False)
+        self.ui.b_ground_truth.setEnabled(False)
         #self.ui.b_depth.setEnabled(False)
         #self.ui.b_of.setEnabled(False)
         self.ui.b_vid.setEnabled(False)
@@ -310,11 +330,12 @@ class Dialog(QDialog, Ui_Dialog):
         if not self.depth_exist:
             self.createDir("Depth")
 
-        self.reCreateDir(RESULTS)        
-        self.reCreateDir(OTHER_DIR)
-        self.reCreateDir(VL_DIR)
-        self.reCreateDir(NP_DIR)
-        self.reCreateDir(MASK_DIR)
+        #self.reCreateDir(RESULTS)        
+        #self.reCreateDir(OTHER_DIR)
+        #self.reCreateDir(VL_DIR)
+        #self.reCreateDir(NP_DIR)
+        #self.reCreateDir(MASK_DIR)
+        #self.reCreateDir(PLOT_SPEED_DIR)
 
     def reCreateDir(self, name):
         path = self.savePathJoin(name)

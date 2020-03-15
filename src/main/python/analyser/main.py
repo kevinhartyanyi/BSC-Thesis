@@ -34,6 +34,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.user = None
         self.vid_player = videoPlayer.VideoPlayer()
         self.ui.layout_vid.insertWidget(1, self.vid_player) # Insert video player into layout
+        self.plot_player = videoPlayer.VideoPlayer()
+        self.ui.layout_plot.insertWidget(1, self.plot_player)
         self.thread = None
         self.vid_opened = False
         self.vid_running = False
@@ -43,9 +45,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.of_dir = None
         self.back_of_dir = None
         self.depth_dir = None
+        self.created = None
         self.app = app
-        self.cycle_vid = cycleVid.cycleVid()      
+        self.cycle_vid = cycleVid.cycleVid() 
+        self.cycle_plot = cycleVid.cycleVid()  
         self.image_holder = imageHolder.imageHolder(self.MAX_LEN, self.fps_limit)
+        self.plot_holder = imageHolder.imageHolder(self.MAX_LEN, self.fps_limit)
         self.ui.t_fps.setText(str(self.fps_limit))
         #self.vid_player.setScaledContents(True)        
         self.signalSetup()  
@@ -78,6 +83,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def showDialog(self):
         widget = Dialog(app=self.app, parent=self)
         widget.sendUser.connect(self.changeUser)
+        widget.sendCreated.connect(self.setCreated)
         widget.rejected.connect(self.dialogExit)
         widget.accepted.connect(self.dialogAccept)
         widget.exec_()
@@ -89,6 +95,15 @@ class MainWindow(QtWidgets.QMainWindow):
     def dialogExit(self):
         print("Exit")
         self.close()
+
+    def setCreated(self, created):
+        if len(created) == 0:
+            return
+
+        self.created = created
+        for key in created:
+            self.cycle_plot.add(key, created[key])
+            print("Created", created[key])
 
     def startSetup(self):
         self.img_dir = os.path.join(self.user["Save"], "Images") 
@@ -106,11 +121,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.cycle_vid.add("depth", self.depth_dir)
         self.cycle_vid.add("velocity", velocity)
         self.cycle_vid.add("mask", mask)
-        self.openVideo(self.img_dir)
+
+        plot_dir = None
+        if self.created != None:
+            plot_dir = self.cycle_plot.up()
+        print("Plot Dir", plot_dir)
+        self.openVideo(self.img_dir, plot_dir=plot_dir)
 
     def changeUser(self, user):
         self.user = user
-        print("Changed Base Dir To:", self.user)
 
     def signalSetup(self):
         """
@@ -139,7 +158,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.t_frame.setText(str(frame))
         else:
             print("Wrong Input For Fps")
-            self.ui.t_frame.setText("")
+            self.ui.t_frame.setText("0")
 
     def changeFps(self):
         """
@@ -158,8 +177,11 @@ class MainWindow(QtWidgets.QMainWindow):
             print("Wrong Input For Fps")
             self.ui.t_fps.setText("")
 
-    def changeFrameTo(self, img):
+    def changeFrameTo(self, img, plot_img=None):
         self.vid_player.setPixmap(toqpixmap(img))
+        if plot_img != None:
+            print("Change plot")
+            self.plot_player.setPixmap(toqpixmap(plot_img))
 
     def resizeVideo(self, width, height):
         if self.vid_opened:
@@ -247,28 +269,43 @@ class MainWindow(QtWidgets.QMainWindow):
             # 6 - Start the thread
             self.thread.start()
 
-    def openVideo(self, img_dir, n_frame=None):
+    def openVideo(self, img_dir, n_frame=None, plot_dir=None):
         self.vid_opened = True
         self.images = utils.readImg(img_dir)
         width = self.vid_player.width()
         height = self.vid_player.height()
         img = self.image_holder.setup(self.images, width, height, colour=self.user["Colour"], n_frame=n_frame)
-        self.changeFrameTo(img)
+        plot_img = None
+        print("Plot Dir", plot_dir)
+
+        if plot_dir != None:
+            plots = utils.readImg(plot_dir)
+            print("Plots", len(plots))
+            width = self.plot_player.width()
+            height = self.plot_player.height()
+            plot_img = self.plot_holder.setup(plots, width, height, colour=self.user["Colour"], n_frame=n_frame)
+        self.changeFrameTo(img, plot_img)
 
     def jumpToFrame(self):
         n_frame = int(self.ui.t_frame.text())
         print("Jumping to frame: {0}".format(n_frame)) 
         self.image_holder.cur_idx = n_frame
         img = self.image_holder.jump(n_frame)
-        self.changeFrameTo(img)
+        plot_img = None
+        if self.created != None:
+            plot_img = self.plot_holder.jump(n_frame)
+        self.changeFrameTo(img, plot_img)
 
     def prevFrame(self):
         assert self.image_holder.cur_idx >= 0, ("Calling prevFrame at the beginning of video")
 
         #self.image_holder.cur_idx -= 1
-        img = self.image_holder.prevImg()        
+        img = self.image_holder.prevImg()  
+        plot_img = None
+        if self.created != None:
+            plot_img = self.plot_holder.prevImg()      
 
-        return img
+        return img, plot_img
 
     def nextFrame(self):
         """
@@ -282,9 +319,12 @@ class MainWindow(QtWidgets.QMainWindow):
         assert self.image_holder.cur_idx < self.image_holder.vidLen - 1, ("Calling nextFrame at the end of video")
 
         #self.image_holder.cur_idx += 1
-        img = self.image_holder.nextImg()        
+        img = self.image_holder.nextImg()  
+        plot_img = None
+        if self.created != None:
+            plot_img = self.plot_holder.nextImg()      
 
-        return img
+        return img, plot_img
 
     def changeVideoToNextFrame(self):
         """
@@ -293,7 +333,10 @@ class MainWindow(QtWidgets.QMainWindow):
         print("Checking: ", self.image_holder.cur_idx)
         if self.image_holder.cur_idx < self.image_holder.vidLen - 1:
             print("Success")
-            self.vid_player.setPixmap(toqpixmap(self.nextFrame()))
+            img, plot_img = self.nextFrame()
+            self.vid_player.setPixmap(toqpixmap(img))
+            if plot_img != None:
+                self.plot_player.setPixmap(toqpixmap(plot_img))
 
     def changeVideoToPrevFrame(self):
         """
@@ -304,8 +347,8 @@ class MainWindow(QtWidgets.QMainWindow):
         print("Checking: ", self.image_holder.cur_idx)
         if cur - 1 >= 0:
             print("Success")
-            img = self.prevFrame()
-            self.changeFrameTo(img)
+            img, plot_img = self.prevFrame()
+            self.changeFrameTo(img, plot_img)
 
 
 if __name__ == '__main__':

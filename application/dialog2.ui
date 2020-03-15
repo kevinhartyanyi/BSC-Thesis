@@ -13,59 +13,141 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_7">
+  <layout class="QVBoxLayout" name="verticalLayout_8">
    <item>
     <layout class="QVBoxLayout" name="layout_v">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_7">
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_6">
+        <layout class="QVBoxLayout" name="verticalLayout_5">
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <layout class="QVBoxLayout" name="verticalLayout_6">
            <item>
-            <widget class="QPushButton" name="b_save">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <family>GE Inspira</family>
-               <pointsize>20</pointsize>
-              </font>
-             </property>
-             <property name="toolTip">
-              <string>Save path for results</string>
-             </property>
-             <property name="text">
-              <string>Save Path</string>
-             </property>
-            </widget>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QPushButton" name="b_save">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>GE Inspira</family>
+                 <pointsize>20</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Save path for results</string>
+               </property>
+               <property name="text">
+                <string>Save Path</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="l_save">
+               <property name="font">
+                <font>
+                 <family>GE Inspira</family>
+                 <pointsize>20</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string/>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
            <item>
-            <widget class="QLabel" name="l_save">
-             <property name="font">
-              <font>
-               <family>GE Inspira</family>
-               <pointsize>20</pointsize>
-              </font>
-             </property>
-             <property name="toolTip">
-              <string/>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <item>
+              <widget class="QPushButton" name="b_vid">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>GE Inspira</family>
+                 <pointsize>20</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Video you wish to analyse</string>
+               </property>
+               <property name="text">
+                <string>Open Video</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="l_vid">
+               <property name="font">
+                <font>
+                 <family>GE Inspira</family>
+                 <pointsize>20</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <item>
+              <widget class="QPushButton" name="b_colour">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>GE Inspira</family>
+                 <pointsize>20</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Filling colour around the video</string>
+               </property>
+               <property name="text">
+                <string>Image Fill Colour</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="l_colour">
+               <property name="font">
+                <font>
+                 <family>GE Inspira</family>
+                 <pointsize>20</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout">
+          <layout class="QHBoxLayout" name="horizontalLayout_9">
            <item>
-            <widget class="QPushButton" name="b_vid">
+            <widget class="QPushButton" name="b_ground_truth">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -82,51 +164,12 @@
               <string>Video you wish to analyse</string>
              </property>
              <property name="text">
-              <string>Open Video</string>
+              <string>Load Ground Truth</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="l_vid">
-             <property name="font">
-              <font>
-               <family>GE Inspira</family>
-               <pointsize>20</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_5">
-           <item>
-            <widget class="QPushButton" name="b_colour">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="font">
-              <font>
-               <family>GE Inspira</family>
-               <pointsize>20</pointsize>
-              </font>
-             </property>
-             <property name="toolTip">
-              <string>Filling colour around the video</string>
-             </property>
-             <property name="text">
-              <string>Image Fill Colour</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="l_colour">
+            <widget class="QLabel" name="l_ground_truth">
              <property name="font">
               <font>
                <family>GE Inspira</family>
@@ -143,7 +186,7 @@
         </layout>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_5">
+        <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
           <layout class="QVBoxLayout" name="verticalLayout">
            <item>

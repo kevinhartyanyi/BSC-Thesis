@@ -8,6 +8,9 @@ import tqdm
 import multiprocessing
 import speed.pwc.run as pwc
 import speed.monodepth.monodepth_simple as monodepth
+from natsort import natsorted
+import numpy as np
+import matplotlib.pyplot as plt
 import os
 import cv2
 import flowiz as fz
@@ -25,7 +28,7 @@ class CalculationRunner(QObject):
     update = pyqtSignal(int)
 
     def __init__(self, img_dir, depth_dir, of_dir, back_of_dir, save_dir, label_dir, high, low, run_dict,
-                of_model, depth_model):
+                of_model, depth_model, plot_speed_dir, numbers_dir):
         super(CalculationRunner, self).__init__()
         self.running = True
         self.use_slic = False
@@ -35,6 +38,7 @@ class CalculationRunner(QObject):
         self.n_sps = 100
         self.run_dict = run_dict
         self.out_dir = save_dir
+        self.numbers_dir = numbers_dir
         self.label_dir = label_dir
         self.vid_name = "Video"
         self.of_model = of_model
@@ -43,6 +47,7 @@ class CalculationRunner(QObject):
         self.depth_model = depth_model
         self.of_dir = of_dir
         self.back_of_dir = back_of_dir
+        self.plot_speed_dir = plot_speed_dir
 
     @pyqtSlot()
     def startCalc(self):
@@ -140,11 +145,33 @@ class CalculationRunner(QObject):
         #self.checkRun("Depth", self.startDepth)
         #self.labelUpdate.emit(self.run_dict["Speed"])
         #self.startCalc()
-        #self.updateFin.emit()
-        self.checkRun("Of_Vid", self.createVid, self.of_dir, self.out_dir, "of.mp4")
-        self.checkRun("Back_Of_Vid", self.createVid, self.back_of_dir, self.out_dir, "back_of.mp4")
-        self.checkRun("Depth_Vid", self.createVid, self.depth_dir, self.out_dir, "depth.mp4")
+        self.updateFin.emit()
+        
+        #self.checkRun("Of_Vid", self.createVid, self.of_dir, self.out_dir, "of.mp4")
+        #self.checkRun("Back_Of_Vid", self.createVid, self.back_of_dir, self.out_dir, "back_of.mp4")
+        #self.checkRun("Depth_Vid", self.createVid, self.depth_dir, self.out_dir, "depth.mp4")
+
+        #self.checkRun("Speed_Plot", self.createPlot)
+
         self.finished.emit()
+
+    @pyqtSlot()
+    def createPlot(self):
+        speeds_dir = utils.list_directory(os.path.join(self.out_dir, self.numbers_dir), extension='speed.npy')
+        speeds_dir = natsorted(speeds_dir)
+        speeds = []
+        for i, s in enumerate(speeds_dir):
+            speeds.append(np.load(s))
+            print("Creating plot {0}".format(i))
+
+            plt.plot(speeds, "m")
+            plt.ylabel("Speed in km/h")
+            plt.xlabel("Frame number")
+            #plt.xticks(np.arange(0, len(speeds), 1))
+            plt.grid(axis='y', linestyle='-')
+            plt.savefig(os.path.join(os.path.join(self.out_dir, self.plot_speed_dir), "{0}_speed.png".format(i)), bbox_inches='tight', dpi=150)
+            
+            self.update.emit(i)
 
     @pyqtSlot()
     def checkRun(self, run_item, run_function, *args, **kwargs):

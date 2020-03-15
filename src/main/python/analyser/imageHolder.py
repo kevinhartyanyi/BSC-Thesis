@@ -77,8 +77,11 @@ class imageHolder:
         return self.cur_idx, self.vidLen, self.fps
 
     def jump(self, n_frame):
+        cur_idx = n_frame
+        if n_frame >= self.vidLen:
+            n_frame = self.vidLen - 1
         self.load(begin=n_frame)
-        self.cur_idx = n_frame
+        self.cur_idx = cur_idx
         self.list_idx = self.cur_idx + self.maxLen + 1
         return self.prepareImg(Image.open(self.img_list[n_frame]))
 
@@ -100,6 +103,7 @@ class imageHolder:
         self.img_dict[idx] = (img, idx)
 
     def load(self, begin=None, end=None):
+        #self.img_dict.clear()
         if begin == None:        
             start = self.list_idx if self.list_idx < self.maxLen else self.list_idx - self.maxLen
             load_len = self.maxLen + start if self.maxLen + start < self.vidLen else self.vidLen
@@ -109,6 +113,7 @@ class imageHolder:
             #    self.list_idx = start + self.maxLen + 1
             #    return
             if self.list_idx >= self.vidLen:
+                print("Skip Load", self.list_idx, self.vidLen, start)
                 self.list_idx = start + self.maxLen + 1
                 return
             load_len = start + self.maxLen + 1 if start + self.maxLen + 1 < self.vidLen else self.vidLen
@@ -133,6 +138,8 @@ class imageHolder:
     
     def prevImg(self):
         self.cur_idx -= 1
+        if self.cur_idx >= self.vidLen:
+            return self.current
         print("Prev: ", self.cur_idx)
         img = Image.open(self.img_list[self.cur_idx])
         self.load(self.cur_idx, self.cur_idx + self.maxLen + 1)
@@ -148,6 +155,8 @@ class imageHolder:
             worker = imageLoader.Worker(self.loadImg, self.img_list[self.list_idx], cur) # Any other args, kwargs are passed to the run function
             self.threadpool.start(worker) 
             self.list_idx += 1
+            return self.current
+        elif self.cur_idx >= self.vidLen:
             return self.current
         print("Current: ", self.list_idx, cur, self.img_dict[cur][1])
         img = self.img_dict[cur][0]    
