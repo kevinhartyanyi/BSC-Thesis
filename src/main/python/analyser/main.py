@@ -144,8 +144,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.t_frame.textChanged.connect(self.changeFrameText)
         self.ui.b_jump.clicked.connect(self.jumpToFrame)
         self.ui.b_rerun.clicked.connect(self.showDialog)
+        self.ui.b_plot_left.clicked.connect(self.cyclePlotLeft)
+        self.ui.b_plot_right.clicked.connect(self.cyclePlotRight)
         self.vid_player.resizeSignal.connect(self.resizeVideo)
         self.plot_player.resizeSignal.connect(self.resizePlotVideo)
+
+    def cyclePlotLeft(self):
+        self.openVideo(plot_dir=self.cycle_plot.up(), n_frame=self.plot_holder.cur_idx)
+
+    
+    def cyclePlotRight(self):
+        self.openVideo(plot_dir=self.cycle_plot.down(), n_frame=self.plot_holder.cur_idx)
+
 
     def changeFrameText(self):
         check = re.search("[1-9][0-9]*", self.ui.t_frame.text())
@@ -280,15 +290,16 @@ class MainWindow(QtWidgets.QMainWindow):
             # 6 - Start the thread
             self.thread.start()
 
-    def openVideo(self, img_dir, n_frame=None, plot_dir=None):
-        self.vid_opened = True
-        self.images = utils.readImg(img_dir)
-        width = self.vid_player.width()
-        height = self.vid_player.height()
-        img = self.image_holder.setup(self.images, width, height, colour=self.user["Colour"], n_frame=n_frame)
+    def openVideo(self, img_dir=None, n_frame=None, plot_dir=None):
+        img = None
+        if img_dir is not None:
+            self.vid_opened = True
+            self.images = utils.readImg(img_dir)
+            width = self.vid_player.width()
+            height = self.vid_player.height()
+            img = self.image_holder.setup(self.images, width, height, colour=self.user["Colour"], n_frame=n_frame)
+        
         plot_img = None
-        print("Plot Dir", plot_dir)
-
         if plot_dir != None:
             plots = utils.readImg(plot_dir)
             print("Plots", len(plots))

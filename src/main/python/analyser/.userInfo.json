@@ -1,8 +1,8 @@
 {
-    "Save": "/home/kevin/Programming/BSC-Thesis/data/test",
+    "Save": "/home/kevin/Programming/BSC-Thesis/data/test2",
     "Of": "",
     "Depth": "",
-    "Video": "",
+    "Video": "/home/kevin/Programming/BSC-Thesis/data/test/test.mp4",
     "Colour": "#1a1a1b",
     "GT": "/home/kevin/Programming/BSC-Thesis/data/test/speed_gt.npy"
 }

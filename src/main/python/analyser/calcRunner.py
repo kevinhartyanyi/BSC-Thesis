@@ -28,13 +28,14 @@ class CalculationRunner(QObject):
     update = pyqtSignal(int)
 
     def __init__(self, img_dir, depth_dir, of_dir, back_of_dir, save_dir, label_dir, high, low, run_dict,
-                of_model, depth_model, plot_speed_dir, numbers_dir, plot_error_dir, speed_gt=""):
+                of_model, depth_model, plot_speed_dir, numbers_dir, plot_error_dir, speed_gt="", vid_path=None):
         super(CalculationRunner, self).__init__()
         self.running = True
         self.use_slic = False
         self.visualize = True
+        self.vid_path = vid_path
         self.high = high
-        self.speed_gt = speed_gt 
+        self.speed_gt = np.load(speed_gt) if speed_gt != "" else "" 
         self.low = low
         self.n_sps = 100
         self.run_dict = run_dict
@@ -142,6 +143,8 @@ class CalculationRunner(QObject):
 
     @pyqtSlot()
     def startThread(self): # A slot takes no params
+        self.checkRun("Video", self.imagesFromVideo, self.vid_path, self.img_dir, "vid")
+
         #self.checkRun("Of", self.startOf)
         #self.checkRun("Back_Of", self.startBackOf)
         #self.checkRun("Depth", self.startDepth)
@@ -153,27 +156,57 @@ class CalculationRunner(QObject):
         #self.checkRun("Back_Of_Vid", self.createVid, self.back_of_dir, self.out_dir, "back_of.mp4")
         #self.checkRun("Depth_Vid", self.createVid, self.depth_dir, self.out_dir, "depth.mp4")
 
-        #self.checkRun("Speed_Plot", self.createPlot)
+        #self.checkRun("Speed_Plot", self.createSpeedPlot)
 
-        speeds_dir = utils.list_directory(os.path.join(self.out_dir, self.numbers_dir), extension='speed.npy')
-        speeds_dir = natsorted(speeds_dir)
-        speeds = []
-        for i, s in enumerate(speeds_dir):
-            speeds.append(np.load(s))
-        self.speed_gt = np.load(self.speed_gt)
-        _ = utils.error_comparison_Speed_Vecors(speeds,self.speed_gt[1:],csv=os.path.join(self.out_dir, self.plot_error_dir, '_error_Simple_OF.csv'))
-
+        
+        
+        
+        if self.run_dict["Error_Plot"]["Run"] and self.run_dict["Speed_Plot"]["Run"]:
+            self.labelUpdate.emit(self.run_dict["Speed_Plot"])
+            self.createSpeedErrorPlot()
+            self.updateFin.emit()
+            self.checkRun("Error_Plot", self.createErrorPlot)
+        else:
+            self.checkRun("Error_Plot", self.createErrorPlot)
+            self.checkRun("Speed_Plot", self.createSpeedPlot)
+        
+        self.checkRun("Speed_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_speed_dir), self.out_dir, "speed_plot.mp4")
+        self.checkRun("Error_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_error_dir), self.out_dir, "error_plot.mp4")
 
         self.finished.emit()
 
     @pyqtSlot()
-    def createPlot(self):
+    def imagesFromVideo(self, path_to_video, save_path, vid_name):
+        cam = cv2.VideoCapture(path_to_video) 
+        
+        # frame 
+        currentframe = 0
+        ret,frame = cam.read() 
+        while(ret):
+            name = os.path.join(save_path, "{0}_{1}.png".format(currentframe, vid_name))
+            print ('Creating...' + name) 
+    
+            cv2.imwrite(name, frame) 
+            currentframe += 1
+            
+            self.update.emit(currentframe)
+            ret,frame = cam.read() 
+
+        
+        # Release all space and windows once done 
+        cam.release() 
+        cv2.destroyAllWindows() 
+        
+
+    @pyqtSlot()
+    def createSpeedPlot(self):
+        plt.clf()
         speeds_dir = utils.list_directory(os.path.join(self.out_dir, self.numbers_dir), extension='speed.npy')
         speeds_dir = natsorted(speeds_dir)
         speeds = []
         for i, s in enumerate(speeds_dir):
             speeds.append(np.load(s))
-            print("Creating plot {0}".format(i))
+            print("Creating speed plot {0}".format(i))
 
             plt.plot(speeds, "m")
             plt.ylabel("Speed in km/h")
@@ -185,6 +218,53 @@ class CalculationRunner(QObject):
             self.update.emit(i)
 
     @pyqtSlot()
+    def createErrorPlot(self):
+        plt.clf()
+        speeds_dir = utils.list_directory(os.path.join(self.out_dir, self.numbers_dir), extension='speed.npy')
+        speeds_dir = natsorted(speeds_dir)
+        speeds = []
+        for s in speeds_dir:
+            speeds.append(np.load(s))
+
+        _ = utils.error_comparison_Speed_Vecors(speeds,self.speed_gt[1:],csv=os.path.join(self.out_dir, '_error_Simple_OF.csv'))
+
+        error = self.speed_gt[1:] - speeds
+        for i in range(1, len(error) + 1):
+            print("Creating plot {0}".format(i))
+
+            plt.plot(error[:i], "r")
+            plt.ylabel("Error in km/h")
+            plt.xlabel("Frame number")
+            #plt.xticks(np.arange(0, len(speeds), 1))
+            plt.grid(axis='y', linestyle='-')
+            plt.savefig(os.path.join(os.path.join(self.out_dir, self.plot_error_dir), "{0}_error.png".format(i)), bbox_inches='tight', dpi=150)
+            
+            self.update.emit(i)
+
+    @pyqtSlot()
+    def createSpeedErrorPlot(self):
+        plt.clf()
+        speeds_dir = utils.list_directory(os.path.join(self.out_dir, self.numbers_dir), extension='speed.npy')
+        speeds_dir = natsorted(speeds_dir)
+        speeds = []
+        for s in speeds_dir:
+            speeds.append(np.load(s))
+
+        ground_truth = self.speed_gt[1:]
+        for i in range(1, len(ground_truth) + 1):
+            print("Creating speed and error plot {0}".format(i))
+
+            est, = plt.plot(speeds[:i], "m", label="Estimated Speed")
+            gt, = plt.plot(ground_truth[:i], "b", label="True Speed")
+            plt.ylabel("Speed in km/h")
+            plt.xlabel("Frame number")
+            plt.legend(handles=[est,gt])
+            #plt.xticks(np.arange(0, len(speeds), 1))
+            plt.grid(axis='y', linestyle='-')
+            plt.savefig(os.path.join(os.path.join(self.out_dir, self.plot_speed_dir), "{0}_speed.png".format(i)), bbox_inches='tight', dpi=150)
+            self.update.emit(i)
+
+    @pyqtSlot()
     def checkRun(self, run_item, run_function, *args, **kwargs):
         if self.run_dict[run_item]["Run"]:
             self.labelUpdate.emit(self.run_dict[run_item])
@@ -193,14 +273,15 @@ class CalculationRunner(QObject):
 
     def createVid(self, images_path, save_path, vid_name, fps=30):
         images = utils.list_directory(images_path, extension=".png")
-
         frame = cv2.imread(images[0])
         height, width, layers = frame.shape
         out = cv2.VideoWriter(os.path.join(save_path, vid_name),cv2.VideoWriter_fourcc(*"mp4v"), fps, (width, height))
         for i in range(len(images)):
             print("Writing frame: {0}".format(i))
             # writing to a image array
-            out.write(cv2.imread(images[i]))
+            img = cv2.imread(images[i])
+            resized = cv2.resize(img,(width,height)) 
+            out.write(resized)
             self.update.emit(i)
         out.release()
 

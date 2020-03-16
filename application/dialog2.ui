@@ -13,134 +13,130 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_8">
+  <layout class="QVBoxLayout" name="verticalLayout_6">
    <item>
     <layout class="QVBoxLayout" name="layout_v">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <layout class="QHBoxLayout" name="horizontalLayout_7">
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_5">
          <item>
-          <layout class="QVBoxLayout" name="verticalLayout_6">
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_2">
-             <item>
-              <widget class="QPushButton" name="b_save">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="font">
-                <font>
-                 <family>GE Inspira</family>
-                 <pointsize>20</pointsize>
-                </font>
-               </property>
-               <property name="toolTip">
-                <string>Save path for results</string>
-               </property>
-               <property name="text">
-                <string>Save Path</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="l_save">
-               <property name="font">
-                <font>
-                 <family>GE Inspira</family>
-                 <pointsize>20</pointsize>
-                </font>
-               </property>
-               <property name="toolTip">
-                <string/>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            <widget class="QPushButton" name="b_save">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <family>GE Inspira</family>
+               <pointsize>20</pointsize>
+              </font>
+             </property>
+             <property name="toolTip">
+              <string>Save path for results</string>
+             </property>
+             <property name="text">
+              <string>Save Path</string>
+             </property>
+            </widget>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout">
-             <item>
-              <widget class="QPushButton" name="b_vid">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="font">
-                <font>
-                 <family>GE Inspira</family>
-                 <pointsize>20</pointsize>
-                </font>
-               </property>
-               <property name="toolTip">
-                <string>Video you wish to analyse</string>
-               </property>
-               <property name="text">
-                <string>Open Video</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="l_vid">
-               <property name="font">
-                <font>
-                 <family>GE Inspira</family>
-                 <pointsize>20</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            <widget class="QLabel" name="l_save">
+             <property name="font">
+              <font>
+               <family>GE Inspira</family>
+               <pointsize>20</pointsize>
+              </font>
+             </property>
+             <property name="toolTip">
+              <string/>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <widget class="QPushButton" name="b_vid">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <family>GE Inspira</family>
+               <pointsize>20</pointsize>
+              </font>
+             </property>
+             <property name="toolTip">
+              <string>Video you wish to analyse</string>
+             </property>
+             <property name="text">
+              <string>Open Video</string>
+             </property>
+            </widget>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_5">
-             <item>
-              <widget class="QPushButton" name="b_colour">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="font">
-                <font>
-                 <family>GE Inspira</family>
-                 <pointsize>20</pointsize>
-                </font>
-               </property>
-               <property name="toolTip">
-                <string>Filling colour around the video</string>
-               </property>
-               <property name="text">
-                <string>Image Fill Colour</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="l_colour">
-               <property name="font">
-                <font>
-                 <family>GE Inspira</family>
-                 <pointsize>20</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            <widget class="QLabel" name="l_vid">
+             <property name="font">
+              <font>
+               <family>GE Inspira</family>
+               <pointsize>20</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <item>
+            <widget class="QPushButton" name="b_colour">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="font">
+              <font>
+               <family>GE Inspira</family>
+               <pointsize>20</pointsize>
+              </font>
+             </property>
+             <property name="toolTip">
+              <string>Filling colour around the video</string>
+             </property>
+             <property name="text">
+              <string>Image Fill Colour</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="l_colour">
+             <property name="font">
+              <font>
+               <family>GE Inspira</family>
+               <pointsize>20</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
@@ -186,11 +182,179 @@
         </layout>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
+        <layout class="QVBoxLayout" name="verticalLayout_8">
          <item>
-          <layout class="QVBoxLayout" name="verticalLayout">
+          <layout class="QVBoxLayout" name="verticalLayout_7">
            <item>
-            <widget class="QLabel" name="label">
+            <layout class="QVBoxLayout" name="verticalLayout">
+             <item>
+              <widget class="QLabel" name="label">
+               <property name="font">
+                <font>
+                 <family>GE Inspira</family>
+                 <pointsize>20</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>Select the videos you wish to create</string>
+               </property>
+               <property name="text">
+                <string>Create Video</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <item>
+                <widget class="QLabel" name="label_2">
+                 <property name="font">
+                  <font>
+                   <family>GE Inspira</family>
+                   <pointsize>20</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Fps</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="t_fps">
+                 <property name="font">
+                  <font>
+                   <family>GE Inspira</family>
+                   <pointsize>20</pointsize>
+                  </font>
+                 </property>
+                 <property name="toolTip">
+                  <string>The fps for the created videos</string>
+                 </property>
+                 <property name="text">
+                  <string>30</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_6">
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_2">
+               <item>
+                <widget class="QCheckBox" name="c_of">
+                 <property name="font">
+                  <font>
+                   <family>GE Inspira</family>
+                   <pointsize>20</pointsize>
+                  </font>
+                 </property>
+                 <property name="toolTip">
+                  <string>Video of optical flow</string>
+                 </property>
+                 <property name="text">
+                  <string>Optical Flow</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="c_back_of">
+                 <property name="font">
+                  <font>
+                   <family>GE Inspira</family>
+                   <pointsize>20</pointsize>
+                  </font>
+                 </property>
+                 <property name="toolTip">
+                  <string>Video of backward optical flow</string>
+                 </property>
+                 <property name="text">
+                  <string>Back Optical Flow</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="c_depth">
+                 <property name="font">
+                  <font>
+                   <family>GE Inspira</family>
+                   <pointsize>20</pointsize>
+                  </font>
+                 </property>
+                 <property name="toolTip">
+                  <string>Video of depth estimation</string>
+                 </property>
+                 <property name="text">
+                  <string>Depth</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_4">
+               <item>
+                <widget class="QCheckBox" name="c_error_plot_video">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>GE Inspira</family>
+                   <pointsize>20</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Error Plot</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="c_speed_plot_video">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>GE Inspira</family>
+                   <pointsize>20</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Speed Plot</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="checkBox_4">
+                 <property name="font">
+                  <font>
+                   <family>GE Inspira</family>
+                   <pointsize>20</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>CheckBox</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <widget class="QLabel" name="label_3">
              <property name="font">
               <font>
                <family>GE Inspira</family>
@@ -198,10 +362,10 @@
               </font>
              </property>
              <property name="toolTip">
-              <string>Select the videos you wish to create</string>
+              <string>Select the plots you wish to create</string>
              </property>
              <property name="text">
-              <string>Create Video</string>
+              <string>Create Plot</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -209,9 +373,9 @@
             </widget>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
              <item>
-              <widget class="QLabel" name="label_2">
+              <widget class="QCheckBox" name="c_speed_plot">
                <property name="font">
                 <font>
                  <family>GE Inspira</family>
@@ -219,91 +383,15 @@
                 </font>
                </property>
                <property name="text">
-                <string>Fps</string>
+                <string>Speed Plot</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="t_fps">
-               <property name="font">
-                <font>
-                 <family>GE Inspira</family>
-                 <pointsize>20</pointsize>
-                </font>
+              <widget class="QCheckBox" name="c_error_plot">
+               <property name="enabled">
+                <bool>false</bool>
                </property>
-               <property name="toolTip">
-                <string>The fps for the created videos</string>
-               </property>
-               <property name="text">
-                <string>30</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_6">
-           <item>
-            <layout class="QVBoxLayout" name="verticalLayout_3">
-             <item>
-              <widget class="QCheckBox" name="c_of">
-               <property name="font">
-                <font>
-                 <family>GE Inspira</family>
-                 <pointsize>20</pointsize>
-                </font>
-               </property>
-               <property name="toolTip">
-                <string>Video of optical flow</string>
-               </property>
-               <property name="text">
-                <string>Optical flow</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="c_back_of">
-               <property name="font">
-                <font>
-                 <family>GE Inspira</family>
-                 <pointsize>20</pointsize>
-                </font>
-               </property>
-               <property name="toolTip">
-                <string>Video of backward optical flow</string>
-               </property>
-               <property name="text">
-                <string>Back Optical flow</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="c_depth">
-               <property name="font">
-                <font>
-                 <family>GE Inspira</family>
-                 <pointsize>20</pointsize>
-                </font>
-               </property>
-               <property name="toolTip">
-                <string>Video of depth estimation</string>
-               </property>
-               <property name="text">
-                <string>Depth</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QVBoxLayout" name="verticalLayout_4">
-             <item>
-              <widget class="QCheckBox" name="checkBox_6">
                <property name="font">
                 <font>
                  <family>GE Inspira</family>
@@ -311,33 +399,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>CheckBox</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="checkBox_5">
-               <property name="font">
-                <font>
-                 <family>GE Inspira</family>
-                 <pointsize>20</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string>CheckBox</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="checkBox_4">
-               <property name="font">
-                <font>
-                 <family>GE Inspira</family>
-                 <pointsize>20</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string>CheckBox</string>
+                <string>Error Plot</string>
                </property>
               </widget>
              </item>

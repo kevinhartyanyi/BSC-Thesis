@@ -136,7 +136,14 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="t_frame"/>
+                 <widget class="QLineEdit" name="t_frame">
+                  <property name="inputMask">
+                   <string/>
+                  </property>
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </item>

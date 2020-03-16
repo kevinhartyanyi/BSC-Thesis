@@ -71,6 +71,9 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.b_ground_truth.clicked.connect(self.openGroundTruth)
 
         self.ui.t_fps.textChanged.connect(self.changeFps)
+        self.ui.c_error_plot.stateChanged.connect(self.checkFiles)
+        self.ui.c_speed_plot.stateChanged.connect(self.checkFiles)
+
         #self.ui.c_of.stateChanged.connect(self.checkVideoCreation)
         #self.ui.c_back_of.stateChanged.connect(self.checkVideoCreation)
         #self.ui.c_depth.stateChanged.connect(self.checkVideoCreation)
@@ -82,6 +85,7 @@ class Dialog(QDialog, Ui_Dialog):
         if gt_dir != "":
             self.user["GT"] = gt_dir
             self.ui.l_ground_truth.setText("Load: " + self.splitPath(gt_dir)[-1])
+        self.checkFiles()
         
 
     def changeFps(self):
@@ -121,6 +125,10 @@ class Dialog(QDialog, Ui_Dialog):
         self.back_of_exist = True if os.path.exists(os.path.join(self.user["Save"], "Back_Of")) else False
         self.img_exist = True if os.path.exists(os.path.join(self.user["Save"], "Images")) else False
         self.depth_exist = True if os.path.exists(os.path.join(self.user["Save"], "Depth")) else False
+
+        self.ui.c_error_plot.setEnabled(self.user["GT"] != "")
+        self.ui.c_error_plot_video.setEnabled(self.ui.c_error_plot.isChecked())
+        self.ui.c_speed_plot_video.setEnabled(self.ui.c_speed_plot.isChecked())
 
         if self.runRequirements():
             self.ui.b_run.setEnabled(True)
@@ -226,7 +234,7 @@ class Dialog(QDialog, Ui_Dialog):
             self.savePathJoin("Depth"), self.savePathJoin("Of"), self.savePathJoin("Back_Of"),
             self.user["Save"], None, 1, 0.309, self.run_dict, self.app.get_resource(os.path.join("of_models", "network-default.pytorch")),
             self.app.get_resource(os.path.join("depth_models", "model_city2kitti.meta")), PLOT_SPEED_DIR,
-            NP_DIR, PLOT_ERROR_DIR, speed_gt=self.user["GT"])  # no parent!
+            NP_DIR, PLOT_ERROR_DIR, speed_gt=self.user["GT"], vid_path=self.user["Video"])  # no parent!
         self.thread = QThread()  # no parent!
 
         self.worker.labelUpdate.connect(self.labelUpdate)
@@ -290,12 +298,17 @@ class Dialog(QDialog, Ui_Dialog):
 
     def buildCreatedDict(self):
         self.created = {}
-        self.created["Speed_Plot"] = self.savePathJoin(PLOT_SPEED_DIR)
+        if self.ui.c_speed_plot.isChecked():
+            self.created["Speed_Plot"] = self.savePathJoin(PLOT_SPEED_DIR)
+        if self.ui.c_error_plot.isChecked():
+            self.created["Error_Plot"] = self.savePathJoin(PLOT_ERROR_DIR)
         self.sendCreated.emit(self.created)
 
 
     def buildRunDict(self):
         ori_images = len(list_directory(self.savePathJoin("Images")))
+        self.run_dict["Video"] = {"Run": not self.img_exist, "Progress":ori_images, "Text":"Preparing video"}
+
         self.run_dict["Of"] = {"Run": not self.of_exist, "Progress":ori_images, "Text":"Running optical flow"}
         self.run_dict["Back_Of"] = {"Run": not self.back_of_exist, "Progress":ori_images, "Text":"Running back optical flow"}
         self.run_dict["Depth"] = {"Run": not self.depth_exist, "Progress":ori_images, "Text":"Running depth estimation"}
@@ -305,7 +318,12 @@ class Dialog(QDialog, Ui_Dialog):
         self.run_dict["Back_Of_Vid"] = {"Run": self.ui.c_back_of.isChecked(), "Progress":ori_images, "Text":"Creating backward optical flow video"}
         self.run_dict["Depth_Vid"] = {"Run": self.ui.c_depth.isChecked(), "Progress":ori_images, "Text":"Creating depth estimation video"}
 
-        self.run_dict["Speed_Plot"] = {"Run": True, "Progress":ori_images, "Text":"Creating plot for speed values"}
+        self.run_dict["Speed_Plot"] = {"Run": self.ui.c_speed_plot.isChecked(), "Progress":ori_images, "Text":"Creating plot for speed values"}
+        self.run_dict["Error_Plot"] = {"Run": self.ui.c_error_plot.isChecked(), "Progress":ori_images, "Text":"Creating plot for speed error"}
+
+        self.run_dict["Speed_Plot_Video"] = {"Run": self.ui.c_speed_plot_video.isChecked(), "Progress":ori_images, "Text":"Creating speed plot video"}
+        self.run_dict["Error_Plot_Video"] = {"Run": self.ui.c_error_plot_video.isChecked(), "Progress":ori_images, "Text":"Creating error plot video"}
+
 
 
 
@@ -341,8 +359,9 @@ class Dialog(QDialog, Ui_Dialog):
         #self.reCreateDir(VL_DIR)
         #self.reCreateDir(NP_DIR)
         #self.reCreateDir(MASK_DIR)
-        #self.reCreateDir(PLOT_SPEED_DIR)
-        if self.user["GT"] != "":
+        if self.ui.c_speed_plot.isChecked():
+            self.reCreateDir(PLOT_SPEED_DIR)
+        if self.user["GT"] != "" and self.ui.c_error_plot.isChecked():
             self.reCreateDir(PLOT_ERROR_DIR)
 
     def reCreateDir(self, name):
