@@ -145,18 +145,18 @@ class CalculationRunner(QObject):
     def startThread(self): # A slot takes no params
         self.checkRun("Video", self.imagesFromVideo, self.vid_path, self.img_dir, "vid")
 
-        #self.checkRun("Of", self.startOf)
-        #self.checkRun("Back_Of", self.startBackOf)
-        #self.checkRun("Depth", self.startDepth)
-        #self.labelUpdate.emit(self.run_dict["Speed"])
-        #self.startCalc()
+        self.checkRun("Of", self.startOf)
+        self.checkRun("Back_Of", self.startBackOf)
+        self.checkRun("Depth", self.startDepth)
+        
+        self.labelUpdate.emit(self.run_dict["Speed"])
+        self.startCalc()
         self.updateFin.emit()
         
-        #self.checkRun("Of_Vid", self.createVid, self.of_dir, self.out_dir, "of.mp4")
-        #self.checkRun("Back_Of_Vid", self.createVid, self.back_of_dir, self.out_dir, "back_of.mp4")
-        #self.checkRun("Depth_Vid", self.createVid, self.depth_dir, self.out_dir, "depth.mp4")
+        self.checkRun("Of_Vid", self.createVid, self.of_dir, self.out_dir, "of.mp4")
+        self.checkRun("Back_Of_Vid", self.createVid, self.back_of_dir, self.out_dir, "back_of.mp4")
+        self.checkRun("Depth_Vid", self.createVid, self.depth_dir, self.out_dir, "depth.mp4")
 
-        #self.checkRun("Speed_Plot", self.createSpeedPlot)
 
         
         

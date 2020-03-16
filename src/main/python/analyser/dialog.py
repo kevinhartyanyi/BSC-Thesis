@@ -11,6 +11,7 @@ import shutil
 import speed.speed_vectors as speed
 from speed.utils import list_directory
 import re
+import cv2
 
 import speed.pwc.run as pwc
 
@@ -253,6 +254,7 @@ class Dialog(QDialog, Ui_Dialog):
     def progressUpdate(self, value):
         self.progressBar.setValue(value)
         self.run_count += 1
+        print("Update to:",self.run_count)
         self.progressAllBar.setValue(self.run_count)
 
     def finishThread(self):
@@ -289,7 +291,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.layout_v.addWidget(self.progressBar)
 
         all_run = sum([self.run_dict[key]["Progress"] for key in self.run_dict if self.run_dict[key]["Run"]])
-
+        print("All run:", all_run)
         self.progressAllBar = QProgressBar(self) # Progress bar created
         self.progressAllBar.setMinimum(1)
         self.progressAllBar.setMaximum(all_run)
@@ -306,7 +308,19 @@ class Dialog(QDialog, Ui_Dialog):
 
 
     def buildRunDict(self):
-        ori_images = len(list_directory(self.savePathJoin("Images")))
+        ori_images = 0
+        if self.img_exist:
+            ori_images = len(list_directory(self.savePathJoin("Images")))
+        else:
+            cam = cv2.VideoCapture(self.user["Video"])       
+            ret,frame = cam.read() 
+            while(ret):
+                print ('Reading...{0}'.format(ori_images)) 
+                ori_images += 1
+                ret,frame = cam.read() 
+            cam.release() 
+            cv2.destroyAllWindows()
+
         self.run_dict["Video"] = {"Run": not self.img_exist, "Progress":ori_images, "Text":"Preparing video"}
 
         self.run_dict["Of"] = {"Run": not self.of_exist, "Progress":ori_images, "Text":"Running optical flow"}
@@ -354,11 +368,11 @@ class Dialog(QDialog, Ui_Dialog):
         if not self.depth_exist:
             self.createDir("Depth")
 
-        #self.reCreateDir(RESULTS)        
-        #self.reCreateDir(OTHER_DIR)
-        #self.reCreateDir(VL_DIR)
-        #self.reCreateDir(NP_DIR)
-        #self.reCreateDir(MASK_DIR)
+        self.reCreateDir(RESULTS)        
+        self.reCreateDir(OTHER_DIR)
+        self.reCreateDir(VL_DIR)
+        self.reCreateDir(NP_DIR)
+        self.reCreateDir(MASK_DIR)
         if self.ui.c_speed_plot.isChecked():
             self.reCreateDir(PLOT_SPEED_DIR)
         if self.user["GT"] != "" and self.ui.c_error_plot.isChecked():
