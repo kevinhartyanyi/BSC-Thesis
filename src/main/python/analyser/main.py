@@ -138,6 +138,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.b_video_right.clicked.connect(self.changeVideoToNextFrame)
         self.ui.b_video_left.clicked.connect(self.changeVideoToPrevFrame)
         self.ui.actionPlay.triggered.connect(self.startVideo)
+        self.ui.actionOF.triggered.connect(self.cycleToOf)
+        self.ui.actionDepth.triggered.connect(self.cycleToDepth)
         self.ui.t_fps.textChanged.connect(self.changeFps)
         self.ui.b_video_up.clicked.connect(self.cycleUp)
         self.ui.b_video_down.clicked.connect(self.cycleDown)
@@ -148,6 +150,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.b_plot_right.clicked.connect(self.cyclePlotRight)
         self.vid_player.resizeSignal.connect(self.resizeVideo)
         self.plot_player.resizeSignal.connect(self.resizePlotVideo)
+
+    def cycleToOf(self, name):
+        self.openVideo(self.cycle_vid.get("of"), n_frame=self.image_holder.cur_idx)
+        
+    def cycleToDepth(self, name):
+        self.openVideo(self.cycle_vid.get("depth"), n_frame=self.image_holder.cur_idx)
+        
 
     def cyclePlotLeft(self):
         self.openVideo(plot_dir=self.cycle_plot.up(), n_frame=self.plot_holder.cur_idx)
@@ -201,7 +210,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.changeFrameTo(img)
     
     def resizePlotVideo(self, width, height):
-        if self.vid_opened:
+        if self.vid_opened and self.created is not None:
             print(width, height)
             plot_img = self.plot_holder.resize(width, height)
             self.changeFrameTo(None, plot_img=plot_img)
@@ -291,6 +300,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.thread.start()
 
     def openVideo(self, img_dir=None, n_frame=None, plot_dir=None):
+        if n_frame is not None and n_frame < 0:
+            n_frame = 0
         img = None
         if img_dir is not None:
             self.vid_opened = True

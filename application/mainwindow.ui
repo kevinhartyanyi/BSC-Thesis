@@ -6,17 +6,17 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>723</width>
+    <height>604</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_6">
+   <layout class="QVBoxLayout" name="verticalLayout_5">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_5">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <layout class="QVBoxLayout" name="layout_vid">
         <item>
@@ -63,13 +63,19 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_7">
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
         <item>
          <layout class="QVBoxLayout" name="layout_plot">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
              <widget class="QPushButton" name="b_plot_left">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
                <string>PushButton</string>
               </property>
@@ -77,6 +83,12 @@
             </item>
             <item>
              <widget class="QPushButton" name="b_plot_right">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
                <string>PushButton</string>
               </property>
@@ -85,16 +97,6 @@
            </layout>
           </item>
          </layout>
-        </item>
-        <item>
-         <widget class="QListWidget" name="lw_data">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
         </item>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout">
@@ -147,34 +149,6 @@
                 </item>
                </layout>
               </item>
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_5">
-                <item>
-                 <widget class="QLabel" name="label_2">
-                  <property name="text">
-                   <string>TextLabel</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="lineEdit_2"/>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_6">
-                <item>
-                 <widget class="QLabel" name="label_3">
-                  <property name="text">
-                   <string>TextLabel</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="lineEdit_3"/>
-                </item>
-               </layout>
-              </item>
              </layout>
             </item>
             <item>
@@ -199,7 +173,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>723</width>
      <height>22</height>
     </rect>
    </property>
@@ -207,6 +181,8 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionNew_Run"/>
+    <addaction name="actionExit"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -222,6 +198,8 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionPlay"/>
+   <addaction name="actionOF"/>
+   <addaction name="actionDepth"/>
   </widget>
   <action name="actionPlay">
    <property name="text">
@@ -234,7 +212,66 @@
     <string>Space</string>
    </property>
   </action>
+  <action name="actionOF">
+   <property name="text">
+    <string>OF</string>
+   </property>
+   <property name="toolTip">
+    <string>Jump to optical flow video</string>
+   </property>
+  </action>
+  <action name="actionDepth">
+   <property name="text">
+    <string>Depth</string>
+   </property>
+   <property name="toolTip">
+    <string>Jump to depth video</string>
+   </property>
+  </action>
+  <action name="actionNew_Run">
+   <property name="text">
+    <string>New Run</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionNew_Run</sender>
+   <signal>triggered()</signal>
+   <receiver>b_rerun</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>656</x>
+     <y>552</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionExit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

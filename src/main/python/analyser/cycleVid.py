@@ -12,6 +12,20 @@ class cycleVid:
         self.idx = 0
         self.container = []
 
+    def get(self, name):
+        re = None
+        print("L:", len(self.container))
+        self.idx = 0
+        for n, vid in self.container:
+            print(n)
+            if n == name:
+                re = vid
+                break
+            self.idx += 1
+        assert re != None, ("Could not find cycleVid with name {0}".format(name))
+        
+        return re
+
     def add(self, name, vid_path):
         self.container.append((name, vid_path))
 
