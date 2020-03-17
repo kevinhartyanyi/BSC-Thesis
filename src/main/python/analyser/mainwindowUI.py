@@ -25,7 +25,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_3.setSpacing(0)
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
-        self.b_video_left = QtWidgets.QPushButton(self.centralwidget)
+        self.b_video_left = ImageButton(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -105,7 +105,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_5.addLayout(self.verticalLayout_2)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 723, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 723, 36))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
@@ -163,3 +163,4 @@ class Ui_MainWindow(object):
         self.actionDepth.setToolTip(_translate("MainWindow", "Jump to depth video"))
         self.actionNew_Run.setText(_translate("MainWindow", "New Run"))
         self.actionExit.setText(_translate("MainWindow", "Exit"))
+from imagebutton import ImageButton

@@ -53,8 +53,37 @@ class MainWindow(QtWidgets.QMainWindow):
         self.plot_holder = imageHolder.imageHolder(self.MAX_LEN, self.fps_limit)
         self.ui.t_fps.setText(str(self.fps_limit))
         #self.vid_player.setScaledContents(True)        
+        self.imageSetup()
         self.signalSetup()  
         self.disableSetup()
+    
+    def imageSetup(self):
+        left_arrow = QtGui.QPixmap(self.app.get_resource("left_arrow.png"))
+        left_arrow_hover = QtGui.QPixmap(self.app.get_resource("left_arrow_hover.png"))
+        left_arrow_pressed = QtGui.QPixmap(self.app.get_resource("left_arrow_pressed.png"))
+        
+        right_arrow = QtGui.QPixmap(self.app.get_resource("right_arrow.png"))
+        right_arrow_hover = QtGui.QPixmap(self.app.get_resource("right_arrow_hover.png"))
+        right_arrow_pressed = QtGui.QPixmap(self.app.get_resource("right_arrow_pressed.png"))
+
+        up_arrow = QtGui.QPixmap(self.app.get_resource("up_arrow.png"))
+        up_arrow_hover = QtGui.QPixmap(self.app.get_resource("up_arrow_hover.png"))
+        up_arrow_pressed = QtGui.QPixmap(self.app.get_resource("up_arrow_pressed.png"))
+
+        down_arrow = QtGui.QPixmap(self.app.get_resource("down_arrow.png"))
+        down_arrow_hover = QtGui.QPixmap(self.app.get_resource("down_arrow_hover.png"))
+        down_arrow_pressed = QtGui.QPixmap(self.app.get_resource("down_arrow_pressed.png"))
+
+        self.ui.b_video_left.setUpPixmaps(down_arrow, down_arrow_hover, down_arrow_pressed)
+        self.ui.b_video_left.setStyleSheet("background-color: red")
+        self.ui.b_video_right.setStyleSheet("background-color: red")
+        self.ui.b_video_left.setIcon(QtGui.QIcon(self.app.get_resource("left_arrow.png")))
+        self.ui.b_video_right.setIcon(QtGui.QIcon(self.app.get_resource("right_arrow.png")))
+        self.ui.b_video_up.setIcon(QtGui.QIcon(self.app.get_resource("up_arrow.png")))
+        self.ui.b_video_left.setIcon(QtGui.QIcon(self.app.get_resource("left_arrow.png")))
+        self.ui.b_plot_left.setIcon(QtGui.QIcon(self.app.get_resource("left_arrow.png")))
+        self.ui.b_plot_right.setIcon(QtGui.QIcon(self.app.get_resource("right_arrow.png")))
+        
 
     def disableSetup(self):
         self.ui.b_video_left.setEnabled(False)
