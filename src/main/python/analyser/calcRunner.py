@@ -220,26 +220,26 @@ class CalculationRunner(QObject):
         self.checkRun("Back_Of", self.startBackOf)
         self.checkRun("Depth", self.startDepth)
         #
-        #self.labelUpdate.emit(self.run_dict["Speed"])
-        #self.startCalc()
+        self.labelUpdate.emit(self.run_dict["Speed"])
+        self.startCalc()
 
-        #self.updateFin.emit()
+        self.updateFin.emit()
         #
-        #self.checkRun("Of_Vid", self.createVid, self.of_dir, self.out_dir, "of.mp4")
-        #self.checkRun("Back_Of_Vid", self.createVid, self.back_of_dir, self.out_dir, "back_of.mp4")
-        #self.checkRun("Depth_Vid", self.createVid, self.depth_dir, self.out_dir, "depth.mp4")
+        self.checkRun("Of_Vid", self.createVid, self.of_dir, self.out_dir, "of.mp4")
+        self.checkRun("Back_Of_Vid", self.createVid, self.back_of_dir, self.out_dir, "back_of.mp4")
+        self.checkRun("Depth_Vid", self.createVid, self.depth_dir, self.out_dir, "depth.mp4")
         #
-        #if self.run_dict["Error_Plot"]["Run"] and self.run_dict["Speed_Plot"]["Run"]:
-        #    self.labelUpdate.emit(self.run_dict["Speed_Plot"])
-        #    self.createSpeedErrorPlot()
-        #    self.updateFin.emit()
-        #    self.checkRun("Error_Plot", self.createErrorPlot)
-        ##else:
-        #    self.checkRun("Error_Plot", self.createErrorPlot)
-        #    self.checkRun("Speed_Plot", self.createSpeedPlot)
-        #
-        #self.checkRun("Speed_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_speed_dir), self.out_dir, "speed_plot.mp4")
-        #self.checkRun("Error_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_error_dir), self.out_dir, "error_plot.mp4")
+        if self.run_dict["Error_Plot"]["Run"] and self.run_dict["Speed_Plot"]["Run"]:
+            self.labelUpdate.emit(self.run_dict["Speed_Plot"])
+            self.createSpeedErrorPlot()
+            self.updateFin.emit()
+            self.checkRun("Error_Plot", self.createErrorPlot)
+        else:
+            self.checkRun("Error_Plot", self.createErrorPlot)
+            self.checkRun("Speed_Plot", self.createSpeedPlot)
+        
+        self.checkRun("Speed_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_speed_dir), self.out_dir, "speed_plot.mp4")
+        self.checkRun("Error_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_error_dir), self.out_dir, "error_plot.mp4")
 
         self.finished.emit()
 

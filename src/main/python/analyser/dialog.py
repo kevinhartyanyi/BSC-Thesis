@@ -21,6 +21,7 @@ OTHER_DIR = os.path.join(RESULTS, 'other')
 VL_DIR = os.path.join(RESULTS, 'velocity')
 NP_DIR = os.path.join(RESULTS, 'numbers')
 MASK_DIR = os.path.join(RESULTS, 'mask')
+DRAW_DIR = os.path.join(RESULTS, 'draw')
 PLOT_SPEED_DIR = os.path.join(RESULTS, 'plot_speed')
 PLOT_ERROR_DIR = os.path.join(RESULTS, 'plot_error')
 
@@ -368,15 +369,16 @@ class Dialog(QDialog, Ui_Dialog):
         if not self.depth_exist:
             self.createDir("Depth")
 
-        #self.reCreateDir(RESULTS)        
-        #self.reCreateDir(OTHER_DIR)
-        #self.reCreateDir(VL_DIR)
-        #self.reCreateDir(NP_DIR)
-        #self.reCreateDir(MASK_DIR)
-        #if self.ui.c_speed_plot.isChecked():
-        #    self.reCreateDir(PLOT_SPEED_DIR)
-        #if self.user["GT"] != "" and self.ui.c_error_plot.isChecked():
-        #    self.reCreateDir(PLOT_ERROR_DIR)
+        self.reCreateDir(RESULTS)        
+        self.reCreateDir(OTHER_DIR)
+        self.reCreateDir(DRAW_DIR)
+        self.reCreateDir(VL_DIR)
+        self.reCreateDir(NP_DIR)
+        self.reCreateDir(MASK_DIR)
+        if self.ui.c_speed_plot.isChecked():
+            self.reCreateDir(PLOT_SPEED_DIR)
+        if self.user["GT"] != "" and self.ui.c_error_plot.isChecked():
+            self.reCreateDir(PLOT_ERROR_DIR)
 
     def reCreateDir(self, name):
         path = self.savePathJoin(name)

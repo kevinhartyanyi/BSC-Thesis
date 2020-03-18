@@ -74,7 +74,7 @@ class MainWindow(QtWidgets.QMainWindow):
         down_arrow_hover = QtGui.QPixmap(self.app.get_resource("down_arrow_hover.png"))
         down_arrow_pressed = QtGui.QPixmap(self.app.get_resource("down_arrow_pressed.png"))
 
-        self.ui.b_video_left.setUpPixmaps(down_arrow, down_arrow_hover, down_arrow_pressed)
+        self.ui.b_video_left.setUpPixmaps(left_arrow, left_arrow_hover, left_arrow_pressed)
         self.ui.b_video_left.setStyleSheet("background-color: red")
         self.ui.b_video_right.setStyleSheet("background-color: red")
         self.ui.b_video_left.setIcon(QtGui.QIcon(self.app.get_resource("left_arrow.png")))
@@ -104,8 +104,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.b_video_down.setEnabled(True)
         self.ui.actionPlay.setEnabled(True)
         self.ui.b_jump.setEnabled(True)
-        self.ui.b_plot_left.setEnabled(True)
-        self.ui.b_plot_right.setEnabled(True)
+        #self.ui.b_plot_left.setEnabled(True)
+        #self.ui.b_plot_right.setEnabled(True)
         self.ui.t_frame.setEnabled(True)
         self.ui.t_fps.setEnabled(True)
 
@@ -128,6 +128,10 @@ class MainWindow(QtWidgets.QMainWindow):
     def setCreated(self, created):
         if len(created) == 0:
             return
+        
+        self.ui.b_plot_left.setEnabled(True)
+        self.ui.b_plot_right.setEnabled(True)
+
 
         self.created = created
         for key in created:
@@ -143,6 +147,7 @@ class MainWindow(QtWidgets.QMainWindow):
         results = sutils.getResultDirs()
         velocity = os.path.join(self.user["Save"], results["Velocity"])
         mask = os.path.join(self.user["Save"], results["Mask"])
+        draw = os.path.join(self.user["Save"], results["Draw"])
 
         self.cycle_vid.add("original", self.img_dir)
         self.cycle_vid.add("of", self.of_dir)
@@ -150,6 +155,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.cycle_vid.add("depth", self.depth_dir)
         self.cycle_vid.add("velocity", velocity)
         self.cycle_vid.add("mask", mask)
+        self.cycle_vid.add("draw", draw)
 
         plot_dir = None
         if self.created != None:

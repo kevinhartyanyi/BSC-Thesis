@@ -31,4 +31,4 @@ class ImageButton(QtWidgets.QAbstractButton):
         self.update()
 
     def sizeHint(self):
-        return QtCore.QSize(200, 200)
+        return QtCore.QSize(10, 50)
