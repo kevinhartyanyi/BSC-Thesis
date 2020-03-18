@@ -14,10 +14,13 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_5">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <widget class="QWidget" name="">
        <layout class="QVBoxLayout" name="layout_vid">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -32,6 +35,9 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="toolTip">
+             <string>Jump to the previous frame</string>
+            </property>
             <property name="text">
              <string>PushButton</string>
             </property>
@@ -39,6 +45,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="b_video_up">
+            <property name="toolTip">
+             <string>Change the selected video</string>
+            </property>
             <property name="text">
              <string>PushButton</string>
             </property>
@@ -46,6 +55,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="b_video_right">
+            <property name="toolTip">
+             <string>Jump to the next frame</string>
+            </property>
             <property name="text">
              <string>PushButton</string>
             </property>
@@ -55,21 +67,36 @@
         </item>
         <item>
          <widget class="QLabel" name="l_description">
+          <property name="font">
+           <font>
+            <family>GE Inspira</family>
+            <pointsize>20</pointsize>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>Description of the currently selected video</string>
+          </property>
           <property name="text">
            <string>TextLabel</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="b_video_down">
+          <property name="toolTip">
+           <string>Change Video</string>
+          </property>
           <property name="text">
            <string>PushButton</string>
           </property>
          </widget>
         </item>
        </layout>
-      </item>
-      <item>
+      </widget>
+      <widget class="QWidget" name="">
        <layout class="QHBoxLayout" name="horizontalLayout_5">
         <item>
          <layout class="QVBoxLayout" name="layout_plot">
@@ -83,6 +110,9 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="toolTip">
+               <string>Change plot</string>
+              </property>
               <property name="text">
                <string>PushButton</string>
               </property>
@@ -95,6 +125,9 @@
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>Change Plot</string>
               </property>
               <property name="text">
                <string>PushButton</string>
@@ -111,6 +144,9 @@
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
              <widget class="QLabel" name="l_fps">
+              <property name="toolTip">
+               <string>Frame rate per second</string>
+              </property>
               <property name="text">
                <string>FPS:</string>
               </property>
@@ -118,6 +154,9 @@
             </item>
             <item>
              <widget class="QLineEdit" name="t_fps">
+              <property name="toolTip">
+               <string>Select video frame rate per second</string>
+              </property>
               <property name="layoutDirection">
                <enum>Qt::LeftToRight</enum>
               </property>
@@ -139,6 +178,9 @@
                <layout class="QHBoxLayout" name="horizontalLayout_4">
                 <item>
                  <widget class="QPushButton" name="b_jump">
+                  <property name="toolTip">
+                   <string>Jumpt to the selected frame</string>
+                  </property>
                   <property name="text">
                    <string>Jump to Frame:</string>
                   </property>
@@ -146,6 +188,9 @@
                 </item>
                 <item>
                  <widget class="QLineEdit" name="t_frame">
+                  <property name="toolTip">
+                   <string>Select the frame that you wish to jump to</string>
+                  </property>
                   <property name="inputMask">
                    <string/>
                   </property>
@@ -160,6 +205,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="b_rerun">
+              <property name="toolTip">
+               <string>Start a new run</string>
+              </property>
               <property name="text">
                <string>PushButton</string>
               </property>
@@ -170,8 +218,8 @@
          </layout>
         </item>
        </layout>
-      </item>
-     </layout>
+      </widget>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -197,6 +245,9 @@
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
     <string>toolBar</string>
+   </property>
+   <property name="toolTip">
+    <string/>
    </property>
    <attribute name="toolBarArea">
     <enum>LeftToolBarArea</enum>
