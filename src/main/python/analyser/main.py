@@ -74,13 +74,10 @@ class MainWindow(QtWidgets.QMainWindow):
         down_arrow_hover = QtGui.QPixmap(self.app.get_resource("down_arrow_hover.png"))
         down_arrow_pressed = QtGui.QPixmap(self.app.get_resource("down_arrow_pressed.png"))
 
-        self.ui.b_video_left.setUpPixmaps(left_arrow, left_arrow_hover, left_arrow_pressed)
-        self.ui.b_video_left.setStyleSheet("background-color: red")
-        self.ui.b_video_right.setStyleSheet("background-color: red")
         self.ui.b_video_left.setIcon(QtGui.QIcon(self.app.get_resource("left_arrow.png")))
         self.ui.b_video_right.setIcon(QtGui.QIcon(self.app.get_resource("right_arrow.png")))
         self.ui.b_video_up.setIcon(QtGui.QIcon(self.app.get_resource("up_arrow.png")))
-        self.ui.b_video_left.setIcon(QtGui.QIcon(self.app.get_resource("left_arrow.png")))
+        self.ui.b_video_down.setIcon(QtGui.QIcon(self.app.get_resource("down_arrow.png")))
         self.ui.b_plot_left.setIcon(QtGui.QIcon(self.app.get_resource("left_arrow.png")))
         self.ui.b_plot_right.setIcon(QtGui.QIcon(self.app.get_resource("right_arrow.png")))
         

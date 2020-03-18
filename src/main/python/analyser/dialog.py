@@ -22,6 +22,7 @@ VL_DIR = os.path.join(RESULTS, 'velocity')
 NP_DIR = os.path.join(RESULTS, 'numbers')
 MASK_DIR = os.path.join(RESULTS, 'mask')
 DRAW_DIR = os.path.join(RESULTS, 'draw')
+SUPER_PIXEL_DIR = os.path.join(RESULTS, 'super_pixel')
 PLOT_SPEED_DIR = os.path.join(RESULTS, 'plot_speed')
 PLOT_ERROR_DIR = os.path.join(RESULTS, 'plot_error')
 
@@ -53,6 +54,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.fps = 30
         self.fps_limit = 60
         self.run_dict = {}
+        self.super_pixel_method = ""
         
         self.app = app
 
@@ -236,7 +238,7 @@ class Dialog(QDialog, Ui_Dialog):
             self.savePathJoin("Depth"), self.savePathJoin("Of"), self.savePathJoin("Back_Of"),
             self.user["Save"], None, 1, 0.309, self.run_dict, self.app.get_resource(os.path.join("of_models", "network-default.pytorch")),
             self.app.get_resource(os.path.join("depth_models", "model_city2kitti.meta")), PLOT_SPEED_DIR,
-            NP_DIR, PLOT_ERROR_DIR, speed_gt=self.user["GT"], vid_path=self.user["Video"])  # no parent!
+            NP_DIR, PLOT_ERROR_DIR, speed_gt=self.user["GT"], vid_path=self.user["Video"], super_pixel_method=self.super_pixel_method)  # no parent!
         self.thread = QThread()  # no parent!
 
         self.worker.labelUpdate.connect(self.labelUpdate)
@@ -360,25 +362,26 @@ class Dialog(QDialog, Ui_Dialog):
     def createDirs(self):
         print("Creating Directories")
 
-        if not self.img_exist:
-            self.createDir("Images")
-        if not self.of_exist:
-            self.createDir("Of")
-        if not self.back_of_exist:
-            self.createDir("Back_Of")
-        if not self.depth_exist:
-            self.createDir("Depth")
-
-        self.reCreateDir(RESULTS)        
-        self.reCreateDir(OTHER_DIR)
-        self.reCreateDir(DRAW_DIR)
-        self.reCreateDir(VL_DIR)
-        self.reCreateDir(NP_DIR)
-        self.reCreateDir(MASK_DIR)
-        if self.ui.c_speed_plot.isChecked():
-            self.reCreateDir(PLOT_SPEED_DIR)
-        if self.user["GT"] != "" and self.ui.c_error_plot.isChecked():
-            self.reCreateDir(PLOT_ERROR_DIR)
+        #if not self.img_exist:
+        #    self.createDir("Images")
+        #if not self.of_exist:
+        #    self.createDir("Of")
+        #if not self.back_of_exist:
+        #    self.createDir("Back_Of")
+        #if not self.depth_exist:
+        #    self.createDir("Depth")
+#
+        #self.reCreateDir(RESULTS)        
+        #self.reCreateDir(OTHER_DIR)
+        #self.reCreateDir(DRAW_DIR)
+        #self.reCreateDir(SUPER_PIXEL_DIR)
+        #self.reCreateDir(VL_DIR)
+        #self.reCreateDir(NP_DIR)
+        #self.reCreateDir(MASK_DIR)
+        #if self.ui.c_speed_plot.isChecked():
+        #    self.reCreateDir(PLOT_SPEED_DIR)
+        #if self.user["GT"] != "" and self.ui.c_error_plot.isChecked():
+        #    self.reCreateDir(PLOT_ERROR_DIR)
 
     def reCreateDir(self, name):
         path = self.savePathJoin(name)

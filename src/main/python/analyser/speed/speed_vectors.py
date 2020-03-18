@@ -3,7 +3,7 @@ import itertools
 import multiprocessing
 import os
 import glob
-
+from skimage.segmentation import felzenszwalb, slic, quickshift, watershed
 import cv2
 import numpy as np
 import tqdm
@@ -124,10 +124,10 @@ VIDEOS = []
 TRAIN_VIDEOS = ['0001', '0002', '0005', '0009', '0014', '0019', '0027']
 
 
-def run(img_dir, depth_dir, of_dir, of_back_dir, save_dir, speed_gt=None, high=1, low=0.309):
+def run(img_dir, depth_dir, of_dir, of_back_dir, save_dir, speed_gt=None, high=1, low=0.309, super_pixel_method=""):
 
     
-    main("Video", img_dir=img_dir, disp_dir=depth_dir, disp2_dir=None, test_number = 6, back_flow_dir=of_back_dir, flow_dir=of_dir, out_dir=save_dir, label_dir=img_dir,
+    main(super_pixel_method, img_dir=img_dir, disp_dir=depth_dir, disp2_dir=None, test_number = 6, back_flow_dir=of_back_dir, flow_dir=of_dir, out_dir=save_dir, label_dir=img_dir,
     high=high, low=low, visualize = True)
     
     
@@ -291,7 +291,7 @@ def run(img_dir, depth_dir, of_dir, of_back_dir, save_dir, speed_gt=None, high=1
 
 class VelocityCalculator(object):
     def __init__(self,fst_img_fn, snd_img_fn, fst_depth_fn, snd_depth_fn, 
-                label_fn, flow_fn, back_flow, out_dir, use_slic, n_sps, visualize_results=True, high=1, low=0, vid_name=''):
+                label_fn, flow_fn, back_flow, out_dir, use_slic, n_sps, visualize_results=True, high=1, low=0, super_pixel_method=""):
         self.read_depth = utils.read_depth
         self.read_flow = readFlowFile.read
         self.average = utils.average
@@ -310,7 +310,8 @@ class VelocityCalculator(object):
         self.back_flow = back_flow
         self.high = high
         self.low = low
-        self.vid_name = vid_name
+        #self.vid_name = vid_name
+        self.super_pixel_method = super_pixel_method
 
 
     def calculate_velocity_and_orientation(self):
@@ -372,16 +373,19 @@ class VelocityCalculator(object):
                 visualize(base_fn + '_viz.png', speed.astype('uint8'), velocity, base_fn + '_flow.png', 
                         fst_img, snd_img, base_fn + '_d1.png', base_fn + '_d2.png', 
                         base_fn + '_speed.png')
-        elif self.back_flow is "N":
+        
+        if self.super_pixel_method != "":
             # Read superpixel labels
             if self.use_slic:
                 labels = utils.read_gslic_labels(self.label_fn, n_sps=self.n_sps)
             else:
                 labels = utils.read_boruvka_labels(self.label_fn, n_sps=self.n_sps)
             
+
             # Read left and right images
             fst_img = cv2.imread(self.fst_img_fn, cv2.IMREAD_COLOR)  # height x width x channels
             snd_img = cv2.imread(self.snd_img_fn, cv2.IMREAD_COLOR)  # height x width x channels
+            labels = slic(fst_img, n_segments=250, compactness=10, sigma=1)
             assert fst_img.shape == snd_img.shape
             height, width, _ = fst_img.shape
             
@@ -413,30 +417,36 @@ class VelocityCalculator(object):
             base_fn = os.path.join(self.out_dir, 
                                 os.path.splitext(os.path.basename(self.flow_fn))[0])
             np.save(base_fn + '_vel.npy', velocity)
-            np.save(base_fn + '_ori.npy', orientation)
+            np.save(base_fn + '_vel.npy', velocity)
+
+            x = velocity[:,:,0]
+            y = velocity[:,:,1]
+            z = velocity[:,:,2]
+            speed_superpixel = utils.vector_distance(x,y,z)
+            np.save(base_fn + '_superpixel.npy', speed_superpixel)
 
             # Visualize the results if needed
-            if self.visualize_results:
-                velocity[velocity > utils.max_velocity] = utils.max_velocity
-                velocity[velocity < -utils.max_velocity] = -utils.max_velocity
-                # Save velocity vectors as image
-                for idx, file_id in enumerate(['x', 'y', 'z']):
-                    utils.save_as_image('{}_{}.png'.format(base_fn, file_id), 
-                                        velocity[:, :, idx], max_val=utils.max_velocity)
-                # Save depth vectors as image
-                for file_id, data in zip(['d1', 'd2', 'd1_avg', 'd2_avg'],
-                                        [fst_depth, snd_depth, 
-                                        avg_fst_depth, avg_fst_depth]):
-                    utils.save_as_image('{}_{}.png'.format(base_fn, file_id), 
-                                        data, min_val=utils.min_depth, max_val=utils.max_depth)
-                # Speed
-                utils.save_as_image(base_fn + '_speed.png', speed, min_val=0, max_val=utils.max_depth)  
-                # Save optical flow as image
-                cv2.imwrite(base_fn + '_flow.png', computeColor.computeImg(flow))
-                # Save the final image
-                visualize(base_fn + '_viz.png', labels, velocity, base_fn + '_z.png', 
-                        fst_img, snd_img, base_fn + '_d1.png', base_fn + '_d2.png', 
-                        base_fn + '_flow.png')
+            #if self.visualize_results:
+            #    velocity[velocity > utils.max_velocity] = utils.max_velocity
+            #    velocity[velocity < -utils.max_velocity] = -utils.max_velocity
+            #    # Save velocity vectors as image
+            #    for idx, file_id in enumerate(['x', 'y', 'z']):
+            #        utils.save_as_image('{}_{}.png'.format(base_fn, file_id), 
+            #                            velocity[:, :, idx], max_val=utils.max_velocity)
+            #    # Save depth vectors as image
+            #    for file_id, data in zip(['d1', 'd2', 'd1_avg', 'd2_avg'],
+            #                            [fst_depth, snd_depth, 
+            #                            avg_fst_depth, avg_fst_depth]):
+            #        utils.save_as_image('{}_{}.png'.format(base_fn, file_id), 
+            #                            data, min_val=utils.min_depth, max_val=utils.max_depth)
+            #    # Speed
+            #    utils.save_as_image(base_fn + '_speed.png', speed, min_val=0, max_val=utils.max_depth)  
+            #    # Save optical flow as image
+            #    cv2.imwrite(base_fn + '_flow.png', computeColor.computeImg(flow))
+            #    # Save the final image
+            #    visualize(base_fn + '_viz.png', labels, velocity, base_fn + '_z.png', 
+            #            fst_img, snd_img, base_fn + '_d1.png', base_fn + '_d2.png', 
+            #            base_fn + '_flow.png')
         else:
             # Read left and right images
             fst_img = cv2.imread(self.fst_img_fn, cv2.IMREAD_COLOR)  # height x width x channels
@@ -605,7 +615,7 @@ def calculate_gt_velocity_and_orientation_wrapper(params):
     velocity_calculator.calculate_velocity_and_orientation()
 
 
-def main(vid_name, img_dir, disp_dir, flow_dir, back_flow_dir,label_dir, disp2_dir = None, out_dir = OUT_PATH, use_slic = False, test_number = 2, n_sps = 100, visualize = False, high = 1, low = 0):
+def main(super_pixel_method, img_dir, disp_dir, flow_dir, back_flow_dir,label_dir, disp2_dir = None, out_dir = OUT_PATH, use_slic = False, test_number = 2, n_sps = 100, visualize = False, high = 1, low = 0):
     
     """video = Video("0001")
 
@@ -680,7 +690,7 @@ def main(vid_name, img_dir, disp_dir, flow_dir, back_flow_dir,label_dir, disp2_d
     params = zip(fst_img_fns, snd_img_fns, fst_disp_fns, snd_disp_fns, label_fns, flow_fns, back_flow, 
                 itertools.repeat(out_dir), itertools.repeat(use_slic), 
                 itertools.repeat(n_sps), itertools.repeat(visualize),
-                itertools.repeat(high), itertools.repeat(low), itertools.repeat(vid_name))
+                itertools.repeat(high), itertools.repeat(low), itertools.repeat(super_pixel_method))
 
     with multiprocessing.Pool() as pool:
         with tqdm.tqdm(total=len(fst_img_fns)) as pbar:

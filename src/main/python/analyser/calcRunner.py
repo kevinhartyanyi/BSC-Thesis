@@ -77,7 +77,7 @@ class CalculationRunner(QObject):
     update = pyqtSignal(int)
 
     def __init__(self, img_dir, depth_dir, of_dir, back_of_dir, save_dir, label_dir, high, low, run_dict,
-                of_model, depth_model, plot_speed_dir, numbers_dir, plot_error_dir, speed_gt="", vid_path=None):
+                of_model, depth_model, plot_speed_dir, numbers_dir, plot_error_dir, speed_gt="", vid_path=None, super_pixel_method=""):
         super(CalculationRunner, self).__init__()
         self.running = True
         self.use_slic = False
@@ -92,7 +92,7 @@ class CalculationRunner(QObject):
         self.plot_error_dir = plot_error_dir
         self.numbers_dir = numbers_dir
         self.label_dir = label_dir
-        self.vid_name = "Video"
+        self.super_pixel_method = super_pixel_method
         self.of_model = of_model
         self.img_dir = img_dir
         self.depth_dir = depth_dir
@@ -138,7 +138,7 @@ class CalculationRunner(QObject):
         params = zip(fst_img_fns, snd_img_fns, fst_disp_fns, snd_disp_fns, label_fns, flow_fns, back_flow, 
                     itertools.repeat(self.out_dir), itertools.repeat(self.use_slic), 
                     itertools.repeat(self.n_sps), itertools.repeat(self.visualize),
-                    itertools.repeat(self.high), itertools.repeat(self.low), itertools.repeat(self.vid_name))
+                    itertools.repeat(self.high), itertools.repeat(self.low), itertools.repeat(self.super_pixel_method))
 
         with multiprocessing.Pool() as pool:
             with tqdm.tqdm(total=len(fst_img_fns)) as pbar:
@@ -210,7 +210,9 @@ class CalculationRunner(QObject):
 
     @pyqtSlot()
     def startThread(self): # A slot takes no params
-        #self.finished.emit()
+        self.finished.emit()
+        self.startCalc()
+
 
 
         self.checkRun("Video", self.imagesFromVideo, self.vid_path, self.img_dir, "vid")

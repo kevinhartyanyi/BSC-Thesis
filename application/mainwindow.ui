@@ -25,7 +25,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="ImageButton" name="b_video_left">
+           <widget class="QPushButton" name="b_video_left">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -52,6 +52,13 @@
            </widget>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="QLabel" name="l_description">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QPushButton" name="b_video_down">
@@ -239,13 +246,6 @@
    </property>
   </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>ImageButton</class>
-   <extends>QPushButton</extends>
-   <header>imagebutton.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections>
   <connection>
