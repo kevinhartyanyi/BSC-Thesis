@@ -513,6 +513,8 @@ class VelocityCalculator(object):
             img_num = os.path.splitext(os.path.basename(self.flow_fn))[0]
             #np.save(base_fn + '_vel.npy', velocity)
             #np.save(base_fn + '_ori.npy', orientation)
+            plt.imsave(os.path.join(base_fn, OTHER_DIR, img_num + '_draw.png'), incons_img.astype('uint8'))
+
 
             #speed, speed_mask = utils.vector_speed(velocity, 0) # Speed calculation
             
