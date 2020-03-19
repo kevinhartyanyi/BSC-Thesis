@@ -251,13 +251,49 @@ class Dialog(QDialog, Ui_Dialog):
 
     def errorChecks(self):
         stop_calculation = False
-        ret = QMessageBox.question(self, "Solving Errors", "Click a button", QMessageBox.Ok | QMessageBox.Abort, QMessageBox.Ok)
+        #ret = QMessageBox.question(self, "Solving Errors", "Click a button", QMessageBox.Ok | QMessageBox.Abort, QMessageBox.Ok)
         found_error = False
         errors = []
+
+
+        print(self.img_exist)
+        print(os.path.exists(self.savePathJoin("Images")))
+        # Check image folder
+        if self.img_exist and not os.path.exists(self.savePathJoin("Images")):
+            found_error = True
+            if os.path.exists(self.user["Video"]):
+                errors.append("Images folder doesn't exist -> Recreate it and recalculate optical flow and depth estimations")
+            else:
+                stop_calculation = True
+                errors.append("Images folder and video file don't exist -> Stopping run")
+
+
+
+        for e in errors:
+            print(e)
+
+        return True
+
+        if self.img_exist:
+            ori_images = len(list_directory(self.savePathJoin("Images")))
+        else:
+            cam = cv2.VideoCapture(self.user["Video"])       
+            ret,frame = cam.read() 
+            while(ret):
+                print ('Reading...{0}'.format(ori_images)) 
+                ori_images += 1
+                ret,frame = cam.read() 
+            cam.release() 
+            cv2.destroyAllWindows()
+
+
+
         if(not os.path.isfile(self.user["GT"]) and self.ui.l_ground_truth != ""):
             self.user["GT"] = ""
             found_error = True
             errors.append("Ground Truth file doesn't exist -> file won't be used")
+
+        
 
         return True
 
