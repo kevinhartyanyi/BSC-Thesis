@@ -253,44 +253,81 @@ class Dialog(QDialog, Ui_Dialog):
         stop_calculation = False
         #ret = QMessageBox.question(self, "Solving Errors", "Click a button", QMessageBox.Ok | QMessageBox.Abort, QMessageBox.Ok)
         found_error = False
-        errors = []
+        errors = {
+            "Info": [],
+            "Critical": []
+        }
+        ori_images = 0
+        of_images = 0
+        depth_images = 0
+        back_of_images = 0
+
+        if os.path.exists(self.savePathJoin("Images")):
+            ori_images = len(list_directory(self.savePathJoin("Images"), extension="png"))
+        #elif os.path.exists(self.user["Video"]):
+        #    ori_images = count_frames(self.user["Video"])
 
 
-        print(self.img_exist)
+        #print(count_frames(self.user["Video"]))
         print(os.path.exists(self.savePathJoin("Images")))
+
         # Check image folder
         if self.img_exist and not os.path.exists(self.savePathJoin("Images")):
-            found_error = True
             if os.path.exists(self.user["Video"]):
-                errors.append("Images folder doesn't exist -> Recreate it and recalculate optical flow and depth estimations")
+                errors["Info"].append("Images folder {0} doesn't exist -> Recreate it and recalculate optical flow and depth estimations".format(self.savePathJoin("Images")))
             else:
                 stop_calculation = True
-                errors.append("Images folder and video file don't exist -> Stopping run")
+                errors["Critical"].append(("Images folder {0} and video file {1} don't exist -> Stopping run".format(self.savePathJoin("Images"), self.user["Video"])))
+        elif self.img_exist and os.path.exists(self.user["Video"]):
+            errors["Info"].append("Both video {0} and Images folder {1} exist -> using Images folder by default".format(self.user["Video"], self.savePathJoin("Images")))
+            #ori_images_vid = count_frames(self.user["Video"])
+            #
+            #if ori_images_vid != ori_images:
+            #    errors["Info"].append("Images in {0} with number {1} doesn't match the video {2} frame number {3} -> Recreating images and recalculating optical flow and depth estimations".
+            #        format(self.savePathJoin("Images"), ori_images, self.user["Video"], ori_images_vid))
+        elif not self.img_exist and os.path.exists(self.user["Video"]):
+            errors["Info"].append("Images folder {0} doesn't exist -> Create it and calculate optical flow and depth estimations".format(self.savePathJoin("Images")))
+
+
+        # Check video file
+        if self.user["Video"] != "" and not os.path.exists(self.user["Video"]):
+            if os.path.exists(self.savePathJoin("Images")):
+                errors["Info"].append(("Video file {0} doesn't exist -> Using images in the Images folder instead".format(self.user["Video"])))
+            else:
+                stop_calculation = True
+                errors["Critical"].append(("Images folder {0} and video file {1} don't exist -> Stopping run".format(self.savePathJoin("Images"), self.user["Video"])))
+        elif os.path.exists(self.user["Video"]) and os.path.exists(self.savePathJoin("Images")):
+            pass
+
+        # Check optical flow
+        if self.of_exist and not os.path.exists(self.savePathJoin("Of")):
+            errors["Info"].append(("Optical flow folder {0} doesn't exist -> Recalculating optical flow".format(self.savePathJoin("Of"))))
+        elif self.of_exist:
+            of_images = len(list_directory(self.savePathJoin("Of"), extension="png"))
+            if of_images != ori_images - 1 and ori_images != 0:
+                errors["Info"].append(("Optical flow number {0} doesn't match video image number {1} - 1 -> Recalculating optical flow".format(of_images, ori_images)))
 
 
 
-        for e in errors:
-            print(e)
+        #print(len(list_directory(self.savePathJoin("Images"), extension="png")))
+        #print(len(list_directory(self.savePathJoin("Of"), extension="png")))
+        #print(len(list_directory(self.savePathJoin("Depth"), extension="png")))        
+        print(ori_images)
+
+
+
+        for key in errors:
+            print(key)
+            for e in errors[key]:
+                print("     " + str(e))
 
         return True
 
-        if self.img_exist:
-            ori_images = len(list_directory(self.savePathJoin("Images")))
-        else:
-            cam = cv2.VideoCapture(self.user["Video"])       
-            ret,frame = cam.read() 
-            while(ret):
-                print ('Reading...{0}'.format(ori_images)) 
-                ori_images += 1
-                ret,frame = cam.read() 
-            cam.release() 
-            cv2.destroyAllWindows()
 
 
 
         if(not os.path.isfile(self.user["GT"]) and self.ui.l_ground_truth != ""):
             self.user["GT"] = ""
-            found_error = True
             errors.append("Ground Truth file doesn't exist -> file won't be used")
 
         
@@ -439,14 +476,15 @@ class Dialog(QDialog, Ui_Dialog):
         if self.img_exist:
             ori_images = len(list_directory(self.savePathJoin("Images")))
         else:
-            cam = cv2.VideoCapture(self.user["Video"])       
-            ret,frame = cam.read() 
-            while(ret):
-                print ('Reading...{0}'.format(ori_images)) 
-                ori_images += 1
-                ret,frame = cam.read() 
-            cam.release() 
-            cv2.destroyAllWindows()
+            pass
+            #cam = cv2.VideoCapture(self.user["Video"])       
+            #ret,frame = cam.read() 
+            #while(ret):
+            #    print ('Reading...{0}'.format(ori_images)) 
+            #    ori_images += 1
+            #    ret,frame = cam.read() 
+            #cam.release() 
+            #cv2.destroyAllWindows()
 
         self.run_dict["Video"] = {"Run": not self.img_exist, "Progress":ori_images, "Text":"Preparing video"}
 
