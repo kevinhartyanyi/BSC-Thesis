@@ -13,35 +13,7 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QPushButton" name="b_run">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>406</y>
-     <width>112</width>
-     <height>58</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="font">
-    <font>
-     <family>GE Inspira</family>
-     <pointsize>20</pointsize>
-    </font>
-   </property>
-   <property name="toolTip">
-    <string>Start the calculation</string>
-   </property>
-   <property name="text">
-    <string>Run</string>
-   </property>
-  </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>470</x>
@@ -105,7 +77,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>810</x>
@@ -281,12 +253,12 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>260</x>
      <y>500</y>
-     <width>340</width>
+     <width>759</width>
      <height>100</height>
     </rect>
    </property>
@@ -354,7 +326,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -509,7 +481,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>340</x>
@@ -616,11 +588,11 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>870</x>
-     <y>450</y>
+     <x>960</x>
+     <y>350</y>
      <width>408</width>
      <height>120</height>
     </rect>
@@ -680,6 +652,40 @@
        </widget>
       </item>
      </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="verticalLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>370</y>
+     <width>160</width>
+     <height>80</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="layout_v">
+    <item>
+     <widget class="QPushButton" name="b_run">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <family>GE Inspira</family>
+        <pointsize>20</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Start the calculation</string>
+      </property>
+      <property name="text">
+       <string>Run</string>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

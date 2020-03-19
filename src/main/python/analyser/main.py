@@ -11,7 +11,7 @@ import videoPlayer
 import utils
 import speed.utils as sutils
 import worker
-import vid
+#import vid
 import imageHolder
 import cycleVid
 import skvideo.io

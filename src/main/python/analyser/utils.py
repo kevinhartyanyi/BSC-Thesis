@@ -51,7 +51,16 @@ def fillImg(img, fill_colour=(26,26,27,255), size=(1920, 1080)):
     fd_img.paste(img, ((int((size[0] - w) / 2), int((size[1] - h) / 2))))
     return fd_img
 
-def images_from_video(vid_path, out_path):    
+def images_from_video(vid_path, out_path):   
+    """Saves every frame of a video to the given path.
+    
+    Arguments:
+        vid_path {string} -- path to video
+        out_path {string} -- path to save dir
+    
+    Raises:
+        ValueError: If video doesn't exist
+    """
     if not os.path.exists(vid_path):
         raise ValueError('Input video file %s does not exist.' % vid_path)
 
@@ -65,16 +74,23 @@ def images_from_video(vid_path, out_path):
             
     cap.close()
 
-def video_from_images(img_dir, out_fn, fps=30):
+def video_from_images(img_dir, out_dir, fps=30):
+    """Creates a video based on the png files contained in the given path. Saves the video to out_dir.
+    
+    Arguments:
+        img_dir {string} -- path to image dir
+        out_dir {string} -- path to save dir
+    
+    Keyword Arguments:
+        fps {int} -- the fps of the video (default: {30})
+    """
     onlyfiles = glob.glob(img_dir +"/*.png")
     onlyfiles = natsorted(onlyfiles)
 
     fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
     
-    #out_fn = os.path.join(root_folder, scene_id, '{}.avi'.format(scene_id))
     img = cv2.imread(onlyfiles[0])
-    #print(onlyfiles[0], img.shape)
-    vid_out = cv2.VideoWriter(out_fn, fourcc, fps, (img.shape[1], img.shape[0]))
+    vid_out = cv2.VideoWriter(out_dir, fourcc, fps, (img.shape[1], img.shape[0]))
 
     for i in range(len(onlyfiles)):
         img = cv2.imread(onlyfiles[i])
@@ -82,6 +98,14 @@ def video_from_images(img_dir, out_fn, fps=30):
     vid_out.release()
 
 def readImg(img_dir):
+    """Reads the png file names in the given directory and returns them sorted.
+    
+    Arguments:
+        img_dir {string} -- path to dir
+    
+    Returns:
+        [string] -- list containing paths to the files sorted by name
+    """
     onlyfiles = glob.glob(img_dir +"/*.png")
     onlyfiles = natsorted(onlyfiles)
     return onlyfiles
