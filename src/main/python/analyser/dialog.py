@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QFileDialog, QColorDialog, QProgressBar, QLabel
+from PyQt5.QtWidgets import QDialog, QFileDialog, QColorDialog, QProgressBar, QLabel, QMessageBox
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, QThread
@@ -250,8 +250,16 @@ class Dialog(QDialog, Ui_Dialog):
             json.dump(self.user, json_file, indent=4)
 
     def errorChecks(self):
-        if(not os.path.isfile(self.user["GT"])):
+        stop_calculation = False
+        ret = QMessageBox.question(self, "Solving Errors", "Click a button", QMessageBox.Ok | QMessageBox.Abort, QMessageBox.Ok)
+        found_error = False
+        errors = []
+        if(not os.path.isfile(self.user["GT"]) and self.ui.l_ground_truth != ""):
             self.user["GT"] = ""
+            found_error = True
+            errors.append("Ground Truth file doesn't exist -> file won't be used")
+
+        return True
 
 
     def buildParamsDict(self):
@@ -277,7 +285,9 @@ class Dialog(QDialog, Ui_Dialog):
     def startRun(self):
         """Start calculations
         """
-        self.errorChecks()
+        if self.errorChecks():
+            return
+        
         self.disableButtons()
         self.saveUser()
         self.sendUser.emit(self.user)
