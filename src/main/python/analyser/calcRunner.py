@@ -76,30 +76,30 @@ class CalculationRunner(QObject):
     labelUpdate = pyqtSignal(object)
     update = pyqtSignal(int)
 
-    def __init__(self, img_dir, depth_dir, of_dir, back_of_dir, save_dir, label_dir, high, low, run_dict,
+    def __init__(self, param_dict, img_dir, depth_dir, of_dir, back_of_dir, save_dir, label_dir, high, low, run_dict,
                 of_model, depth_model, plot_speed_dir, numbers_dir, plot_error_dir, speed_gt="", vid_path=None, super_pixel_method=""):
         super(CalculationRunner, self).__init__()
         self.running = True
         self.use_slic = False
         self.visualize = True
-        self.vid_path = vid_path
-        self.high = high
-        self.speed_gt = np.load(speed_gt) if speed_gt != "" else "" 
-        self.low = low
+        self.vid_path = param_dict["vid_path"]
+        self.high = param_dict["high"]
+        self.speed_gt = np.load(param_dict["speed_gt"]) if param_dict["speed_gt"] != "" else "" 
+        self.low = param_dict["low"]
         self.n_sps = 100
-        self.run_dict = run_dict
-        self.out_dir = save_dir
-        self.plot_error_dir = plot_error_dir
-        self.numbers_dir = numbers_dir
+        self.run_dict = param_dict["run_dict"]
+        self.out_dir = param_dict["save_dir"]
+        self.plot_error_dir = param_dict["plot_error_dir"]
+        self.numbers_dir = param_dict["numbers_dir"]
         self.label_dir = label_dir
-        self.super_pixel_method = super_pixel_method
-        self.of_model = of_model
-        self.img_dir = img_dir
-        self.depth_dir = depth_dir
-        self.depth_model = depth_model
-        self.of_dir = of_dir
-        self.back_of_dir = back_of_dir
-        self.plot_speed_dir = plot_speed_dir
+        self.super_pixel_method = param_dict["super_pixel_method"]
+        self.of_model = param_dict["of_model"]
+        self.img_dir = param_dict["img_dir"]
+        self.depth_dir = param_dict["depth_dir"]
+        self.depth_model = param_dict["depth_model"]
+        self.of_dir = param_dict["of_dir"]
+        self.back_of_dir = param_dict["back_of_dir"]
+        self.plot_speed_dir = param_dict["plot_speed_dir"]
 
     @pyqtSlot()
     def startCalc(self):

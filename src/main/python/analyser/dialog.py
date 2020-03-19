@@ -45,6 +45,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.progressAllBar = None
         self.progressLabel = None
         self.img_exist = False
+        self.params_dict = None
         self.of_exist = False
         self.back_of_exist = False
         self.depth_exist = False
@@ -84,8 +85,10 @@ class Dialog(QDialog, Ui_Dialog):
     
 
     def openGroundTruth(self):
-        gt_dir = name = self.openFile(self.user["GT"], title="Load Ground Truth Data", 
-        file_filter="Numpy Files (*.npy);;All files (*)")
+        """Open file with ground truth values for speed
+        """
+        gt_dir = self.openFile(self.user["GT"], title="Load Ground Truth Data", 
+                                file_filter="Numpy Files (*.npy);;All files (*)")
         if gt_dir != "":
             self.user["GT"] = gt_dir
             self.ui.l_ground_truth.setText("Load: " + self.splitPath(gt_dir)[-1])
@@ -107,10 +110,19 @@ class Dialog(QDialog, Ui_Dialog):
             self.ui.t_fps.setText(str(fps))
         else:
             print("Wrong Input For Fps")
-            self.ui.t_fps.setText("")
+            self.ui.t_fps.setText("30")
+            self.fps = 30
 
 
     def splitPath(self, path):
+        """Split the given path based on filesystem
+        
+        Arguments:
+            path {str  } -- path you want to split
+        
+        Returns:
+            path splitted on / or \ -- only use \ on windows
+        """
         sep = "/"
         if platform.system() == "Windows": 
             sep = "\\"
@@ -118,6 +130,8 @@ class Dialog(QDialog, Ui_Dialog):
         return path.split(sep)
 
     def openSave(self):
+        """Open directory to save results
+        """
         save_dir = QFileDialog.getExistingDirectory(self, "Select a folder", self.user["Save"], QFileDialog.ShowDirsOnly)
         if save_dir != "":
             self.user["Save"] = save_dir
@@ -125,6 +139,8 @@ class Dialog(QDialog, Ui_Dialog):
             self.checkFiles()
 
     def checkFiles(self):
+        """Checks if there are folders from previous runs, so we don't need to create them. 
+        """
         self.of_exist = True if os.path.exists(os.path.join(self.user["Save"], "Of")) else False
         self.back_of_exist = True if os.path.exists(os.path.join(self.user["Save"], "Back_Of")) else False
         self.img_exist = True if os.path.exists(os.path.join(self.user["Save"], "Images")) else False
@@ -139,23 +155,19 @@ class Dialog(QDialog, Ui_Dialog):
         else:
             self.ui.b_run.setEnabled(False)
     
-    #def runRequirements_old(self):
-    #    ready = ((self.depth_exist         and self.of_exist         and self.img_exist)           or\
-    #            (self.user["Depth"] != "" and self.of_exist         and self.img_exist)           or\
-    #            (self.depth_exist         and self.user["Of"] != "" and self.img_exist)           or\
-    #            (self.depth_exist         and self.of_exist         and self.user["Video"] != "") or\
-    #            (self.user["Depth"] != "" and self.user["Of"] != "" and self.img_exist)           or\
-    #            (self.depth_exist         and self.user["Of"] != "" and self.user["Video"] != "") or\
-    #            (self.user["Depth"] != "" and self.of_exist         and self.user["Video"] != "") or\
-    #            (self.user["Depth"] != "" and self.user["Of"] != "" and self.user["Video"] != "")) and\
-    #            ((self.back_of_exist and self.of_exist) or self.user["Of"] != "")
-    #    return ready
 
     def runRequirements(self):
+        """Basic requirements to start run
+        
+        Returns:
+            bool -- returns true if the requirements are satisfied
+        """
         ready = (self.user["Save"] != "" and self.user["Video"]) or self.img_exist
         return ready
 
     def openVideo(self):
+        """Open video to analyze
+        """
         fname = self.openFile(self.user["Video"])
         if fname != "":
             self.user["Video"] = fname
@@ -179,11 +191,25 @@ class Dialog(QDialog, Ui_Dialog):
         self.checkFiles()
 
     def openFile(self, folder, title="Open Video", file_filter="Video Files (*.mp4 *.avi *.mkv);;All files (*)"):
+        """Open QFileDialog with the given parameters, returns selected file
+        
+        Arguments:
+            folder {str} -- path where the file dialog should start
+        
+        Keyword Arguments:
+            title {str} -- title of the file dialog (default: {"Open Video"})
+            file_filter {str} -- filter for file extensions (default: {"Video Files (*.mp4 *.avi *.mkv);;All files (*)"})
+        
+        Returns:
+            [str] -- path to file
+        """
         fname = QFileDialog.getOpenFileName(self, title, folder, file_filter)   
         
         return fname[0]
     
     def userSetup(self):
+        """Label text setup if the user json is not empty
+        """
         if self.user["Save"] == "":
             #self.ui.b_vid.setEnabled(False)
             #self.ui.b_of.setEnabled(False)
@@ -197,21 +223,29 @@ class Dialog(QDialog, Ui_Dialog):
             #    self.ui.l_depth.setText(self.user["Depth"])
             if self.user["Video"] != "":
                 self.ui.l_vid.setText(self.user["Video"])
+            if self.user["GT"] != "":
+                self.ui.l_ground_truth.setText(self.splitPath(self.user["GT"])[-1])
+            
+            self.vid_name = self.splitPath(self.user["Video"])[-1]
+            self.ui.l_colour.setText(self.user["Colour"])
+            
+            
     
-    def loadUser(self):    
+    def loadUser(self):
+        """Load user file if exists, create empty otherwise
+        """ 
         if(os.path.isfile(self.user_file)):
             print("Found User File")
             with open(self.user_file, "r") as json_file:
                 self.user = json.load(json_file)
             self.checkFiles()
-            self.vid_name = self.splitPath(self.user["Video"])[-1]
-            self.ui.l_colour.setText(self.user["Colour"])
-            self.ui.l_ground_truth.setText(self.splitPath(self.user["GT"])[-1])
         else:
             self.user = {"Save":"","Of":"","Depth":"","Video":"", "Colour":"#1a1a1b", "GT":""}
             self.saveUser()
 
     def saveUser(self):
+        """Saves user data to json file
+        """
         with open(self.user_file, "w+") as json_file:
             json.dump(self.user, json_file, indent=4)
 
@@ -219,7 +253,30 @@ class Dialog(QDialog, Ui_Dialog):
         if(not os.path.isfile(self.user["GT"])):
             self.user["GT"] = ""
 
+
+    def buildParamsDict(self):
+        self.params_dict = {
+            "img_dir": self.savePathJoin("Images"),
+            "depth_dir": self.savePathJoin("Depth"),
+            "back_of_dir": self.savePathJoin("Back_Of"),
+            "of_dir": self.savePathJoin("Of"),
+            "save_dir": self.user["Save"],
+            "high": 1,
+            "low": 0.309,
+            "run_dict": self.run_dict,
+            "of_model": self.app.get_resource(os.path.join("of_models", "network-default.pytorch")),
+            "depth_model": self.app.get_resource(os.path.join("depth_models", "model_city2kitti.meta")),
+            "plot_speed_dir": PLOT_SPEED_DIR,
+            "numbers_dir": NP_DIR,
+            "plot_error_dir": PLOT_ERROR_DIR,
+            "speed_gt": self.user["GT"],
+            "vid_path": self.user["Video"],
+            "super_pixel_method": self.super_pixel_method
+        }
+
     def startRun(self):
+        """Start calculations
+        """
         self.errorChecks()
         self.disableButtons()
         self.saveUser()
@@ -228,13 +285,16 @@ class Dialog(QDialog, Ui_Dialog):
         self.createDirs()
         print("Start Run")
         self.buildRunDict()
+        self.buildParamsDict()
         self.showProgressBar()
         self.startCalcThread()
         
     
     def startCalcThread(self):
+        """Starting calculations on another thread
+        """
         # 1 - create Worker and Thread inside the Form
-        self.worker = calcRunner.CalculationRunner(self.savePathJoin("Images"),
+        self.worker = calcRunner.CalculationRunner(self.params_dict, self.savePathJoin("Images"),
             self.savePathJoin("Depth"), self.savePathJoin("Of"), self.savePathJoin("Back_Of"),
             self.user["Save"], None, 1, 0.309, self.run_dict, self.app.get_resource(os.path.join("of_models", "network-default.pytorch")),
             self.app.get_resource(os.path.join("depth_models", "model_city2kitti.meta")), PLOT_SPEED_DIR,
@@ -244,7 +304,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.worker.labelUpdate.connect(self.labelUpdate)
 
         self.worker.update.connect(self.progressUpdate)
-        self.worker.updateFin.connect(self.progressAllUpdate)
+        #self.worker.updateFin.connect(self.progressAllUpdate)
 
         self.worker.finished.connect(self.finishThread)
 
@@ -255,24 +315,31 @@ class Dialog(QDialog, Ui_Dialog):
         self.thread.start()
 
     def progressUpdate(self, value):
+        """Updating both progressbar
+        
+        Arguments:
+            value {int} -- current progress
+        """
         self.progressBar.setValue(value)
         self.run_count += 1
         print("Update to:",self.run_count)
         self.progressAllBar.setValue(self.run_count)
 
     def finishThread(self):
+        """Clean up after calculations thread finished
+        """
         print("Fin Thread")
         self.worker.stop()
         self.thread.quit()
         self.thread.wait()
         self.accept()
 
-    def progressAllUpdate(self):
-        pass
-        #self.run_count += 1
-        #self.progressAllBar.setValue(self.run_count)
-
     def labelUpdate(self, run_dict):
+        """Update progressbar label's text to show the current calculation
+        
+        Arguments:
+            run_dict {dictionary} -- dictionary of the current process
+        """
         self.progressBar.reset()
         self.progressBar.setMinimum(1)
         self.progressBar.setMaximum(run_dict["Progress"])
@@ -280,6 +347,8 @@ class Dialog(QDialog, Ui_Dialog):
 
 
     def showProgressBar(self):
+        """Create two progressbars to show how the calculations progresses
+        """
         print("Show progress bar")
         self.progressLabel = QLabel(self)
         font = QFont()
@@ -302,6 +371,9 @@ class Dialog(QDialog, Ui_Dialog):
         self.progressAllBar.setValue(1)
 
     def buildCreatedDict(self):
+        """Build dictionary containing the created plots (if there's any).
+        Send signal with this dictionary
+        """
         self.created = {}
         if self.ui.c_speed_plot.isChecked():
             self.created["Speed_Plot"] = self.savePathJoin(PLOT_SPEED_DIR)
@@ -311,6 +383,12 @@ class Dialog(QDialog, Ui_Dialog):
 
 
     def buildRunDict(self):
+        """Build dictionary with all calculations
+        Dictionary fields:
+            -Run: {bool} true if needs to be calculated, false otherwise
+            -Progress: {int} the amount of steps to complete the calculation (used to update the progressbar)
+            -Text: {str} the text to be showed in the progressbar label's when the calculation is running   
+        """
         ori_images = 0
         if self.img_exist:
             ori_images = len(list_directory(self.savePathJoin("Images")))
@@ -342,24 +420,41 @@ class Dialog(QDialog, Ui_Dialog):
         self.run_dict["Error_Plot_Video"] = {"Run": self.ui.c_error_plot_video.isChecked(), "Progress":ori_images, "Text":"Creating error plot video"}
 
 
-
-
     def disableButtons(self):
-        self.ui.b_run.setEnabled(False)
-        self.ui.b_colour.setEnabled(False)
-        self.ui.b_ground_truth.setEnabled(False)
-        #self.ui.b_depth.setEnabled(False)
-        #self.ui.b_of.setEnabled(False)
-        self.ui.b_vid.setEnabled(False)
-        self.ui.b_save.setEnabled(False)
+        """Disable widgets while the calculation is running
+        """
+        self.setEnabled(False)
+        #self.progressLabel.setEnabled(True)
+        #self.ui.b_run.setEnabled(False)
+        #self.ui.b_colour.setEnabled(False)
+        #self.ui.b_ground_truth.setEnabled(False)
+        ##self.ui.b_depth.setEnabled(False)
+        ##self.ui.b_of.setEnabled(False)
+        #self.ui.b_vid.setEnabled(False)
+        #self.ui.b_save.setEnabled(False)
 
     def savePathJoin(self, path):
+        """Join the given path with the save path (stored in user info)
+        
+        Arguments:
+            path {str} -- path to join after the save path
+        
+        Returns:
+            str -- joined path
+        """
         return os.path.join(self.user["Save"], path)
 
     def createDir(self, dir_name):
+        """Create directory with the given name in the save path (stored in user info)
+        
+        Arguments:
+            dir_name {[type]} -- [description]
+        """
         os.mkdir(os.path.join(self.user["Save"], dir_name))
 
     def createDirs(self):
+        """Create or recreate (destroy and create) directories for the calculations
+        """
         print("Creating Directories")
 
         #if not self.img_exist:
@@ -370,7 +465,7 @@ class Dialog(QDialog, Ui_Dialog):
         #    self.createDir("Back_Of")
         #if not self.depth_exist:
         #    self.createDir("Depth")
-#
+
         #self.reCreateDir(RESULTS)        
         #self.reCreateDir(OTHER_DIR)
         #self.reCreateDir(DRAW_DIR)
@@ -384,12 +479,20 @@ class Dialog(QDialog, Ui_Dialog):
         #    self.reCreateDir(PLOT_ERROR_DIR)
 
     def reCreateDir(self, name):
+        """Create directory with the given name in save dir (stored in user info).
+        If it already exists, then delete it first
+        
+        Arguments:
+            name {str} -- name of the new directory
+        """
         path = self.savePathJoin(name)
         if os.path.exists(path):
             shutil.rmtree(path)
         os.makedirs(path)
 
     def pickColour(self):
+        """Opens a QColorDialog to choose a colour
+        """
         colour = QColorDialog.getColor()
         if colour.isValid():
             self.user["Colour"] = colour.name()
