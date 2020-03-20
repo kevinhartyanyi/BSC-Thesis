@@ -321,7 +321,7 @@ class Dialog(QDialog, Ui_Dialog):
             for e in errors[key]:
                 print("     " + str(e))
 
-        return True
+        return False
 
 
 
@@ -352,7 +352,8 @@ class Dialog(QDialog, Ui_Dialog):
             "plot_error_dir": PLOT_ERROR_DIR,
             "speed_gt": self.user["GT"],
             "vid_path": self.user["Video"],
-            "super_pixel_method": self.super_pixel_method
+            "super_pixel_method": self.super_pixel_method,
+            "send_video_frame": False
         }
 
     def startRun(self):
@@ -364,24 +365,21 @@ class Dialog(QDialog, Ui_Dialog):
         self.disableButtons()
         self.saveUser()
         self.sendUser.emit(self.user)
-        self.buildCreatedDict()
-        self.createDirs()
+        self.buildCreatedDict()        
         print("Start Run")
         self.buildRunDict()
-        self.buildParamsDict()
-        self.showProgressBar()
-        self.startCalcThread()
-        
+
     
     def startCalcThread(self):
         """Starting calculations on another thread
         """
         # 1 - create Worker and Thread inside the Form
-        self.worker = calcRunner.CalculationRunner(self.params_dict, self.savePathJoin("Images"),
-            self.savePathJoin("Depth"), self.savePathJoin("Of"), self.savePathJoin("Back_Of"),
-            self.user["Save"], None, 1, 0.309, self.run_dict, self.app.get_resource(os.path.join("of_models", "network-default.pytorch")),
-            self.app.get_resource(os.path.join("depth_models", "model_city2kitti.meta")), PLOT_SPEED_DIR,
-            NP_DIR, PLOT_ERROR_DIR, speed_gt=self.user["GT"], vid_path=self.user["Video"], super_pixel_method=self.super_pixel_method)  # no parent!
+        self.worker = calcRunner.CalculationRunner(self.params_dict)
+            #, self.savePathJoin("Images"),
+            #self.savePathJoin("Depth"), self.savePathJoin("Of"), self.savePathJoin("Back_Of"),
+            #self.user["Save"], None, 1, 0.309, self.run_dict, self.app.get_resource(os.path.join("of_models", "network-default.pytorch")),
+            #self.app.get_resource(os.path.join("depth_models", "model_city2kitti.meta")), PLOT_SPEED_DIR,
+            #NP_DIR, PLOT_ERROR_DIR, speed_gt=self.user["GT"], vid_path=self.user["Video"], super_pixel_method=self.super_pixel_method)  # no parent!
         self.thread = QThread()  # no parent!
 
         self.worker.labelUpdate.connect(self.labelUpdate)
@@ -403,19 +401,26 @@ class Dialog(QDialog, Ui_Dialog):
         Arguments:
             value {int} -- current progress
         """
-        self.progressBar.setValue(value)
-        self.run_count += 1
+        self.progressBar.setValue(value)        
         print("Update to:",self.run_count)
-        self.progressAllBar.setValue(self.run_count)
+        if self.progressAllBar is not None:
+            self.run_count += 1
+            self.progressAllBar.setValue(self.run_count)
+        else:
+            print("None")
 
     def finishThread(self):
         """Clean up after calculations thread finished
         """
         print("Fin Thread")
+        self.cleanThread()
+        self.accept()
+
+    def cleanThread(self):
+        print("Clean Thread")
         self.worker.stop()
         self.thread.quit()
         self.thread.wait()
-        self.accept()
 
     def labelUpdate(self, run_dict):
         """Update progressbar label's text to show the current calculation
@@ -443,15 +448,17 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.layout_v.addWidget(self.progressLabel)
 
         self.progressBar = QProgressBar(self) # Progress bar created
+        self.progressBar.setRange(0,0)
         self.ui.layout_v.addWidget(self.progressBar)
 
+    def addAllProgressBar(self):
         all_run = sum([self.run_dict[key]["Progress"] for key in self.run_dict if self.run_dict[key]["Run"]])
         print("All run:", all_run)
         self.progressAllBar = QProgressBar(self) # Progress bar created
         self.progressAllBar.setMinimum(1)
         self.progressAllBar.setMaximum(all_run)
         self.ui.layout_v.addWidget(self.progressAllBar)
-        self.progressAllBar.setValue(1)
+        self.progressAllBar.setValue(1)        
 
     def buildCreatedDict(self):
         """Build dictionary containing the created plots (if there's any).
@@ -472,21 +479,36 @@ class Dialog(QDialog, Ui_Dialog):
             -Progress: {int} the amount of steps to complete the calculation (used to update the progressbar)
             -Text: {str} the text to be showed in the progressbar label's when the calculation is running   
         """
+        self.showProgressBar()
         ori_images = 0
         if self.img_exist:
             ori_images = len(list_directory(self.savePathJoin("Images")))
-        else:
-            pass
-            #cam = cv2.VideoCapture(self.user["Video"])       
-            #ret,frame = cam.read() 
-            #while(ret):
-            #    print ('Reading...{0}'.format(ori_images)) 
-            #    ori_images += 1
-            #    ret,frame = cam.read() 
-            #cam.release() 
-            #cv2.destroyAllWindows()
+            self.buildRunDictMain(ori_images)
+        else:            
+            self.run_dict["Video"] = {"Run": True, "Progress":ori_images, "Text":"Preparing video"}
+            self.buildParamsDict()
+            self.params_dict["send_video_frame"] = True            
 
-        self.run_dict["Video"] = {"Run": not self.img_exist, "Progress":ori_images, "Text":"Preparing video"}
+
+            self.worker = calcRunner.CalculationRunner(self.params_dict)  # no parent!
+            self.thread = QThread()  # no parent!
+
+            self.worker.labelUpdate.connect(self.labelUpdate)
+
+            self.worker.update.connect(self.progressUpdate)
+            #self.worker.updateFin.connect(self.progressAllUpdate)
+            self.worker.videoFrame.connect(self.setVidFrame)
+
+            self.worker.moveToThread(self.thread)
+            self.thread.started.connect(self.worker.startThread)
+            self.thread.start()
+
+    def setVidFrame(self, ori_images):
+        self.cleanThread()
+        input("")
+        self.buildRunDictMain(ori_images)
+
+    def buildRunDictMain(self, ori_images):        
 
         self.run_dict["Of"] = {"Run": not self.of_exist, "Progress":ori_images, "Text":"Running optical flow"}
         self.run_dict["Back_Of"] = {"Run": not self.back_of_exist, "Progress":ori_images, "Text":"Running back optical flow"}
@@ -503,19 +525,23 @@ class Dialog(QDialog, Ui_Dialog):
         self.run_dict["Speed_Plot_Video"] = {"Run": self.ui.c_speed_plot_video.isChecked(), "Progress":ori_images, "Text":"Creating speed plot video"}
         self.run_dict["Error_Plot_Video"] = {"Run": self.ui.c_error_plot_video.isChecked(), "Progress":ori_images, "Text":"Creating error plot video"}
 
+        self.addAllProgressBar()
+        self.createDirs()
+        self.buildParamsDict()
+        self.startCalcThread()
 
     def disableButtons(self):
         """Disable widgets while the calculation is running
         """
-        self.setEnabled(False)
+        #self.setEnabled(False)
         #self.progressLabel.setEnabled(True)
-        #self.ui.b_run.setEnabled(False)
-        #self.ui.b_colour.setEnabled(False)
-        #self.ui.b_ground_truth.setEnabled(False)
-        ##self.ui.b_depth.setEnabled(False)
-        ##self.ui.b_of.setEnabled(False)
-        #self.ui.b_vid.setEnabled(False)
-        #self.ui.b_save.setEnabled(False)
+        self.ui.b_run.setEnabled(False)
+        self.ui.b_colour.setEnabled(False)
+        self.ui.b_ground_truth.setEnabled(False)
+        #self.ui.b_depth.setEnabled(False)
+        #self.ui.b_of.setEnabled(False)
+        self.ui.b_vid.setEnabled(False)
+        self.ui.b_save.setEnabled(False)
 
     def savePathJoin(self, path):
         """Join the given path with the save path (stored in user info)

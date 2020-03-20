@@ -75,9 +75,9 @@ class CalculationRunner(QObject):
     updateFin = pyqtSignal()
     labelUpdate = pyqtSignal(object)
     update = pyqtSignal(int)
+    videoFrame = pyqtSignal(int)
 
-    def __init__(self, param_dict, img_dir, depth_dir, of_dir, back_of_dir, save_dir, label_dir, high, low, run_dict,
-                of_model, depth_model, plot_speed_dir, numbers_dir, plot_error_dir, speed_gt="", vid_path=None, super_pixel_method=""):
+    def __init__(self, param_dict):
         super(CalculationRunner, self).__init__()
         self.running = True
         self.use_slic = False
@@ -91,7 +91,6 @@ class CalculationRunner(QObject):
         self.out_dir = param_dict["save_dir"]
         self.plot_error_dir = param_dict["plot_error_dir"]
         self.numbers_dir = param_dict["numbers_dir"]
-        self.label_dir = label_dir
         self.super_pixel_method = param_dict["super_pixel_method"]
         self.of_model = param_dict["of_model"]
         self.img_dir = param_dict["img_dir"]
@@ -100,6 +99,8 @@ class CalculationRunner(QObject):
         self.of_dir = param_dict["of_dir"]
         self.back_of_dir = param_dict["back_of_dir"]
         self.plot_speed_dir = param_dict["plot_speed_dir"]
+        self.send_video_frame = param_dict["send_video_frame"]
+        self.video_frame = 0
 
     @pyqtSlot()
     def startCalc(self):
@@ -112,12 +113,6 @@ class CalculationRunner(QObject):
         back_flow = utils.list_directory(self.back_of_dir, extension='.flo')
         calculate_velocity = calculate_velocity_and_orientation_wrapper
 
-        if self.label_dir != None:
-            label_fns = utils.list_directory(self.label_dir)
-
-            
-            if len(label_fns) > len(flow_fns):
-                label_fns = label_fns
 
         #print(len(flow_fns))
         #print(len(fst_img_fns))
@@ -210,12 +205,20 @@ class CalculationRunner(QObject):
 
     @pyqtSlot()
     def startThread(self): # A slot takes no params
-        self.finished.emit()
+        if self.send_video_frame:
+            print("Only run image create")
+            self.imagesFromVideo(self.vid_path, self.img_dir, "vid")
+            self.videoFrame.emit(self.video_frame)
+            return
+        print("Start Main")
+        self.labelUpdate.emit(self.run_dict["Speed"])
         self.startCalc()
+        self.finished.emit()
+        return
 
 
 
-        self.checkRun("Video", self.imagesFromVideo, self.vid_path, self.img_dir, "vid")
+        #self.checkRun("Video", self.imagesFromVideo, self.vid_path, self.img_dir, "vid")
 
         self.checkRun("Of", self.startOf)
 
@@ -259,10 +262,11 @@ class CalculationRunner(QObject):
             cv2.imwrite(name, frame) 
             currentframe += 1
             
-            self.update.emit(currentframe)
+            #self.update.emit(currentframe)
             ret,frame = cam.read() 
 
         
+        self.video_frame = currentframe
         # Release all space and windows once done 
         cam.release() 
         cv2.destroyAllWindows() 
