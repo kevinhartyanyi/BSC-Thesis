@@ -49,6 +49,8 @@ class Dialog(QDialog, Ui_Dialog):
         self.of_exist = False
         self.back_of_exist = False
         self.depth_exist = False
+        self.gt_exist = False
+        self.no_error = True
         self.vid_name = None
         self.all_run = 1
         self.run_count = 1
@@ -141,11 +143,12 @@ class Dialog(QDialog, Ui_Dialog):
     def checkFiles(self):
         """Checks if there are folders from previous runs, so we don't need to create them. 
         """
-        self.of_exist = True if os.path.exists(os.path.join(self.user["Save"], "Of")) else False
-        self.back_of_exist = True if os.path.exists(os.path.join(self.user["Save"], "Back_Of")) else False
-        self.img_exist = True if os.path.exists(os.path.join(self.user["Save"], "Images")) else False
-        self.depth_exist = True if os.path.exists(os.path.join(self.user["Save"], "Depth")) else False
+        self.of_exist = os.path.exists(os.path.join(self.user["Save"], "Of"))
+        self.back_of_exist = os.path.exists(os.path.join(self.user["Save"], "Back_Of"))
+        self.img_exist = os.path.exists(os.path.join(self.user["Save"], "Images"))
+        self.depth_exist = os.path.exists(os.path.join(self.user["Save"], "Depth"))
 
+        self.gt_exist = self.user["GT"] != ""
         self.ui.c_error_plot.setEnabled(self.user["GT"] != "")
         self.ui.c_error_plot_video.setEnabled(self.ui.c_error_plot.isChecked())
         self.ui.c_speed_plot_video.setEnabled(self.ui.c_speed_plot.isChecked())
@@ -279,7 +282,7 @@ class Dialog(QDialog, Ui_Dialog):
                 stop_calculation = True
                 errors["Critical"].append(("Images folder {0} and video file {1} don't exist -> Stopping run".format(self.savePathJoin("Images"), self.user["Video"])))
         elif self.img_exist and os.path.exists(self.user["Video"]):
-            errors["Info"].append("Both video {0} and Images folder {1} exist -> using Images folder by default".format(self.user["Video"], self.savePathJoin("Images")))
+            errors["Info"].append("Both the video {0} and Images folder {1} exist -> using Images folder by default".format(self.user["Video"], self.savePathJoin("Images")))
             #ori_images_vid = count_frames(self.user["Video"])
             #
             #if ori_images_vid != ori_images:
@@ -290,13 +293,13 @@ class Dialog(QDialog, Ui_Dialog):
 
 
         # Check video file
-        if self.user["Video"] != "" and not os.path.exists(self.user["Video"]):
+        if self.user["Video"] != "" and not os.path.isfile(self.user["Video"]):
             if os.path.exists(self.savePathJoin("Images")):
                 errors["Info"].append(("Video file {0} doesn't exist -> Using images in the Images folder instead".format(self.user["Video"])))
             else:
                 stop_calculation = True
                 errors["Critical"].append(("Images folder {0} and video file {1} don't exist -> Stopping run".format(self.savePathJoin("Images"), self.user["Video"])))
-        elif os.path.exists(self.user["Video"]) and os.path.exists(self.savePathJoin("Images")):
+        elif os.path.isfile(self.user["Video"]) and os.path.exists(self.savePathJoin("Images")):
             pass
 
         # Check optical flow
@@ -305,8 +308,20 @@ class Dialog(QDialog, Ui_Dialog):
         elif self.of_exist:
             of_images = len(list_directory(self.savePathJoin("Of"), extension="png"))
             if of_images != ori_images - 1 and ori_images != 0:
-                errors["Info"].append(("Optical flow number {0} doesn't match video image number {1} - 1 -> Recalculating optical flow".format(of_images, ori_images)))
+                errors["Info"].append(("Optical flow image number {0} doesn't match video image number {1} - 1 -> Recalculating optical flow".format(of_images, ori_images)))
 
+        # Check depth estimation
+        if self.depth_exist and not os.path.exists(self.savePathJoin("Depth")):
+            errors["Info"].append(("Depth folder {0} doesn't exist -> Recalculating depth".format(self.savePathJoin("Depth"))))
+        elif self.depth_exist:
+            depth_images = len(list_directory(self.savePathJoin("Depth"), extension="png"))
+            if depth_images != ori_images and ori_images != 0:
+                errors["Info"].append(("Depth image number {0} doesn't match video image number {1} -> Recalculating depth".format(depth_images, ori_images)))
+
+        # Check ground truth
+        if self.gt_exist and not os.path.isfile(self.user["GT"]):
+            errors["Info"].append(("Ground Truth file {0} doesn't exist -> File won't be used".format(self.user["GT"])))
+        
 
 
         #print(len(list_directory(self.savePathJoin("Images"), extension="png")))
@@ -321,18 +336,36 @@ class Dialog(QDialog, Ui_Dialog):
             for e in errors[key]:
                 print("     " + str(e))
 
-        return False
+        answer = ""
+        if len(errors["Info"]) > 0 and len(errors["Critical"]) == 0:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("Some calculations might not run the way you expect them.\nIn show details check the right side of the arrows to see what will happen.")
+            msg.setWindowTitle("Information")
+            all_info = ""
+            for info in errors["Info"]:
+                all_info = info + "\n"
+            msg.setDetailedText(all_info)
+            msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Abort)
+            answer = msg.exec_()            
+        elif len(errors["Critical"]) > 0:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Found critical error\nCouldn't start run, see show details for more information")
+            msg.setWindowTitle("Critical Error")
+            all_info = ""
+            for info in errors["Critical"]:
+                all_info = info + "\n"
+            msg.setDetailedText(all_info)
+            msg.setStandardButtons(QMessageBox.Abort)
+            answer = msg.exec_()
+
+        return (answer == int("0x00040000", 16) or stop_calculation)
 
 
-
-
-        if(not os.path.isfile(self.user["GT"]) and self.ui.l_ground_truth != ""):
-            self.user["GT"] = ""
-            errors.append("Ground Truth file doesn't exist -> file won't be used")
-
-        
-
-        return True
+    def calculateError(self, errorMessage):
+        self.no_error = False
+        QMessageBox.warning(self, "Found Error", errorMessage, QMessageBox.Ok, QMessageBox.Ok)
 
 
     def buildParamsDict(self):
@@ -365,7 +398,6 @@ class Dialog(QDialog, Ui_Dialog):
         self.disableButtons()
         self.saveUser()
         self.sendUser.emit(self.user)
-        self.buildCreatedDict()        
         print("Start Run")
         self.buildRunDict()
 
@@ -386,6 +418,8 @@ class Dialog(QDialog, Ui_Dialog):
 
         self.worker.update.connect(self.progressUpdate)
         #self.worker.updateFin.connect(self.progressAllUpdate)
+
+        self.worker.error.connect(self.calculateError)
 
         self.worker.finished.connect(self.finishThread)
 
@@ -413,6 +447,7 @@ class Dialog(QDialog, Ui_Dialog):
         """Clean up after calculations thread finished
         """
         print("Fin Thread")
+        self.buildCreatedDict()    
         self.cleanThread()
         self.accept()
 
@@ -467,7 +502,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.created = {}
         if self.ui.c_speed_plot.isChecked():
             self.created["Speed_Plot"] = self.savePathJoin(PLOT_SPEED_DIR)
-        if self.ui.c_error_plot.isChecked():
+        if self.ui.c_error_plot.isChecked() and self.no_error:
             self.created["Error_Plot"] = self.savePathJoin(PLOT_ERROR_DIR)
         self.sendCreated.emit(self.created)
 

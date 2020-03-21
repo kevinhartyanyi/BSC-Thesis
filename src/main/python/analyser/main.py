@@ -132,8 +132,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.created = created
         for key in created:
-            self.cycle_plot.add(key, created[key])
-            print("Created", created[key])
+            if created[key] != "":
+                self.cycle_plot.add(key, created[key])
+                print("Found Plot:", created[key])
 
     def startSetup(self):
         self.img_dir = os.path.join(self.user["Save"], "Images") 

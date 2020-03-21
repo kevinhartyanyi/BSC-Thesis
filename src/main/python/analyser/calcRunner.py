@@ -76,6 +76,7 @@ class CalculationRunner(QObject):
     labelUpdate = pyqtSignal(object)
     update = pyqtSignal(int)
     videoFrame = pyqtSignal(int)
+    error = pyqtSignal(str)
 
     def __init__(self, param_dict):
         super(CalculationRunner, self).__init__()
@@ -100,6 +101,7 @@ class CalculationRunner(QObject):
         self.back_of_dir = param_dict["back_of_dir"]
         self.plot_speed_dir = param_dict["plot_speed_dir"]
         self.send_video_frame = param_dict["send_video_frame"]
+        self.ground_truth_error = False
         self.video_frame = 0
 
     @pyqtSlot()
@@ -205,6 +207,27 @@ class CalculationRunner(QObject):
 
     @pyqtSlot()
     def startThread(self): # A slot takes no params
+        if self.run_dict["Error_Plot"]["Run"] and self.run_dict["Speed_Plot"]["Run"]:
+            self.labelUpdate.emit(self.run_dict["Speed_Plot"])
+            try:
+                self.createSpeedErrorPlot()
+                self.checkRun("Error_Plot", self.createErrorPlot)
+            except:
+                self.error.emit("Error with the Ground Truth file, doesn't have correct shape")
+                self.ground_truth_error = True
+                self.createSpeedPlot()
+            self.updateFin.emit()
+        else:
+            self.checkRun("Error_Plot", self.createErrorPlot)
+            self.checkRun("Speed_Plot", self.createSpeedPlot)
+            
+        self.checkRun("Speed_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_speed_dir), self.out_dir, "speed_plot.mp4")
+        if not self.ground_truth_error:
+            self.checkRun("Error_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_error_dir), self.out_dir, "error_plot.mp4")
+
+        self.finished.emit()
+        return
+        
         if self.send_video_frame:
             print("Only run image create")
             self.imagesFromVideo(self.vid_path, self.img_dir, "vid")
@@ -244,7 +267,8 @@ class CalculationRunner(QObject):
             self.checkRun("Speed_Plot", self.createSpeedPlot)
         
         self.checkRun("Speed_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_speed_dir), self.out_dir, "speed_plot.mp4")
-        self.checkRun("Error_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_error_dir), self.out_dir, "error_plot.mp4")
+        if not self.ground_truth_error:
+            self.checkRun("Error_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_error_dir), self.out_dir, "error_plot.mp4")
 
         self.finished.emit()
 
@@ -311,7 +335,12 @@ class CalculationRunner(QObject):
         for i, s in enumerate(speeds_dir):
             speeds.append(np.load(s))
         
-        _ = utils.error_comparison_Speed_Vecors(speeds,self.speed_gt[1:],csv=os.path.join(self.out_dir, '_error_Simple_OF.csv'))
+        try:
+            _ = utils.error_comparison_Speed_Vecors(speeds,self.speed_gt[1:],csv=os.path.join(self.out_dir, '_error_Simple_OF.csv'))
+        except:
+            self.error.emit("Error with the Ground Truth file, doesn't have correct shape")
+            self.ground_truth_error = True
+            return
 
         error = self.speed_gt[1:] - speeds
 
