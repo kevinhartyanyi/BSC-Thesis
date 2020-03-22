@@ -302,6 +302,7 @@ class Dialog(QDialog, Ui_Dialog):
             "Info": [],
             "Critical": []
         }
+        error_types = []
         ori_images = 0
         of_images = 0
         depth_images = 0
@@ -320,18 +321,15 @@ class Dialog(QDialog, Ui_Dialog):
         if self.img_exist and not os.path.exists(self.savePathJoin("Images")):
             if os.path.exists(self.user["Video"]):
                 errors["Info"].append("Images folder {0} doesn't exist -> Recreate it and recalculate optical flow and depth estimations".format(self.savePathJoin("Images")))
+                error_types.append("NoImages")
             else:
                 stop_calculation = True
                 errors["Critical"].append(("Images folder {0} and video file {1} don't exist -> Stopping run".format(self.savePathJoin("Images"), self.user["Video"])))
         elif self.img_exist and os.path.exists(self.user["Video"]):
             errors["Info"].append("Both the video {0} and Images folder {1} exist -> using Images folder by default".format(self.user["Video"], self.savePathJoin("Images")))
-            #ori_images_vid = count_frames(self.user["Video"])
-            #
-            #if ori_images_vid != ori_images:
-            #    errors["Info"].append("Images in {0} with number {1} doesn't match the video {2} frame number {3} -> Recreating images and recalculating optical flow and depth estimations".
-            #        format(self.savePathJoin("Images"), ori_images, self.user["Video"], ori_images_vid))
         elif not self.img_exist and os.path.exists(self.user["Video"]):
             errors["Info"].append("Images folder {0} doesn't exist -> Create it and calculate optical flow and depth estimations".format(self.savePathJoin("Images")))
+            error_types.append("NoImages")
 
 
         # Check video file
@@ -347,39 +345,37 @@ class Dialog(QDialog, Ui_Dialog):
         # Check optical flow
         if self.of_exist and not os.path.exists(self.savePathJoin("Of")):
             errors["Info"].append(("Optical flow folder {0} doesn't exist -> Recalculating optical flow".format(self.savePathJoin("Of"))))
+            error_types.append("NoOf")
         elif self.of_exist:
             of_images = len(list_directory(self.savePathJoin("Of"), extension="png"))
             if of_images != ori_images - 1 and ori_images != 0:
                 errors["Info"].append(("Optical flow image number {0} doesn't match video image number {1} - 1 -> Recalculating optical flow".format(of_images, ori_images)))
+                error_types.append("NoOf")
 
         # Check backward optical flow
         if self.back_of_exist and not os.path.exists(self.savePathJoin("Back_Of")):
             errors["Info"].append(("Backward optical flow folder {0} doesn't exist -> Recalculating optical flow".format(self.savePathJoin("Back_Of"))))
+            error_types.append("NoOf")
         elif self.back_of_exist:
             back_of_images = len(list_directory(self.savePathJoin("Back_Of"), extension="png"))
             if back_of_images != of_images:
                 errors["Info"].append(("Backward optical flow image number {0} doesn't match optical flow image number {1} -> Recalculating optical flow".format(back_of_images, of_images)))
-
+                error_types.append("NoOf")
 
         # Check depth estimation
         if self.depth_exist and not os.path.exists(self.savePathJoin("Depth")):
             errors["Info"].append(("Depth folder {0} doesn't exist -> Recalculating depth".format(self.savePathJoin("Depth"))))
+            error_types.append("NoDepth")
         elif self.depth_exist:
             depth_images = len(list_directory(self.savePathJoin("Depth"), extension="png"))
             if depth_images != ori_images and ori_images != 0:
                 errors["Info"].append(("Depth image number {0} doesn't match video image number {1} -> Recalculating depth".format(depth_images, ori_images)))
-
+                error_types.append("NoDepth")
+                
         # Check ground truth
         if self.gt_exist and not os.path.isfile(self.user["GT"]):
             errors["Info"].append(("Ground Truth file {0} doesn't exist -> File won't be used".format(self.user["GT"])))
-        
-
-
-        #print(len(list_directory(self.savePathJoin("Images"), extension="png")))
-        #print(len(list_directory(self.savePathJoin("Of"), extension="png")))
-        #print(len(list_directory(self.savePathJoin("Depth"), extension="png")))        
-        print(ori_images)
-
+            error_types.append("NoGT")
 
 
         for key in errors:
@@ -410,6 +406,24 @@ class Dialog(QDialog, Ui_Dialog):
             msg.setDetailedText(all_info)
             msg.setStandardButtons(QMessageBox.Abort)
             answer = msg.exec_()
+
+
+        if (answer != int("0x00040000", 16)):
+            for ty in error_types:
+                print("Solve error:", ty)
+                if ty == "NoImage":
+                    self.img_exist = False
+                    self.of_exist = False
+                    self.back_of_exist = False
+                    self.depth_exist = False
+                elif ty == "NoOf":
+                    self.of_exist = False
+                    self.back_of_exist = False
+                elif ty == "NoDepth":
+                    self.depth_exist = False
+                elif ty == "NoGT":
+                    self.gt_exist = False
+
 
         return (answer == int("0x00040000", 16) or stop_calculation)
 
@@ -608,10 +622,10 @@ class Dialog(QDialog, Ui_Dialog):
         self.run_dict["Depth_Vid"] = {"Run": self.ui.c_depth.isChecked(), "Progress":ori_images, "Text":"Creating depth estimation video"}
 
         self.run_dict["Speed_Plot"] = {"Run": self.ui.c_speed_plot.isChecked(), "Progress":ori_images, "Text":"Creating plot for speed values"}
-        self.run_dict["Error_Plot"] = {"Run": self.ui.c_error_plot.isChecked(), "Progress":ori_images, "Text":"Creating plot for speed error"}
+        self.run_dict["Error_Plot"] = {"Run": self.ui.c_error_plot.isChecked() and self.gt_exist, "Progress":ori_images, "Text":"Creating plot for speed error"}
 
         self.run_dict["Speed_Plot_Video"] = {"Run": self.ui.c_speed_plot_video.isChecked(), "Progress":ori_images, "Text":"Creating speed plot video"}
-        self.run_dict["Error_Plot_Video"] = {"Run": self.ui.c_error_plot_video.isChecked(), "Progress":ori_images, "Text":"Creating error plot video"}
+        self.run_dict["Error_Plot_Video"] = {"Run": self.ui.c_error_plot_video.isChecked() and self.gt_exist, "Progress":ori_images, "Text":"Creating error plot video"}
 
         self.run_dict["Super_Pixel_Video"] = {"Run": self.ui.combo_superpixel.currentIndex() != 0 and self.ui.c_super_pixel_video.isChecked(), "Progress":ori_images, "Text":"Creating super pixel video"}
 
@@ -659,14 +673,18 @@ class Dialog(QDialog, Ui_Dialog):
         """
         print("Creating Directories")
 
-        #if not self.img_exist:
-        #    self.createDir("Images")
-        #if not self.of_exist:
-        #    self.createDir("Of")
-        #if not self.back_of_exist:
-        #    self.createDir("Back_Of")
-        #if not self.depth_exist:
-        #    self.createDir("Depth")
+        if not self.img_exist:
+            #self.createDir("Images")
+            self.reCreateDir(self.savePathJoin("Images")) 
+        if not self.of_exist:
+            #self.createDir("Of")
+            self.reCreateDir(self.savePathJoin("Of")) 
+        if not self.back_of_exist:
+            #self.createDir("Back_Of")
+            self.reCreateDir(self.savePathJoin("Back_Of")) 
+        if not self.depth_exist:
+            #self.createDir("Depth")
+            self.reCreateDir(self.savePathJoin("Depth")) 
 
         #self.reCreateDir(RESULTS)        
         #self.reCreateDir(OTHER_DIR)
