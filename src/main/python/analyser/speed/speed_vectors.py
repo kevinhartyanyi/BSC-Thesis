@@ -575,7 +575,7 @@ class VelocityCalculator(object):
             
             #speed, speed_mask = utils.vector_speedOF(velocity, 0) # Speed calculation
             #speed, speed_mask = utils.vector_speedOF4Side(velocity, 0) # Speed calculation
-            
+            print("Low {0}, High {1}".format(self.low, self.high))
             speed, speed_mask = utils.vector_speedOF_Simple(velocity,low=self.low,high=self.high) # Speed calculation
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_speed.npy'), speed)
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_mask.npy'), speed_mask)

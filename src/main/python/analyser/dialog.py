@@ -80,8 +80,8 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.b_ground_truth.clicked.connect(self.openGroundTruth)
 
         self.ui.t_fps.textChanged.connect(self.changeFps)
-        self.ui.t_low.textChanged.connect(self.changeLow)
-        self.ui.t_high.textChanged.connect(self.changeHigh)
+        self.ui.t_low.editingFinished.connect(self.changeLow)
+        self.ui.t_high.editingFinished.connect(self.changeHigh)
         self.ui.c_error_plot.stateChanged.connect(self.checkFiles)
         self.ui.c_speed_plot.stateChanged.connect(self.checkFiles)
         self.ui.combo_superpixel.currentIndexChanged.connect(self.changeSuperPixelMethod)
