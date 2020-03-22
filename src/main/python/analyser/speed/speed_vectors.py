@@ -4,6 +4,8 @@ import multiprocessing
 import os
 import glob
 from skimage.segmentation import felzenszwalb, slic, quickshift, watershed
+from skimage.color import rgb2gray
+from skimage.filters import sobel
 import cv2
 import numpy as np
 import tqdm
@@ -93,6 +95,8 @@ VL_DIR = os.path.join(RESULTS, 'velocity')
 NP_DIR = os.path.join(RESULTS, 'numbers')
 MASK_DIR = os.path.join(RESULTS, 'mask')
 DRAW_DIR = os.path.join(RESULTS, 'draw')
+SUPER_PIXEL_DIR = os.path.join(RESULTS, 'super_pixel')
+
 
 DATA = '/home/kevin/workspace/pipeline_zero/test2/'
 
@@ -374,18 +378,28 @@ class VelocityCalculator(object):
                         fst_img, snd_img, base_fn + '_d1.png', base_fn + '_d2.png', 
                         base_fn + '_speed.png')
         
-        if self.super_pixel_method != "":
+        if False and self.super_pixel_method != "":
             # Read superpixel labels
-            if self.use_slic:
-                labels = utils.read_gslic_labels(self.label_fn, n_sps=self.n_sps)
-            else:
-                labels = utils.read_boruvka_labels(self.label_fn, n_sps=self.n_sps)
+            #if self.use_slic:
+            #    labels = utils.read_gslic_labels(self.label_fn, n_sps=self.n_sps)
+            #else:
+            #    labels = utils.read_boruvka_labels(self.label_fn, n_sps=self.n_sps)
             
 
             # Read left and right images
             fst_img = cv2.imread(self.fst_img_fn, cv2.IMREAD_COLOR)  # height x width x channels
             snd_img = cv2.imread(self.snd_img_fn, cv2.IMREAD_COLOR)  # height x width x channels
-            labels = slic(fst_img, n_segments=250, compactness=10, sigma=1)
+
+            if self.super_pixel_method == "Felzenszwalb":
+                labels = felzenszwalb(fst_img, scale=100, sigma=0.5, min_size=50)                
+            elif self.super_pixel_method == "Quickshift":
+                labels = quickshift(fst_img, kernel_size=3, max_dist=6, ratio=0.5)
+            elif self.super_pixel_method == "Slic":
+                labels = slic(fst_img, n_segments=250, compactness=10, sigma=1)
+            elif self.super_pixel_method == "Watershed":
+                gradient = sobel(rgb2gray(fst_img))
+                labels = watershed(gradient, markers=250, compactness=0.001)
+
             assert fst_img.shape == snd_img.shape
             height, width, _ = fst_img.shape
             
@@ -424,6 +438,7 @@ class VelocityCalculator(object):
             z = velocity[:,:,2]
             speed_superpixel = utils.vector_distance(x,y,z)
             np.save(base_fn + '_superpixel.npy', speed_superpixel)
+            
 
             # Visualize the results if needed
             #if self.visualize_results:
@@ -461,18 +476,7 @@ class VelocityCalculator(object):
             snd_depth = self.read_depth(self.snd_depth_fn, width, height)
             # Read optical flow
             flow = self.read_flow(self.flow_fn)
-            back_flow = self.read_flow(self.back_flow)
-            #avg_flow = np.zeros_like(flow) 
-            #avg_flow[:, :, 0] = self.average(flow[:, :, 0], labels)
-            #avg_flow[:, :, 1] = self.average(flow[:, :, 1], labels)
-
-            # Shift labels and depth values respect to the average optical flow
-            #shifted_labels = self.calculate_shifted_labels(labels, avg_flow) #TODO: replace
-            #avg_shifted_depth = self.average(snd_depth, shifted_labels)
-
-            #base_fn = os.path.join(self.out_dir, 
-            #                    os.path.splitext(os.path.basename(self.flow_fn))[0])
-            
+            back_flow = self.read_flow(self.back_flow)            
 
             of_mask, next_position, prev_position = utils.calc_bidi_errormap(flow, back_flow, tau=0.8)
             good_flow = flow.copy()
@@ -526,6 +530,46 @@ class VelocityCalculator(object):
             #np.save(base_fn + '_ori.npy', orientation)
             plt.imsave(os.path.join(base_fn, DRAW_DIR, img_num + '_draw.png'), incons_img.astype('uint8'))
 
+            if self.super_pixel_method != "":
+                if self.super_pixel_method == "Felzenszwalb":
+                    labels = felzenszwalb(fst_img, scale=100, sigma=0.5, min_size=50)                
+                elif self.super_pixel_method == "Quickshift":
+                    labels = quickshift(fst_img, kernel_size=3, max_dist=6, ratio=0.5)
+                elif self.super_pixel_method == "Slic":
+                    labels = slic(fst_img, n_segments=250, compactness=10, sigma=1)
+                elif self.super_pixel_method == "Watershed":
+                    gradient = sobel(rgb2gray(fst_img))
+                    labels = watershed(gradient, markers=250, compactness=0.001)
+                # Read disparity maps
+                fst_depth = self.read_depth(self.fst_depth_fn, width, height)
+                avg_fst_depth = self.average(fst_depth, labels)
+                snd_depth = self.read_depth(self.snd_depth_fn, width, height)
+                
+                # Read optical flow
+                flow = self.read_flow(self.flow_fn)
+                avg_flow = np.zeros_like(flow) 
+                avg_flow[:, :, 0] = self.average(flow[:, :, 0], labels)
+                avg_flow[:, :, 1] = self.average(flow[:, :, 1], labels)
+
+                # Shift labels and depth values respect to the average optical flow
+                shifted_labels = self.calculate_shifted_labels(labels, avg_flow)
+                avg_shifted_depth = self.average(snd_depth, shifted_labels)
+
+                # Calculate the velocity and the orientation
+                velocity_2, _ = \
+                    utils.calculate_velocity_and_orientation_vectors(labels, shifted_labels, 
+                                                                    avg_flow, 
+                                                                    avg_fst_depth, 
+                                                                    avg_shifted_depth)
+
+                x = velocity_2[:,:,0]
+                y = velocity_2[:,:,1]
+                z = velocity_2[:,:,2]
+                speed_superpixel = utils.vector_distance(x,y,z)
+                np.save(os.path.join(base_fn, NP_DIR, img_num + '_superpixel.npy'), speed_superpixel)
+                plt.matshow(speed_superpixel)
+                plt.colorbar()
+                plt.savefig(os.path.join(base_fn, SUPER_PIXEL_DIR, "{0}_superpixel.png".format(img_num)), bbox_inches='tight', dpi=150)
 
             #speed, speed_mask = utils.vector_speed(velocity, 0) # Speed calculation
             

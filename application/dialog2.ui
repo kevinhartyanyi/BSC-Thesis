@@ -82,7 +82,7 @@
     <rect>
      <x>810</x>
      <y>10</y>
-     <width>444</width>
+     <width>449</width>
      <height>280</height>
     </rect>
    </property>
@@ -235,7 +235,10 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="checkBox_4">
+         <widget class="QCheckBox" name="c_super_pixel_video">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="font">
            <font>
             <family>GE Inspira</family>
@@ -243,7 +246,7 @@
            </font>
           </property>
           <property name="text">
-           <string>CheckBox</string>
+           <string>Super Pixel</string>
           </property>
          </widget>
         </item>
@@ -528,7 +531,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="t_fps_2">
+         <widget class="QLineEdit" name="t_low">
           <property name="font">
            <font>
             <family>GE Inspira</family>
@@ -539,7 +542,7 @@
            <string>The fps for the created videos</string>
           </property>
           <property name="text">
-           <string>30</string>
+           <string>0.309</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -564,7 +567,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="t_fps_3">
+         <widget class="QLineEdit" name="t_high">
           <property name="font">
            <font>
             <family>GE Inspira</family>
@@ -575,7 +578,7 @@
            <string>The fps for the created videos</string>
           </property>
           <property name="text">
-           <string>30</string>
+           <string>1</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -593,13 +596,16 @@
     <rect>
      <x>960</x>
      <y>350</y>
-     <width>408</width>
+     <width>411</width>
      <height>120</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_12">
     <item>
-     <widget class="QCheckBox" name="c_depth_2">
+     <widget class="QCheckBox" name="c_csv">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="font">
        <font>
         <family>GE Inspira</family>
@@ -610,7 +616,7 @@
        <string>Video of depth estimation</string>
       </property>
       <property name="text">
-       <string>Create CSV from Speed data</string>
+       <string>Create CSV from Speed Error</string>
       </property>
      </widget>
     </item>

@@ -42,12 +42,12 @@ class cycleVid:
         return self.container[self.idx][1]
 
     def up(self):
-        print("Cycle:",self.idx)
         if self.idx < len(self.container) - 1:
             self.idx += 1
         else:
             self.idx = 0
             
+        print("Cycle:", self.container[self.idx][0])
         return self.container[self.idx][1]
     
 

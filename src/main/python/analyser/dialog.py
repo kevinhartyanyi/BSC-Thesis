@@ -56,6 +56,8 @@ class Dialog(QDialog, Ui_Dialog):
         self.run_count = 1
         self.fps = 30
         self.fps_limit = 60
+        self.low = 0.309
+        self.high = 1 
         self.run_dict = {}
         self.super_pixel_method = ""
         
@@ -78,13 +80,50 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.b_ground_truth.clicked.connect(self.openGroundTruth)
 
         self.ui.t_fps.textChanged.connect(self.changeFps)
+        self.ui.t_low.textChanged.connect(self.changeLow)
+        self.ui.t_high.textChanged.connect(self.changeHigh)
         self.ui.c_error_plot.stateChanged.connect(self.checkFiles)
         self.ui.c_speed_plot.stateChanged.connect(self.checkFiles)
+        self.ui.combo_superpixel.currentIndexChanged.connect(self.changeSuperPixelMethod)
 
         #self.ui.c_of.stateChanged.connect(self.checkVideoCreation)
         #self.ui.c_back_of.stateChanged.connect(self.checkVideoCreation)
         #self.ui.c_depth.stateChanged.connect(self.checkVideoCreation)
     
+    def changeLow(self):
+        self.changeLowHigh(self.ui.t_low, t_type="low")
+        
+    def changeHigh(self):
+        self.changeLowHigh(self.ui.t_high, t_type="high")
+    
+    def changeLowHigh(self, text_widget, t_type="low"):
+        check = re.search("(0[.][0-9]+|1)", text_widget.text())
+        if check:
+            num = check.group()
+            i_num = float(num)    
+            if t_type == "low":        
+                self.low = i_num
+            else:
+                self.high = i_num
+            text_widget.setText(str(i_num))
+        else:
+            print("Wrong Input For low or high")
+            if t_type == "low":
+                text_widget.setText("0.309")
+                self.low = 0.309
+            else:
+                text_widget.setText("1")
+                self.high = 1
+
+    def changeSuperPixelMethod(self, index):
+        if index == 1:
+            self.super_pixel_method = "Felzenszwalb"
+        elif index == 2:
+            self.super_pixel_method = "Quickshift"
+        elif index == 3:
+            self.super_pixel_method = "Slic"
+        elif index == 4:
+            self.super_pixel_method = "Watershed"
 
     def openGroundTruth(self):
         """Open file with ground truth values for speed
@@ -152,6 +191,8 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.c_error_plot.setEnabled(self.user["GT"] != "")
         self.ui.c_error_plot_video.setEnabled(self.ui.c_error_plot.isChecked())
         self.ui.c_speed_plot_video.setEnabled(self.ui.c_speed_plot.isChecked())
+        self.ui.c_super_pixel_video.setEnabled(self.ui.combo_superpixel.currentIndex() != 0)
+        self.ui.c_csv.setEnabled(self.ui.c_error_plot.isChecked())        
 
         if self.runRequirements():
             self.ui.b_run.setEnabled(True)
@@ -310,6 +351,15 @@ class Dialog(QDialog, Ui_Dialog):
             if of_images != ori_images - 1 and ori_images != 0:
                 errors["Info"].append(("Optical flow image number {0} doesn't match video image number {1} - 1 -> Recalculating optical flow".format(of_images, ori_images)))
 
+        # Check backward optical flow
+        if self.back_of_exist and not os.path.exists(self.savePathJoin("Back_Of")):
+            errors["Info"].append(("Backward optical flow folder {0} doesn't exist -> Recalculating optical flow".format(self.savePathJoin("Back_Of"))))
+        elif self.back_of_exist:
+            back_of_images = len(list_directory(self.savePathJoin("Back_Of"), extension="png"))
+            if back_of_images != of_images:
+                errors["Info"].append(("Backward optical flow image number {0} doesn't match optical flow image number {1} -> Recalculating optical flow".format(back_of_images, of_images)))
+
+
         # Check depth estimation
         if self.depth_exist and not os.path.exists(self.savePathJoin("Depth")):
             errors["Info"].append(("Depth folder {0} doesn't exist -> Recalculating depth".format(self.savePathJoin("Depth"))))
@@ -344,7 +394,7 @@ class Dialog(QDialog, Ui_Dialog):
             msg.setWindowTitle("Information")
             all_info = ""
             for info in errors["Info"]:
-                all_info = info + "\n"
+                all_info += info + "\n\n"
             msg.setDetailedText(all_info)
             msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Abort)
             answer = msg.exec_()            
@@ -355,7 +405,7 @@ class Dialog(QDialog, Ui_Dialog):
             msg.setWindowTitle("Critical Error")
             all_info = ""
             for info in errors["Critical"]:
-                all_info = info + "\n"
+                all_info += info + "\n"
             msg.setDetailedText(all_info)
             msg.setStandardButtons(QMessageBox.Abort)
             answer = msg.exec_()
@@ -375,8 +425,8 @@ class Dialog(QDialog, Ui_Dialog):
             "back_of_dir": self.savePathJoin("Back_Of"),
             "of_dir": self.savePathJoin("Of"),
             "save_dir": self.user["Save"],
-            "high": 1,
-            "low": 0.309,
+            "high": self.high,
+            "low": self.low,
             "run_dict": self.run_dict,
             "of_model": self.app.get_resource(os.path.join("of_models", "network-default.pytorch")),
             "depth_model": self.app.get_resource(os.path.join("depth_models", "model_city2kitti.meta")),
@@ -386,7 +436,9 @@ class Dialog(QDialog, Ui_Dialog):
             "speed_gt": self.user["GT"],
             "vid_path": self.user["Video"],
             "super_pixel_method": self.super_pixel_method,
-            "send_video_frame": False
+            "super_pixel_dir": SUPER_PIXEL_DIR,
+            "send_video_frame": False,
+            "create_csv": self.ui.c_csv.isChecked()
         }
 
     def startRun(self):
@@ -559,6 +611,10 @@ class Dialog(QDialog, Ui_Dialog):
 
         self.run_dict["Speed_Plot_Video"] = {"Run": self.ui.c_speed_plot_video.isChecked(), "Progress":ori_images, "Text":"Creating speed plot video"}
         self.run_dict["Error_Plot_Video"] = {"Run": self.ui.c_error_plot_video.isChecked(), "Progress":ori_images, "Text":"Creating error plot video"}
+
+        self.run_dict["Super_Pixel_Video"] = {"Run": self.ui.combo_superpixel.currentIndex() != 0 and self.ui.c_super_pixel_video.isChecked(), "Progress":ori_images, "Text":"Creating super pixel video"}
+
+        self.ui.combo_superpixel.currentIndex() != 0
 
         self.addAllProgressBar()
         self.createDirs()

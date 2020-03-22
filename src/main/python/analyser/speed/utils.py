@@ -22,6 +22,7 @@ VL_DIR = os.path.join(RESULTS, 'velocity')
 NP_DIR = os.path.join(RESULTS, 'numbers')
 MASK_DIR = os.path.join(RESULTS, 'mask')
 DRAW_DIR = os.path.join(RESULTS, 'draw')
+SUPER_PIXEL_DIR = os.path.join(RESULTS, 'super_pixel')
 
 
 width_to_focal = dict()
@@ -38,7 +39,7 @@ max_depth = 80
 max_velocity = 60
 
 def getResultDirs():
-    results = {"Velocity": VL_DIR, "Mask": MASK_DIR, "Draw": DRAW_DIR}
+    results = {"Velocity": VL_DIR, "Mask": MASK_DIR, "Draw": DRAW_DIR, "SuperPixel": SUPER_PIXEL_DIR}
     return results
 
 def calculate_shifted_labels(labels, avg_flow):

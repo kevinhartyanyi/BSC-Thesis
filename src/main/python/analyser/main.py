@@ -146,6 +146,7 @@ class MainWindow(QtWidgets.QMainWindow):
         velocity = os.path.join(self.user["Save"], results["Velocity"])
         mask = os.path.join(self.user["Save"], results["Mask"])
         draw = os.path.join(self.user["Save"], results["Draw"])
+        super_pixel = os.path.join(self.user["Save"], results["SuperPixel"])
 
         self.cycle_vid.add("original", self.img_dir)
         self.cycle_vid.add("of", self.of_dir)
@@ -154,6 +155,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.cycle_vid.add("velocity", velocity)
         self.cycle_vid.add("mask", mask)
         self.cycle_vid.add("draw", draw)
+        if len(sutils.list_directory(super_pixel, extension="png")) > 0:
+            self.cycle_vid.add("super_pixel", super_pixel)            
 
         plot_dir = None
         if self.created != None:
