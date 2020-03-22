@@ -220,7 +220,7 @@ class CalculationRunner(QObject):
         
         self.checkRun("Error_Plot", self.createErrorPlot)
         self.checkRun("Super_Pixel_Video", self.createVid, os.path.join(self.out_dir, self.super_pixel_dir), self.out_dir, "super_pixel.mp4")
-
+        print("End Main")
         self.finished.emit()
         return
 
