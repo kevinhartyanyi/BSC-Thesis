@@ -508,12 +508,18 @@ class VelocityCalculator(object):
             fst_zeros[snd_mono == 0] = 0
             
 
+            # Save the results
+            base_fn = self.out_dir# + self.vid_name
+            img_num = os.path.splitext(os.path.basename(self.flow_fn))[0]
+
             # Calculate the velocity and the orientation
             velocity = \
                 utils.calculate_velocity_and_orientation_vectors_vectorised(of_mask,next_position, prev_position, 
                                                                 flow, 
                                                                 fst_depth, 
                                                                 snd_depth)
+            image = velocity.copy()
+            plt.imsave(os.path.join(base_fn, VL_DIR, img_num + '_velocity.png'), image.astype('uint8'))
             #print("")
             #print(np.sort(np.unique(fst_depth)))
             #print("")
@@ -523,9 +529,7 @@ class VelocityCalculator(object):
             fst_depth[inaccurate_mono] = 0
             velocity[inaccurate_mono] = 0
 
-            # Save the results
-            base_fn = self.out_dir# + self.vid_name
-            img_num = os.path.splitext(os.path.basename(self.flow_fn))[0]
+            
             #np.save(base_fn + '_vel.npy', velocity)
             #np.save(base_fn + '_ori.npy', orientation)
             plt.imsave(os.path.join(base_fn, DRAW_DIR, img_num + '_draw.png'), incons_img.astype('uint8'))
@@ -541,12 +545,9 @@ class VelocityCalculator(object):
                     gradient = sobel(rgb2gray(fst_img))
                     labels = watershed(gradient, markers=250, compactness=0.001)
                 # Read disparity maps
-                fst_depth = self.read_depth(self.fst_depth_fn, width, height)
                 avg_fst_depth = self.average(fst_depth, labels)
-                snd_depth = self.read_depth(self.snd_depth_fn, width, height)
                 
                 # Read optical flow
-                flow = self.read_flow(self.flow_fn)
                 avg_flow = np.zeros_like(flow) 
                 avg_flow[:, :, 0] = self.average(flow[:, :, 0], labels)
                 avg_flow[:, :, 1] = self.average(flow[:, :, 1], labels)
@@ -575,15 +576,15 @@ class VelocityCalculator(object):
             
             #speed, speed_mask = utils.vector_speedOF(velocity, 0) # Speed calculation
             #speed, speed_mask = utils.vector_speedOF4Side(velocity, 0) # Speed calculation
-            print("Low {0}, High {1}".format(self.low, self.high))
+            #print("Low {0}, High {1}".format(self.low, self.high))
             speed, speed_mask = utils.vector_speedOF_Simple(velocity,low=self.low,high=self.high) # Speed calculation
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_speed.npy'), speed)
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_mask.npy'), speed_mask)
 
-            image = velocity.copy()
-            #image = image + abs(image.min())
-            #image *= 255.0/image.max()
-            plt.imsave(os.path.join(base_fn, VL_DIR, img_num + '_velocity.png'), image.astype('uint8'))
+            #image = velocity.copy()
+            ##image = image + abs(image.min())
+            ##image *= 255.0/image.max()
+            #plt.imsave(os.path.join(base_fn, VL_DIR, img_num + '_velocity.png'), image.astype('uint8'))
             #utils.save_as_image(base_fn + '_velocity.png', image, min_val=0, max_val=utils.max_depth) 
 
 

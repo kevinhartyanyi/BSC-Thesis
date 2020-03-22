@@ -57,7 +57,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.fps = 30
         self.fps_limit = 60
         self.low = 0.309
-        self.high = 1 
+        self.high = 1.0 
         self.run_dict = {}
         self.super_pixel_method = ""
         
@@ -98,7 +98,8 @@ class Dialog(QDialog, Ui_Dialog):
     
     def changeLowHigh(self, text_widget, t_type="low"):
         check = re.search("(0[.][0-9]+|1)", text_widget.text())
-        if check:
+        print(self.ui.t_low.text(), self.ui.t_high.text())
+        if check and self.ui.t_low.text() != self.ui.t_high.text():
             num = check.group()
             i_num = float(num)    
             if t_type == "low":        

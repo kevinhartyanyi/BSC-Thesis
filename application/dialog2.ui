@@ -578,7 +578,7 @@
            <string>The fps for the created videos</string>
           </property>
           <property name="text">
-           <string>1</string>
+           <string>1.0</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
