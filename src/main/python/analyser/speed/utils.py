@@ -426,7 +426,7 @@ def vector_speed(vectors, slc = 0):
     mask_uni = only_good_of
     #mask_uni = np.ones(x.shape, dtype=bool)
     #mask_uni = np.logical_and(mask_z_thr, only_good_of)
-    #mask_uni = np.logical_and(mask_y_thr, only_good_of)
+    mask_uni = np.logical_and(mask_y_thr, only_good_of)
 
 
     #######################x

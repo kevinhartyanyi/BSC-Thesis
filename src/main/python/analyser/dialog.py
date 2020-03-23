@@ -379,6 +379,12 @@ class Dialog(QDialog, Ui_Dialog):
             errors["Info"].append(("Ground Truth file {0} doesn't exist -> File won't be used".format(self.user["GT"])))
             error_types.append("NoGT")
 
+        # Check super pixel labels
+        if self.super_pixel_method != "" and os.path.exists(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)) \
+        and ori_images != 0 and len(list_directory(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method), extension=".npy")) != ori_images:
+            errors["Info"].append(("Super pixel label number {0} doesn't match image number {1} -> Recalculating super pixel labels".format(len(list_directory(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method), extension=".npy")),
+            ori_images)))
+            error_types.append("LabelError")
 
         for key in errors:
             print(key)
@@ -426,6 +432,8 @@ class Dialog(QDialog, Ui_Dialog):
                 elif ty == "NoGT":
                     self.gt_exist = False
                     self.user["GT"] = ""
+                elif ty == "LabelError":
+                    shutil.rmtree(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method))
 
 
         return (answer == int("0x00040000", 16) or stop_calculation)
@@ -457,7 +465,8 @@ class Dialog(QDialog, Ui_Dialog):
             "super_pixel_dir": SUPER_PIXEL_DIR,
             "send_video_frame": False,
             "create_csv": self.ui.c_csv.isChecked(),
-            "create_draw": self.ui.c_draw.isChecked()
+            "create_draw": self.ui.c_draw.isChecked(),
+            "super_pixel_label_dir": os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)
         }
 
     def startRun(self):
@@ -632,8 +641,10 @@ class Dialog(QDialog, Ui_Dialog):
         self.run_dict["Error_Plot_Video"] = {"Run": self.ui.c_error_plot_video.isChecked() and self.gt_exist, "Progress":ori_images, "Text":"Creating error plot video"}
 
         self.run_dict["Super_Pixel_Video"] = {"Run": self.ui.combo_superpixel.currentIndex() != 0 and self.ui.c_super_pixel_video.isChecked(), "Progress":ori_images, "Text":"Creating super pixel video"}
+        self.run_dict["Super_Pixel_Label"] = {"Run": self.super_pixel_method != "" and not os.path.exists(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)), "Progress":ori_images, "Text":"Creating {0} superpixel labels".format(self.super_pixel_method)}
 
-        self.ui.combo_superpixel.currentIndex() != 0
+        #print("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",self.super_pixel_method != "" and not os.path.exists(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)))
+        #self.ui.combo_superpixel.currentIndex() != 0
 
         self.addAllProgressBar()
         self.createDirs()
@@ -689,8 +700,10 @@ class Dialog(QDialog, Ui_Dialog):
         if not self.depth_exist:
             #self.createDir("Depth")
             self.reCreateDir(self.savePathJoin("Depth"))
-        if not os.path.exists("Super_Pixel"):
-            self.createDir("Super_Pixel")
+        #if not os.path.exists(self.savePathJoin("Super_Pixel")):
+        #    self.createDir("Super_Pixel")
+        if self.super_pixel_method != "" and not os.path.exists(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)):
+            os.makedirs(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method))
 
         #self.reCreateDir(RESULTS)        
         #self.reCreateDir(OTHER_DIR)

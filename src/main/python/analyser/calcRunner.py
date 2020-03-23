@@ -45,16 +45,22 @@ def createErrorPlotMain(params):
     plt.savefig(os.path.join(out_dir, "{0}_error.png".format(i)), bbox_inches='tight', dpi=150)
     
 def createSuperPixelMain(params):
-    super_pixel_method = params
-    if self.super_pixel_method == "Felzenszwalb":
-        labels = felzenszwalb(fst_img, scale=100, sigma=0.5, min_size=50)                
-    elif self.super_pixel_method == "Quickshift":
-        labels = quickshift(fst_img, kernel_size=3, max_dist=6, ratio=0.5)
-    elif self.super_pixel_method == "Slic":
-        labels = slic(fst_img, n_segments=250, compactness=10, sigma=1)
-    elif self.super_pixel_method == "Watershed":
-        gradient = sobel(rgb2gray(fst_img))
+    super_pixel_method, img_file, i, out_dir = params
+
+    img = cv2.imread(img_file[i], cv2.IMREAD_COLOR)
+
+    if super_pixel_method == "Felzenszwalb":
+        labels = felzenszwalb(img, scale=100, sigma=0.5, min_size=50)                
+    elif super_pixel_method == "Quickshift":
+        labels = quickshift(img, kernel_size=3, max_dist=6, ratio=0.5)
+    elif super_pixel_method == "Slic":
+        labels = slic(img, n_segments=250, compactness=10, sigma=1)
+    elif super_pixel_method == "Watershed":
+        gradient = sobel(rgb2gray(img))
         labels = watershed(gradient, markers=250, compactness=0.001)
+    
+    np.save(os.path.join(out_dir, "{0}_{1}.npy".format(i, super_pixel_method)), labels)
+
 
 def createSpeedPlotMain(params):
     speeds, i, out_dir = params
@@ -117,6 +123,7 @@ class CalculationRunner(QObject):
         self.send_video_frame = param_dict["send_video_frame"]
         self.create_csv = param_dict["create_csv"]
         self.create_draw = param_dict["create_draw"]
+        self.super_pixel_label_dir = param_dict["super_pixel_label_dir"]
         self.ground_truth_error = False
         self.video_frame = 0
 
@@ -144,9 +151,11 @@ class CalculationRunner(QObject):
         assert len(fst_disp_fns) == len(snd_disp_fns) 
         if self.back_of_dir != None:
             assert len(flow_fns) == len(back_flow)
-        label_fns = fst_img_fns # So it doesn't quit too early
-        
-        
+        #label_fns = fst_img_fns # So it doesn't quit too early
+        label_fns_files = utils.list_directory(self.super_pixel_label_dir, extension=".npy")
+        label_fns = []
+        for label in label_fns_files:
+            label_fns.append(np.load(label))
 
         params = zip(fst_img_fns, snd_img_fns, fst_disp_fns, snd_disp_fns, label_fns, flow_fns, back_flow, 
                     itertools.repeat(self.out_dir), itertools.repeat(self.use_slic), 
@@ -230,10 +239,9 @@ class CalculationRunner(QObject):
             self.videoFrame.emit(self.video_frame)
             return
         print("Start Main")
-        if self.super_pixel_method != "" and len(os.path.join(self.out_dir, "Super_Pixel", self.super_pixel_method) == 0):
-            self.createSuperPixel()
-
-
+        self.checkRun("Super_Pixel_Label", self.createSuperPixel)
+        #if self.super_pixel_method != "" and len(os.path.join(self.out_dir, "Super_Pixel", self.super_pixel_method) == 0):
+        #    self.createSuperPixel()
         self.labelUpdate.emit(self.run_dict["Speed"])
         self.startCalc()
         
@@ -308,7 +316,10 @@ class CalculationRunner(QObject):
         
 
     def createSuperPixel(self):
-        pass
+        print("Create SUPER pixel label")
+        images = utils.list_directory(self.img_dir, extension=".png")
+        params = zip(itertools.repeat(self.super_pixel_method), itertools.repeat(images), range(0, len(images)), itertools.repeat(self.super_pixel_label_dir))
+        self.startMultiFunc(createSuperPixelMain, params)
 
     def createSpeedPlot(self):
         plt.clf()
