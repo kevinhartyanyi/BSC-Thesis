@@ -423,6 +423,7 @@ class Dialog(QDialog, Ui_Dialog):
                     self.depth_exist = False
                 elif ty == "NoGT":
                     self.gt_exist = False
+                    self.user["GT"] = ""
 
 
         return (answer == int("0x00040000", 16) or stop_calculation)
