@@ -83,16 +83,6 @@ class MainWindow(QtWidgets.QMainWindow):
         
     def changeDescription(self):
         vid_type = self.cycle_vid.currentType()
-        self.cycle_vid.add("original", self.img_dir)
-        self.cycle_vid.add("of", self.of_dir)
-        self.cycle_vid.add("back_of", self.back_of_dir)
-        self.cycle_vid.add("depth", self.depth_dir)
-        self.cycle_vid.add("velocity", velocity)
-        self.cycle_vid.add("mask", mask)
-        if os.path.exists(draw):
-            self.cycle_vid.add("draw", draw)
-        if os.path.exists(super_pixel):#len(sutils.list_directory(super_pixel, extension="png")) > 0:
-            self.cycle_vid.add("super_pixel", super_pixel) 
         
         if vid_type == "original":
             self.ui.l_description.setText("The original video")
@@ -178,17 +168,20 @@ class MainWindow(QtWidgets.QMainWindow):
         draw = os.path.join(self.user["Save"], results["Draw"])
         super_pixel = os.path.join(self.user["Save"], results["SuperPixel"])
 
+        self.cycle_vid.reset()
         self.cycle_vid.add("original", self.img_dir)
         self.cycle_vid.add("of", self.of_dir)
         self.cycle_vid.add("back_of", self.back_of_dir)
         self.cycle_vid.add("depth", self.depth_dir)
-        self.cycle_vid.add("velocity", velocity)
         self.cycle_vid.add("mask", mask)
+        if os.path.exists(velocity):
+            self.cycle_vid.add("velocity", velocity)
         if os.path.exists(draw):
             self.cycle_vid.add("draw", draw)
         if os.path.exists(super_pixel):#len(sutils.list_directory(super_pixel, extension="png")) > 0:
             self.cycle_vid.add("super_pixel", super_pixel)            
 
+        self.cycle_plot.reset()
         plot_dir = None
         if self.created != None:
             plot_dir = self.cycle_plot.current()
@@ -245,7 +238,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 frame = maxF
             self.ui.t_frame.setText(str(frame))
         else:
-            print("Wrong Input For Fps")
+            print("Wrong Input For Frame")
             self.ui.t_frame.setText("0")
 
     def changeFps(self):
@@ -263,7 +256,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.t_fps.setText(str(fps))
         else:
             print("Wrong Input For Fps")
-            self.ui.t_fps.setText("")
+            self.ui.t_fps.setText("30")
 
     def changeFrameTo(self, img, plot_img=None):
         if img != None:

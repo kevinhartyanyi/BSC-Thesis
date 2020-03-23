@@ -50,6 +50,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.back_of_exist = False
         self.depth_exist = False
         self.gt_exist = False
+        self.create_super_pixel_label = False
         self.no_error = True
         self.vid_name = None
         self.all_run = 1
@@ -179,7 +180,9 @@ class Dialog(QDialog, Ui_Dialog):
         save_dir = QFileDialog.getExistingDirectory(self, "Select a folder", self.user["Save"], QFileDialog.ShowDirsOnly)
         if save_dir != "":
             self.user["Save"] = save_dir
-            self.ui.l_save.setText("Save to: " + save_dir)
+            name_split = self.splitPath(save_dir)[-1]
+            name = name_split.split(".")[0]
+            self.ui.l_save.setText("Save to: " + name)
             self.checkFiles()
 
     def checkFiles(self):
@@ -191,6 +194,11 @@ class Dialog(QDialog, Ui_Dialog):
         self.depth_exist = os.path.exists(os.path.join(self.user["Save"], "Depth"))
 
         self.gt_exist = self.user["GT"] != ""
+
+        self.create_super_pixel_label = (self.super_pixel_method != "" and not os.path.exists(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)))
+        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", self.super_pixel_method != "")
+        print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", not os.path.exists(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)))
+
         self.ui.c_error_plot.setEnabled(self.user["GT"] != "")
         self.ui.c_error_plot_video.setEnabled(self.ui.c_error_plot.isChecked())
         self.ui.c_speed_plot_video.setEnabled(self.ui.c_speed_plot.isChecked())
@@ -209,7 +217,7 @@ class Dialog(QDialog, Ui_Dialog):
         Returns:
             bool -- returns true if the requirements are satisfied
         """
-        ready = (self.user["Save"] != "" and self.user["Video"]) or self.img_exist
+        ready = (self.user["Save"] != "" and self.user["Video"] != "") or self.img_exist
         return ready
 
     def openVideo(self):
@@ -219,8 +227,8 @@ class Dialog(QDialog, Ui_Dialog):
         if fname != "":
             self.user["Video"] = fname
             name = self.splitPath(fname)[-1]
-            self.ui.l_vid.setText("Load: " + name)
             self.vid_name = name.split(".")[0]
+            self.ui.l_vid.setText("Load: " + self.vid_name)
             self.checkFiles()
 
     def openOf(self):
@@ -263,17 +271,21 @@ class Dialog(QDialog, Ui_Dialog):
             #self.ui.b_depth.setEnabled(False)
             self.ui.b_run.setEnabled(False)
         else:
-            self.ui.l_save.setText(self.user["Save"])
+            name_split = self.splitPath(self.user["Save"])[-1]
+            name = name_split.split(".")[0]
+            self.ui.l_save.setText("Save to: " + name)
             #if self.user["Of"] != "":
             #    self.ui.l_of.setText(self.user["Of"])
             #if self.user["Depth"] != "":
             #    self.ui.l_depth.setText(self.user["Depth"])
-            if self.user["Video"] != "":
-                self.ui.l_vid.setText(self.user["Video"])
+
+
+            #if self.user["Video"] != "":
+            #    self.ui.l_vid.setText(self.user["Video"])
             if self.user["GT"] != "":
                 self.ui.l_ground_truth.setText(self.splitPath(self.user["GT"])[-1])
             
-            self.vid_name = self.splitPath(self.user["Video"])[-1]
+            #self.vid_name = self.splitPath(self.user["Video"])[-1]
             self.ui.l_colour.setText(self.user["Colour"])
             
             
@@ -284,7 +296,7 @@ class Dialog(QDialog, Ui_Dialog):
         if(os.path.isfile(self.user_file)):
             print("Found User File")
             with open(self.user_file, "r") as json_file:
-                self.user = json.load(json_file)
+                self.user = json.load(json_file)            
             self.checkFiles()
         else:
             self.user = {"Save":"","Of":"","Depth":"","Video":"", "Colour":"#1a1a1b", "GT":""}
@@ -293,6 +305,7 @@ class Dialog(QDialog, Ui_Dialog):
     def saveUser(self):
         """Saves user data to json file
         """
+        self.user["Video"] = ""
         with open(self.user_file, "w+") as json_file:
             json.dump(self.user, json_file, indent=4)
 
@@ -329,9 +342,9 @@ class Dialog(QDialog, Ui_Dialog):
                 errors["Critical"].append(("Images folder {0} and video file {1} don't exist -> Stopping run".format(self.savePathJoin("Images"), self.user["Video"])))
         elif self.img_exist and os.path.exists(self.user["Video"]):
             errors["Info"].append("Both the video {0} and Images folder {1} exist -> using Images folder by default".format(self.user["Video"], self.savePathJoin("Images")))
-        elif not self.img_exist and os.path.exists(self.user["Video"]):
-            errors["Info"].append("Images folder {0} doesn't exist -> Create it and calculate optical flow and depth estimations".format(self.savePathJoin("Images")))
-            error_types.append("NoImages")
+        #elif not self.img_exist and os.path.exists(self.user["Video"]):
+        #    errors["Info"].append("Images folder {0} doesn't exist -> Create it and calculate optical flow and depth estimations".format(self.savePathJoin("Images")))
+        #    error_types.append("NoImages")
 
 
         # Check video file
@@ -433,6 +446,7 @@ class Dialog(QDialog, Ui_Dialog):
                     self.gt_exist = False
                     self.user["GT"] = ""
                 elif ty == "LabelError":
+                    self.create_super_pixel_label = True
                     shutil.rmtree(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method))
 
 
@@ -467,20 +481,23 @@ class Dialog(QDialog, Ui_Dialog):
             "create_csv": self.ui.c_csv.isChecked(),
             "create_draw": self.ui.c_draw.isChecked(),
             "create_velocity": self.ui.c_velocity.isChecked(),
+            "create_video_fps": int(self.ui.t_fps.text()),
             "super_pixel_label_dir": os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)
         }
 
     def startRun(self):
         """Start calculations
         """
+        self.checkFiles()
         if self.errorChecks():
             return
         
         self.disableButtons()
-        self.saveUser()
         self.sendUser.emit(self.user)
         print("Start Run")
+        self.createDirs()
         self.buildRunDict()
+        
 
     
     def startCalcThread(self):
@@ -605,6 +622,7 @@ class Dialog(QDialog, Ui_Dialog):
             self.buildParamsDict()
             self.params_dict["send_video_frame"] = True            
 
+            self.progressLabel.setText("Create images from video")
 
             self.worker = calcRunner.CalculationRunner(self.params_dict)  # no parent!
             self.thread = QThread()  # no parent!
@@ -621,7 +639,6 @@ class Dialog(QDialog, Ui_Dialog):
 
     def setVidFrame(self, ori_images):
         self.cleanThread()
-        input("")
         self.buildRunDictMain(ori_images)
 
     def buildRunDictMain(self, ori_images):        
@@ -642,14 +659,15 @@ class Dialog(QDialog, Ui_Dialog):
         self.run_dict["Error_Plot_Video"] = {"Run": self.ui.c_error_plot_video.isChecked() and self.gt_exist, "Progress":ori_images, "Text":"Creating error plot video"}
 
         self.run_dict["Super_Pixel_Video"] = {"Run": self.ui.combo_superpixel.currentIndex() != 0 and self.ui.c_super_pixel_video.isChecked(), "Progress":ori_images, "Text":"Creating super pixel video"}
-        self.run_dict["Super_Pixel_Label"] = {"Run": self.super_pixel_method != "" and not os.path.exists(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)), "Progress":ori_images, "Text":"Creating {0} superpixel labels".format(self.super_pixel_method)}
+        self.run_dict["Super_Pixel_Label"] = {"Run": self.create_super_pixel_label, "Progress":ori_images, "Text":"Creating {0} superpixel labels".format(self.super_pixel_method)}
 
         #print("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",self.super_pixel_method != "" and not os.path.exists(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)))
+        print("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT", self.create_super_pixel_label)
         #self.ui.combo_superpixel.currentIndex() != 0
 
-        self.addAllProgressBar()
-        self.createDirs()
+        self.addAllProgressBar()        
         self.buildParamsDict()
+        self.saveUser()
         self.startCalcThread()
 
     def disableButtons(self):

@@ -1,8 +1,8 @@
 {
-    "Save": "/home/kevin/Programming/School/semester_6/BSC-Thesis/data/test",
+    "Save": "/home/kevin/Programming/BSC-Thesis/data/test2",
     "Of": "",
     "Depth": "",
-    "Video": "/home/kevin/Programming/School/semester_6/BSC-Thesis/data/data/vid_0001/2011_09_26_drive_0001.mp4",
-    "Colour": "#1a1a1b",
-    "GT": "/home/kevin/Programming/School/semester_6/BSC-Thesis/data/data/vid_0001/speed_gt.npy"
+    "Video": "",
+    "Colour": "#73d216",
+    "GT": "/home/kevin/Programming/BSC-Thesis/data/data/vid_0001/speed_gt.npy"
 }

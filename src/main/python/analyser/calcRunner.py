@@ -125,8 +125,66 @@ class CalculationRunner(QObject):
         self.create_draw = param_dict["create_draw"]
         self.create_velocity = param_dict["create_velocity"]
         self.super_pixel_label_dir = param_dict["super_pixel_label_dir"]
+        self.create_video_fps = param_dict["create_video_fps"]
         self.ground_truth_error = False
         self.video_frame = 0
+
+
+
+    @pyqtSlot()
+    def startThread(self): # A slot takes no params        
+        if self.send_video_frame:
+            print("Only run image create")
+            self.imagesFromVideo(self.vid_path, self.img_dir, "vid")
+            self.videoFrame.emit(self.video_frame)
+            return
+        print("Start Main")
+        #if self.super_pixel_method != "" and len(os.path.join(self.out_dir, "Super_Pixel", self.super_pixel_method) == 0):
+        #    self.createSuperPixel()
+        
+        
+
+
+        #self.checkRun("Video", self.imagesFromVideo, self.vid_path, self.img_dir, "vid")
+
+        self.checkRun("Of", self.startOf)
+
+        self.checkRun("Back_Of", self.startBackOf)
+        self.checkRun("Depth", self.startDepth)
+        self.checkRun("Super_Pixel_Label", self.createSuperPixel)
+        #
+        self.labelUpdate.emit(self.run_dict["Speed"])
+        self.startCalc()
+
+        self.updateFin.emit()
+        #
+        self.checkRun("Of_Vid", self.createVid, self.of_dir, self.out_dir, "of.mp4", self.create_video_fps)
+        self.checkRun("Back_Of_Vid", self.createVid, self.back_of_dir, self.out_dir, "back_of.mp4", self.create_video_fps)
+        self.checkRun("Depth_Vid", self.createVid, self.depth_dir, self.out_dir, "depth.mp4", self.create_video_fps)
+        #
+        if self.run_dict["Error_Plot"]["Run"] and self.run_dict["Speed_Plot"]["Run"]:
+            self.labelUpdate.emit(self.run_dict["Speed_Plot"])
+            try:
+                self.createSpeedErrorPlot()
+                self.checkRun("Error_Plot", self.createErrorPlot)
+            except:
+                self.error.emit("Error with the Ground Truth file, doesn't have correct shape")
+                self.ground_truth_error = True
+                self.createSpeedPlot()
+            self.updateFin.emit()
+        else:
+            self.checkRun("Error_Plot", self.createErrorPlot)
+            self.checkRun("Speed_Plot", self.createSpeedPlot)
+            
+        self.checkRun("Speed_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_speed_dir), self.out_dir, "speed_plot.mp4", self.create_video_fps)
+        if not self.ground_truth_error:
+            self.checkRun("Error_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_error_dir), self.out_dir, "error_plot.mp4")
+
+        self.checkRun("Super_Pixel_Video", self.createVid, os.path.join(self.out_dir, self.super_pixel_dir), self.out_dir, "super_pixel.mp4", self.create_video_fps)
+        
+
+        self.finished.emit()
+
 
     @pyqtSlot()
     def startCalc(self):
@@ -153,10 +211,13 @@ class CalculationRunner(QObject):
         if self.back_of_dir != None:
             assert len(flow_fns) == len(back_flow)
         #label_fns = fst_img_fns # So it doesn't quit too early
-        label_fns_files = utils.list_directory(self.super_pixel_label_dir, extension=".npy")
-        label_fns = []
-        for label in label_fns_files:
-            label_fns.append(np.load(label))
+        if self.super_pixel_method != "":
+            label_fns_files = utils.list_directory(self.super_pixel_label_dir, extension=".npy")
+            label_fns = []
+            for label in label_fns_files:
+                label_fns.append(np.load(label))
+        else:
+            label_fns = fst_img_fns # So it doesn't quit too early
 
         params = zip(fst_img_fns, snd_img_fns, fst_disp_fns, snd_disp_fns, label_fns, flow_fns, back_flow, 
                     itertools.repeat(self.out_dir), itertools.repeat(self.use_slic), 
@@ -232,65 +293,6 @@ class CalculationRunner(QObject):
         
 
 
-    @pyqtSlot()
-    def startThread(self): # A slot takes no params        
-        if self.send_video_frame:
-            print("Only run image create")
-            self.imagesFromVideo(self.vid_path, self.img_dir, "vid")
-            self.videoFrame.emit(self.video_frame)
-            return
-        print("Start Main")
-        self.checkRun("Super_Pixel_Label", self.createSuperPixel)
-        #if self.super_pixel_method != "" and len(os.path.join(self.out_dir, "Super_Pixel", self.super_pixel_method) == 0):
-        #    self.createSuperPixel()
-        self.labelUpdate.emit(self.run_dict["Speed"])
-        self.startCalc()
-        
-        self.checkRun("Error_Plot", self.createErrorPlot)
-        self.checkRun("Super_Pixel_Video", self.createVid, os.path.join(self.out_dir, self.super_pixel_dir), self.out_dir, "super_pixel.mp4")
-        print("End Main")
-        self.finished.emit()
-        return
-
-
-
-        #self.checkRun("Video", self.imagesFromVideo, self.vid_path, self.img_dir, "vid")
-
-        self.checkRun("Of", self.startOf)
-
-        self.checkRun("Back_Of", self.startBackOf)
-        self.checkRun("Depth", self.startDepth)
-        #
-        self.labelUpdate.emit(self.run_dict["Speed"])
-        self.startCalc()
-
-        self.updateFin.emit()
-        #
-        self.checkRun("Of_Vid", self.createVid, self.of_dir, self.out_dir, "of.mp4")
-        self.checkRun("Back_Of_Vid", self.createVid, self.back_of_dir, self.out_dir, "back_of.mp4")
-        self.checkRun("Depth_Vid", self.createVid, self.depth_dir, self.out_dir, "depth.mp4")
-        #
-        if self.run_dict["Error_Plot"]["Run"] and self.run_dict["Speed_Plot"]["Run"]:
-            self.labelUpdate.emit(self.run_dict["Speed_Plot"])
-            try:
-                self.createSpeedErrorPlot()
-                self.checkRun("Error_Plot", self.createErrorPlot)
-            except:
-                self.error.emit("Error with the Ground Truth file, doesn't have correct shape")
-                self.ground_truth_error = True
-                self.createSpeedPlot()
-            self.updateFin.emit()
-        else:
-            self.checkRun("Error_Plot", self.createErrorPlot)
-            self.checkRun("Speed_Plot", self.createSpeedPlot)
-            
-        self.checkRun("Speed_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_speed_dir), self.out_dir, "speed_plot.mp4")
-        if not self.ground_truth_error:
-            self.checkRun("Error_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_error_dir), self.out_dir, "error_plot.mp4")
-
-        self.checkRun("Super_Pixel_Video", self.createVid, os.path.join(self.out_dir, self.super_pixel_dir), self.out_dir, "super_pixel.mp4")
-
-        self.finished.emit()
 
     @pyqtSlot()
     def imagesFromVideo(self, path_to_video, save_path, vid_name):
@@ -371,7 +373,7 @@ class CalculationRunner(QObject):
             self.ground_truth_error = True
             return
 
-        error = self.speed_gt[1:] - speeds
+        error = abs(self.speed_gt[1:] - speeds)
 
 
         params = zip(itertools.repeat(error), range(1, len(error) + 1), itertools.repeat(os.path.join(self.out_dir, self.plot_error_dir)))

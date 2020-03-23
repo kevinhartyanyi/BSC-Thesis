@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import speed.computeColor as computeColor
 import imageio
+from skimage import measure
 from natsort import natsorted
 
 TMP_IMG = '/home/kevin/workspace/pipeline_zero/tmp_img/'
@@ -122,8 +123,8 @@ def calculate_velocity_and_orientation_vectors(labels, shifted_labels, avg_flow,
         shifted_depth = avg_shifted_depth[shifted_sp_x, shifted_sp_y]
         z = (shifted_depth - depth) * fps * 3.6
 
-        velocity[labels == sp_id] = (x, y, z)
-        orientation[labels == sp_id] = normalize((x, y, z))
+        velocity[labels == sp_id] = (y, x, z)
+        orientation[labels == sp_id] = normalize((y, x, z))
     return velocity, orientation
 
 def calculate_velocity_and_orientation_vectors_vectorised(of_mask, next_position, prev_position, flow, 
@@ -405,7 +406,7 @@ def reduce_sort(vector, low=0.1,high=0.9, skip=None):
     return mask_vector
 
 
-def vector_speed(vectors, low, high, slc = 0):
+def vector_speed(vectors, low, high):
     x = vectors[:,:,0]
     y = vectors[:,:,1]
     z = vectors[:,:,2]
@@ -852,7 +853,7 @@ def read_boruvka_labels(label_fn, n_sps=-1):
     #assert n_sps == -1 or n_sps == len(np.unique(labels))
     return labels
 
-def average(data, labels, leave_out=None):
+def average_old(data, labels, leave_out=None):
     """
     Calculate the averages value of each superpixel 
     :param data: data matrix
@@ -863,6 +864,13 @@ def average(data, labels, leave_out=None):
     avg = np.zeros_like(data)
     for sp_id in sp_ids:
         avg[labels == sp_id] = np.mean(data[labels == sp_id])
+    return avg
+
+def average(data, labels):
+    avg = np.zeros_like(data)
+    regions = measure.regionprops(labels, intensity_image=data)
+    for r in regions:
+        avg[labels == r.label] = r.mean_intensity
     return avg
 
 def concat_vid2(vid1_path, vid2_path, out_path, dir = 0, test = False, x = 0, y = 0, w = 0, h = 0):

@@ -51,6 +51,7 @@ class cycleVid:
             self.idx = 0
             
         print("Cycle:", self.container[self.idx][0])
+        print("Cycle:", self.idx, len(self.container))
         return self.container[self.idx][1]
     
 

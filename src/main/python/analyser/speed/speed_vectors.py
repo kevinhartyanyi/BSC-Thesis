@@ -361,10 +361,12 @@ class VelocityCalculator(object):
             assert fst_img.shape == snd_img.shape
             height, width, _ = fst_img.shape
             
+            print("A")
             # Read disparity maps
             fst_depth = self.read_depth(self.fst_depth_fn, width, height)
             avg_fst_depth = self.average(fst_depth, labels)
             snd_depth = self.read_depth(self.snd_depth_fn, width, height)
+            print("B")
             
             
             avg_flow[:, :, 0] = self.average(flow[:, :, 0], labels)
@@ -373,6 +375,7 @@ class VelocityCalculator(object):
             # Shift labels and depth values respect to the average optical flow
             shifted_labels = self.calculate_shifted_labels(labels, avg_flow)
             avg_shifted_depth = self.average(snd_depth, shifted_labels)
+            print("C")
 
             # Calculate the velocity and the orientation
             velocity, orientation = \
@@ -381,12 +384,14 @@ class VelocityCalculator(object):
                                                                 avg_fst_depth, 
                                                                 avg_shifted_depth)
 
+            print("D")
             
 
-            speed, speed_mask = utils.vector_speed(velocity, 0) # Speed calculation
+            speed, speed_mask = utils.vector_speedOF_Simple(velocity, low=self.low, high=self.high) # Speed calculation
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_speed.npy'), speed)
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_mask.npy'), speed_mask)
             utils.save_as_image(os.path.join(base_fn, MASK_DIR, img_num + '_speed_masked.png'), speed_mask*50, min_val=0, max_val=utils.max_depth) 
+            print("E")
 
             if self.create_draw:
                 back_flow = self.read_flow(self.back_flow) 
@@ -401,11 +406,12 @@ class VelocityCalculator(object):
             x = velocity[:,:,0]
             y = velocity[:,:,1]
             z = velocity[:,:,2]
-            speed_superpixel = utils.vector_distance(x,y,z, low=self.low, high=self.high)
+            speed_superpixel = utils.vector_distance(x,y,z)
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_superpixel.npy'), speed_superpixel)
             plt.matshow(speed_superpixel)
             plt.colorbar()
             plt.savefig(os.path.join(base_fn, SUPER_PIXEL_DIR, "{0}_superpixel.png".format(img_num)), bbox_inches='tight', dpi=150)
+            print("F")
 
             # Visualize the results if needed
             #if self.visualize_results:
