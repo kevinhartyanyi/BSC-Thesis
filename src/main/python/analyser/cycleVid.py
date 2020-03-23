@@ -32,6 +32,9 @@ class cycleVid:
     def current(self):
         return self.container[self.idx][1]
     
+    def currentType(self):
+        return self.container[self.idx][0]
+    
     def down(self):
         if self.idx > 0:
             self.idx -= 1

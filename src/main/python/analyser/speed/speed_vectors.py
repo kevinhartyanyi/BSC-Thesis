@@ -295,7 +295,8 @@ def run(img_dir, depth_dir, of_dir, of_back_dir, save_dir, speed_gt=None, high=1
 
 class VelocityCalculator(object):
     def __init__(self,fst_img_fn, snd_img_fn, fst_depth_fn, snd_depth_fn, 
-                label_fn, flow_fn, back_flow, out_dir, use_slic, n_sps, visualize_results=True, high=1, low=0, super_pixel_method="", create_draw=False):
+                label_fn, flow_fn, back_flow, out_dir, use_slic, n_sps, visualize_results=True, high=1, low=0,
+                super_pixel_method="", create_draw=False, create_velocity=False):
         self.read_depth = utils.read_depth
         self.read_flow = readFlowFile.read
         self.average = utils.average
@@ -318,6 +319,7 @@ class VelocityCalculator(object):
         #self.vid_name = vid_name
         self.super_pixel_method = super_pixel_method
         self.create_draw = create_draw
+        self.create_velocity = create_velocity
 
 
     def calculate_velocity_and_orientation(self):        
@@ -392,9 +394,9 @@ class VelocityCalculator(object):
                 incons_img = np.tile(255*of_mask[..., None], (1, 1, 3)).astype(np.uint8)
                 incons_img = utils.draw_velocity_vectors(incons_img, next_position, relative_disp=False, color=(0, 0, 255))
             
-
-            image = velocity.copy()
-            plt.imsave(os.path.join(base_fn, VL_DIR, img_num + '_velocity.png'), image.astype('uint8'))
+            if self.create_velocity:
+                image = velocity.copy()
+                plt.imsave(os.path.join(base_fn, VL_DIR, img_num + '_velocity.png'), image.astype('uint8'))
 
             x = velocity[:,:,0]
             y = velocity[:,:,1]
@@ -483,8 +485,10 @@ class VelocityCalculator(object):
                                                                 flow, 
                                                                 fst_depth, 
                                                                 snd_depth)
-            image = velocity.copy()
-            plt.imsave(os.path.join(base_fn, VL_DIR, img_num + '_velocity.png'), image.astype('uint8'))
+            
+            if self.create_velocity:
+                image = velocity.copy()
+                plt.imsave(os.path.join(base_fn, VL_DIR, img_num + '_velocity.png'), image.astype('uint8'))
             #print("")
             #print(np.sort(np.unique(fst_depth)))
             #print("")

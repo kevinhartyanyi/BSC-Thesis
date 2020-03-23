@@ -123,6 +123,7 @@ class CalculationRunner(QObject):
         self.send_video_frame = param_dict["send_video_frame"]
         self.create_csv = param_dict["create_csv"]
         self.create_draw = param_dict["create_draw"]
+        self.create_velocity = param_dict["create_velocity"]
         self.super_pixel_label_dir = param_dict["super_pixel_label_dir"]
         self.ground_truth_error = False
         self.video_frame = 0
@@ -161,7 +162,7 @@ class CalculationRunner(QObject):
                     itertools.repeat(self.out_dir), itertools.repeat(self.use_slic), 
                     itertools.repeat(self.n_sps), itertools.repeat(self.visualize),
                     itertools.repeat(self.high), itertools.repeat(self.low), itertools.repeat(self.super_pixel_method), 
-                    itertools.repeat(self.create_draw))
+                    itertools.repeat(self.create_draw), itertools.repeat(self.create_velocity))
 
         with multiprocessing.Pool() as pool:
             with tqdm.tqdm(total=len(fst_img_fns)) as pbar:

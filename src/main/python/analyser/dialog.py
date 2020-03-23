@@ -466,6 +466,7 @@ class Dialog(QDialog, Ui_Dialog):
             "send_video_frame": False,
             "create_csv": self.ui.c_csv.isChecked(),
             "create_draw": self.ui.c_draw.isChecked(),
+            "create_velocity": self.ui.c_velocity.isChecked(),
             "super_pixel_label_dir": os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)
         }
 
@@ -705,19 +706,21 @@ class Dialog(QDialog, Ui_Dialog):
         if self.super_pixel_method != "" and not os.path.exists(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)):
             os.makedirs(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method))
 
-        #self.reCreateDir(RESULTS)        
-        #self.reCreateDir(OTHER_DIR)
+        self.reCreateDir(RESULTS)        
+        self.reCreateDir(OTHER_DIR)
+        self.reCreateDir(NP_DIR)
+        self.reCreateDir(MASK_DIR)
+
         if self.ui.c_draw.isChecked():
             self.reCreateDir(DRAW_DIR)
+        if self.ui.c_velocity.isChecked():
+            self.reCreateDir(VL_DIR)
+        if self.ui.c_speed_plot.isChecked():
+            self.reCreateDir(PLOT_SPEED_DIR)
         if self.super_pixel_method != "":
             self.reCreateDir(SUPER_PIXEL_DIR)
-        #self.reCreateDir(VL_DIR)
-        #self.reCreateDir(NP_DIR)
-        #self.reCreateDir(MASK_DIR)
-        #if self.ui.c_speed_plot.isChecked():
-        #    self.reCreateDir(PLOT_SPEED_DIR)
-        #if self.user["GT"] != "" and self.ui.c_error_plot.isChecked():
-        #    self.reCreateDir(PLOT_ERROR_DIR)
+        if self.user["GT"] != "" and self.ui.c_error_plot.isChecked():
+            self.reCreateDir(PLOT_ERROR_DIR)
 
     def reCreateDir(self, name):
         """Create directory with the given name in save dir (stored in user info).

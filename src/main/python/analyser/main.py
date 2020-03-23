@@ -81,6 +81,36 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.b_plot_left.setIcon(QtGui.QIcon(self.app.get_resource("left_arrow.png")))
         self.ui.b_plot_right.setIcon(QtGui.QIcon(self.app.get_resource("right_arrow.png")))
         
+    def changeDescription(self):
+        vid_type = self.cycle_vid.currentType()
+        self.cycle_vid.add("original", self.img_dir)
+        self.cycle_vid.add("of", self.of_dir)
+        self.cycle_vid.add("back_of", self.back_of_dir)
+        self.cycle_vid.add("depth", self.depth_dir)
+        self.cycle_vid.add("velocity", velocity)
+        self.cycle_vid.add("mask", mask)
+        if os.path.exists(draw):
+            self.cycle_vid.add("draw", draw)
+        if os.path.exists(super_pixel):#len(sutils.list_directory(super_pixel, extension="png")) > 0:
+            self.cycle_vid.add("super_pixel", super_pixel) 
+        
+        if vid_type == "original":
+            self.ui.l_description.setText("The original video")
+        elif vid_type == "of":
+            self.ui.l_description.setText("Optical flow (motion of image objects between two consecutive frames)")
+        elif vid_type == "back_of":
+            self.ui.l_description.setText("Backward optical flow (optical flow with reversed frames)")
+        elif vid_type == "depth":
+            self.ui.l_description.setText("Depth estimation (darker means farther, brighter means closer)")
+        elif vid_type == "velocity":
+            self.ui.l_description.setText("Optical flow directions with colours (after throwing away the inconsistent optical flow)")
+        elif vid_type == "mask":
+            self.ui.l_description.setText("Speed mask (the coloured pixels are used in the speed estimation)")
+        elif vid_type == "draw":
+            self.ui.l_description.setText("Optical flow directions with arrows (after throwing away the inconsistent optical flow)")
+        elif vid_type == "super_pixel":
+            self.ui.l_description.setText("Speed values in the super pixel segmentation")
+
 
     def disableSetup(self):
         self.ui.b_video_left.setEnabled(False)
@@ -163,6 +193,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.created != None:
             plot_dir = self.cycle_plot.current()
         print("Plot Dir", plot_dir)
+        self.changeDescription()
         self.openVideo(self.img_dir, plot_dir=plot_dir)
 
     def changeUser(self, user):
@@ -254,6 +285,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def cycleUp(self):
         self.openVideo(self.cycle_vid.up(), self.image_holder.cur_idx)
+        self.changeDescription()
         #img = self.image_holder.getCurrent()
         #img = self.image_holder.prepareImg(img)
         #self.image_holder.increment()
@@ -261,6 +293,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def cycleDown(self):
         self.openVideo(self.cycle_vid.down(), self.image_holder.cur_idx)
+        self.changeDescription()
         #img = self.image_holder.getCurrent()
         #img = self.image_holder.prepareImg(img)
         #self.image_holder.increment()
