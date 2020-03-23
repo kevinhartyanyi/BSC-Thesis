@@ -154,8 +154,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.cycle_vid.add("depth", self.depth_dir)
         self.cycle_vid.add("velocity", velocity)
         self.cycle_vid.add("mask", mask)
-        self.cycle_vid.add("draw", draw)
-        if len(sutils.list_directory(super_pixel, extension="png")) > 0:
+        if os.path.exists(draw):
+            self.cycle_vid.add("draw", draw)
+        if os.path.exists(super_pixel):#len(sutils.list_directory(super_pixel, extension="png")) > 0:
             self.cycle_vid.add("super_pixel", super_pixel)            
 
         plot_dir = None

@@ -591,13 +591,47 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="layoutWidget">
+  <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>960</x>
-     <y>350</y>
-     <width>411</width>
-     <height>120</height>
+     <x>90</x>
+     <y>370</y>
+     <width>160</width>
+     <height>80</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="layout_v">
+    <item>
+     <widget class="QPushButton" name="b_run">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <family>GE Inspira</family>
+        <pointsize>20</pointsize>
+       </font>
+      </property>
+      <property name="toolTip">
+       <string>Start the calculation</string>
+      </property>
+      <property name="text">
+       <string>Run</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>980</x>
+     <y>311</y>
+     <width>416</width>
+     <height>178</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_12">
@@ -659,25 +693,10 @@
       </item>
      </layout>
     </item>
-   </layout>
-  </widget>
-  <widget class="QWidget" name="verticalLayoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>90</x>
-     <y>370</y>
-     <width>160</width>
-     <height>80</height>
-    </rect>
-   </property>
-   <layout class="QVBoxLayout" name="layout_v">
     <item>
-     <widget class="QPushButton" name="b_run">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
+     <widget class="QCheckBox" name="c_draw">
+      <property name="enabled">
+       <bool>true</bool>
       </property>
       <property name="font">
        <font>
@@ -686,10 +705,10 @@
        </font>
       </property>
       <property name="toolTip">
-       <string>Start the calculation</string>
+       <string>Video of depth estimation</string>
       </property>
       <property name="text">
-       <string>Run</string>
+       <string>Calculate optical flow arrows</string>
       </property>
      </widget>
     </item>

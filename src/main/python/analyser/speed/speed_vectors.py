@@ -295,7 +295,7 @@ def run(img_dir, depth_dir, of_dir, of_back_dir, save_dir, speed_gt=None, high=1
 
 class VelocityCalculator(object):
     def __init__(self,fst_img_fn, snd_img_fn, fst_depth_fn, snd_depth_fn, 
-                label_fn, flow_fn, back_flow, out_dir, use_slic, n_sps, visualize_results=True, high=1, low=0, super_pixel_method=""):
+                label_fn, flow_fn, back_flow, out_dir, use_slic, n_sps, visualize_results=True, high=1, low=0, super_pixel_method="", create_draw=False):
         self.read_depth = utils.read_depth
         self.read_flow = readFlowFile.read
         self.average = utils.average
@@ -316,6 +316,7 @@ class VelocityCalculator(object):
         self.low = low
         #self.vid_name = vid_name
         self.super_pixel_method = super_pixel_method
+        self.create_draw = create_draw
 
 
     def calculate_velocity_and_orientation(self):
@@ -378,7 +379,7 @@ class VelocityCalculator(object):
                         fst_img, snd_img, base_fn + '_d1.png', base_fn + '_d2.png', 
                         base_fn + '_speed.png')
         
-        if False and self.super_pixel_method != "":
+        if self.super_pixel_method != "":
             # Read superpixel labels
             #if self.use_slic:
             #    labels = utils.read_gslic_labels(self.label_fn, n_sps=self.n_sps)
@@ -425,20 +426,33 @@ class VelocityCalculator(object):
                                                                 avg_fst_depth, 
                                                                 avg_shifted_depth)
 
-            speed, speed_mask = utils.vector_speed(velocity, 0) # Speed calculation
-
             # Save the results
-            base_fn = os.path.join(self.out_dir, 
-                                os.path.splitext(os.path.basename(self.flow_fn))[0])
-            np.save(base_fn + '_vel.npy', velocity)
-            np.save(base_fn + '_vel.npy', velocity)
+            base_fn = self.out_dir
+            img_num = os.path.splitext(os.path.basename(self.flow_fn))[0]
+
+            speed, speed_mask = utils.vector_speed(velocity, 0) # Speed calculation
+            np.save(os.path.join(base_fn, NP_DIR, img_num + '_speed.npy'), speed)
+            np.save(os.path.join(base_fn, NP_DIR, img_num + '_mask.npy'), speed_mask)
+            utils.save_as_image(os.path.join(base_fn, MASK_DIR, img_num + '_speed_masked.png'), speed_mask*50, min_val=0, max_val=utils.max_depth) 
+
+            if self.create_draw:
+                back_flow = self.read_flow(self.back_flow) 
+                of_mask, next_position, prev_position = utils.calc_bidi_errormap(flow, back_flow, tau=0.8)
+                incons_img = np.tile(255*of_mask[..., None], (1, 1, 3)).astype(np.uint8)
+                incons_img = utils.draw_velocity_vectors(incons_img, next_position, relative_disp=False, color=(0, 0, 255))
+            
+
+            image = velocity.copy()
+            plt.imsave(os.path.join(base_fn, VL_DIR, img_num + '_velocity.png'), image.astype('uint8'))
 
             x = velocity[:,:,0]
             y = velocity[:,:,1]
             z = velocity[:,:,2]
             speed_superpixel = utils.vector_distance(x,y,z)
-            np.save(base_fn + '_superpixel.npy', speed_superpixel)
-            
+            np.save(os.path.join(base_fn, NP_DIR, img_num + '_superpixel.npy'), speed_superpixel)
+            plt.matshow(speed_superpixel)
+            plt.colorbar()
+            plt.savefig(os.path.join(base_fn, SUPER_PIXEL_DIR, "{0}_superpixel.png".format(img_num)), bbox_inches='tight', dpi=150)
 
             # Visualize the results if needed
             #if self.visualize_results:
@@ -532,7 +546,8 @@ class VelocityCalculator(object):
             
             #np.save(base_fn + '_vel.npy', velocity)
             #np.save(base_fn + '_ori.npy', orientation)
-            plt.imsave(os.path.join(base_fn, DRAW_DIR, img_num + '_draw.png'), incons_img.astype('uint8'))
+            if self.create_draw:
+                plt.imsave(os.path.join(base_fn, DRAW_DIR, img_num + '_draw.png'), incons_img.astype('uint8'))
 
             if self.super_pixel_method != "":
                 if self.super_pixel_method == "Felzenszwalb":

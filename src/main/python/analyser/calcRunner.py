@@ -5,6 +5,9 @@ import speed.utils as utils
 from speed.speed_vectors import calculate_velocity_and_orientation_wrapper
 import itertools
 import tqdm
+from skimage.segmentation import felzenszwalb, slic, quickshift, watershed
+from skimage.color import rgb2gray
+from skimage.filters import sobel
 import multiprocessing
 import speed.pwc.run as pwc
 import speed.monodepth.monodepth_simple as monodepth
@@ -41,7 +44,17 @@ def createErrorPlotMain(params):
     plt.grid(axis='y', linestyle='-')
     plt.savefig(os.path.join(out_dir, "{0}_error.png".format(i)), bbox_inches='tight', dpi=150)
     
-
+def createSuperPixelMain(params):
+    super_pixel_method = params
+    if self.super_pixel_method == "Felzenszwalb":
+        labels = felzenszwalb(fst_img, scale=100, sigma=0.5, min_size=50)                
+    elif self.super_pixel_method == "Quickshift":
+        labels = quickshift(fst_img, kernel_size=3, max_dist=6, ratio=0.5)
+    elif self.super_pixel_method == "Slic":
+        labels = slic(fst_img, n_segments=250, compactness=10, sigma=1)
+    elif self.super_pixel_method == "Watershed":
+        gradient = sobel(rgb2gray(fst_img))
+        labels = watershed(gradient, markers=250, compactness=0.001)
 
 def createSpeedPlotMain(params):
     speeds, i, out_dir = params
@@ -103,6 +116,7 @@ class CalculationRunner(QObject):
         self.plot_speed_dir = param_dict["plot_speed_dir"]
         self.send_video_frame = param_dict["send_video_frame"]
         self.create_csv = param_dict["create_csv"]
+        self.create_draw = param_dict["create_draw"]
         self.ground_truth_error = False
         self.video_frame = 0
 
@@ -137,7 +151,8 @@ class CalculationRunner(QObject):
         params = zip(fst_img_fns, snd_img_fns, fst_disp_fns, snd_disp_fns, label_fns, flow_fns, back_flow, 
                     itertools.repeat(self.out_dir), itertools.repeat(self.use_slic), 
                     itertools.repeat(self.n_sps), itertools.repeat(self.visualize),
-                    itertools.repeat(self.high), itertools.repeat(self.low), itertools.repeat(self.super_pixel_method))
+                    itertools.repeat(self.high), itertools.repeat(self.low), itertools.repeat(self.super_pixel_method), 
+                    itertools.repeat(self.create_draw))
 
         with multiprocessing.Pool() as pool:
             with tqdm.tqdm(total=len(fst_img_fns)) as pbar:
@@ -215,6 +230,10 @@ class CalculationRunner(QObject):
             self.videoFrame.emit(self.video_frame)
             return
         print("Start Main")
+        if self.super_pixel_method != "" and len(os.path.join(self.out_dir, "Super_Pixel", self.super_pixel_method) == 0):
+            self.createSuperPixel()
+
+
         self.labelUpdate.emit(self.run_dict["Speed"])
         self.startCalc()
         
@@ -287,6 +306,9 @@ class CalculationRunner(QObject):
         cam.release() 
         cv2.destroyAllWindows() 
         
+
+    def createSuperPixel(self):
+        pass
 
     def createSpeedPlot(self):
         plt.clf()

@@ -117,7 +117,9 @@ class Dialog(QDialog, Ui_Dialog):
                 self.high = 1
 
     def changeSuperPixelMethod(self, index):
-        if index == 1:
+        if index == 0:
+            self.super_pixel_method = ""
+        elif index == 1:
             self.super_pixel_method = "Felzenszwalb"
         elif index == 2:
             self.super_pixel_method = "Quickshift"
@@ -454,7 +456,8 @@ class Dialog(QDialog, Ui_Dialog):
             "super_pixel_method": self.super_pixel_method,
             "super_pixel_dir": SUPER_PIXEL_DIR,
             "send_video_frame": False,
-            "create_csv": self.ui.c_csv.isChecked()
+            "create_csv": self.ui.c_csv.isChecked(),
+            "create_draw": self.ui.c_draw.isChecked()
         }
 
     def startRun(self):
@@ -685,12 +688,16 @@ class Dialog(QDialog, Ui_Dialog):
             self.reCreateDir(self.savePathJoin("Back_Of")) 
         if not self.depth_exist:
             #self.createDir("Depth")
-            self.reCreateDir(self.savePathJoin("Depth")) 
+            self.reCreateDir(self.savePathJoin("Depth"))
+        if not os.path.exists("Super_Pixel"):
+            self.createDir("Super_Pixel")
 
         #self.reCreateDir(RESULTS)        
         #self.reCreateDir(OTHER_DIR)
-        #self.reCreateDir(DRAW_DIR)
-        #self.reCreateDir(SUPER_PIXEL_DIR)
+        if self.ui.c_draw.isChecked():
+            self.reCreateDir(DRAW_DIR)
+        if self.super_pixel_method != "":
+            self.reCreateDir(SUPER_PIXEL_DIR)
         #self.reCreateDir(VL_DIR)
         #self.reCreateDir(NP_DIR)
         #self.reCreateDir(MASK_DIR)
