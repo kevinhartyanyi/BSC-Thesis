@@ -405,7 +405,7 @@ def reduce_sort(vector, low=0.1,high=0.9, skip=None):
     return mask_vector
 
 
-def vector_speed(vectors, slc = 0):
+def vector_speed(vectors, low, high, slc = 0):
     x = vectors[:,:,0]
     y = vectors[:,:,1]
     z = vectors[:,:,2]
@@ -416,7 +416,7 @@ def vector_speed(vectors, slc = 0):
     #disp_mask = np.logical_and(disp >= disp_unique[int(len(disp_unique) * md_low)],
     #    disp <= disp_unique[int(len(disp_unique) * md_high) - 1])
 
-    mask_y_thr = reduce_sort(y)
+    mask_y_thr = reduce_sort(y, low=low,high=high)
     #mask_z_thr = reduce_sort(z,low=0.3,high=0.6) # 0.5 - 0.6: 26
     only_good_of = z != 0
     z_negative = z < 0

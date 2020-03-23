@@ -320,66 +320,7 @@ class VelocityCalculator(object):
         self.create_draw = create_draw
 
 
-    def calculate_velocity_and_orientation(self):
-        if self.back_flow is "NA":
-            # Read left and right images
-            fst_img = cv2.imread(self.fst_img_fn, cv2.IMREAD_COLOR)  # height x width x channels
-            snd_img = cv2.imread(self.snd_img_fn, cv2.IMREAD_COLOR)  # height x width x channels
-
-            assert fst_img.shape == snd_img.shape
-            height, width, _ = fst_img.shape
-            
-            # Read disparity maps
-            fst_depth = self.read_depth(self.fst_depth_fn, width, height)
-            snd_depth = self.read_depth(self.snd_depth_fn, width, height)
-
-            flow = self.read_flow(self.flow_fn)
-
-            base_fn = os.path.join(self.out_dir, 
-                                os.path.splitext(os.path.basename(self.flow_fn))[0])
-
-            # Calculate the velocity and the orientation
-            velocity = \
-                utils.calculate_velocity_and_orientation_vectors_vectorised_gt(
-                                                                flow, 
-                                                                fst_depth, 
-                                                                snd_depth)
-            
-
-            # Save the results
-            base_fn = os.path.join(self.out_dir, 
-                                os.path.splitext(os.path.basename(self.flow_fn))[0])
-            np.save(base_fn + '_vel.npy', velocity)
-            #np.save(base_fn + '_ori.npy', orientation)
-            speed, speed_mask = utils.vector_speed(velocity, 0) # Speed calculation
-            np.save(base_fn + '_speed.npy', speed)
-
-            # Visualize the results if needed
-            if self.visualize_results:
-                #velocity[velocity > utils.max_velocity] = utils.max_velocity
-                #velocity[velocity < -utils.max_velocity] = -utils.max_velocity
-                
-                # Save speed vectors as image
-                masked_speed = speed
-                masked_speed[~speed_mask] = 0
-                utils.save_as_image(base_fn + '_speed.png', speed, min_val=0, max_val=utils.max_depth) 
-                utils.save_as_image(base_fn + '_speed_masked.png', masked_speed, min_val=0, max_val=utils.max_depth) 
-                # Save velocity vectors as image
-                for idx, file_id in enumerate(['x', 'y', 'z']):
-                    utils.save_as_image('{}_{}.png'.format(base_fn, file_id), 
-                                        velocity[:, :, idx], max_val=utils.max_velocity)
-                # Save depth vectors as image
-                for file_id, data in zip(['d1', 'd2'],
-                                        [fst_depth, snd_depth]):
-                    utils.save_as_image('{}_{}.png'.format(base_fn, file_id), 
-                                        data, min_val=0, max_val=utils.max_depth)
-                # Save optical flow as image
-                cv2.imwrite(base_fn + '_flow.png', computeColor.computeImg(flow))
-                # Save the final image
-                visualize(base_fn + '_viz.png', speed.astype('uint8'), velocity, base_fn + '_flow.png', 
-                        fst_img, snd_img, base_fn + '_d1.png', base_fn + '_d2.png', 
-                        base_fn + '_speed.png')
-        
+    def calculate_velocity_and_orientation(self):        
         if self.super_pixel_method != "":
             # Read superpixel labels
             #if self.use_slic:
@@ -458,7 +399,7 @@ class VelocityCalculator(object):
             x = velocity[:,:,0]
             y = velocity[:,:,1]
             z = velocity[:,:,2]
-            speed_superpixel = utils.vector_distance(x,y,z)
+            speed_superpixel = utils.vector_distance(x,y,z, low=self.low, high=self.high)
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_superpixel.npy'), speed_superpixel)
             plt.matshow(speed_superpixel)
             plt.colorbar()
