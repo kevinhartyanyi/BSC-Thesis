@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1546</width>
+    <width>1620</width>
     <height>785</height>
    </rect>
   </property>
@@ -27,7 +27,7 @@
           </font>
          </property>
          <property name="toolTip">
-          <string>Select the plots you wish to create</string>
+          <string>Data Save/Load options</string>
          </property>
          <property name="text">
           <string>Data Save/Load</string>
@@ -72,7 +72,7 @@
               </font>
              </property>
              <property name="toolTip">
-              <string/>
+              <string>Path where the results will be saved</string>
              </property>
              <property name="text">
               <string/>
@@ -113,6 +113,9 @@
                <pointsize>20</pointsize>
               </font>
              </property>
+             <property name="toolTip">
+              <string>Path of the chosen video</string>
+             </property>
              <property name="text">
               <string/>
              </property>
@@ -137,7 +140,7 @@
               </font>
              </property>
              <property name="toolTip">
-              <string>Video you wish to analyse</string>
+              <string>Ground truth speed data for the video</string>
              </property>
              <property name="text">
               <string>Load Ground Truth</string>
@@ -152,6 +155,9 @@
                <pointsize>20</pointsize>
               </font>
              </property>
+             <property name="toolTip">
+              <string>Path of the chosen ground truth speed file</string>
+             </property>
              <property name="text">
               <string/>
              </property>
@@ -162,6 +168,19 @@
         </layout>
        </item>
       </layout>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>30</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_17">
@@ -180,7 +199,7 @@
                 </font>
                </property>
                <property name="toolTip">
-                <string>Select the plots you wish to create</string>
+                <string>Parameters for the calculations</string>
                </property>
                <property name="text">
                 <string>Run Parameters</string>
@@ -202,6 +221,9 @@
                      <pointsize>20</pointsize>
                     </font>
                    </property>
+                   <property name="toolTip">
+                    <string>Drop values from the top</string>
+                   </property>
                    <property name="text">
                     <string>Low Cut</string>
                    </property>
@@ -216,7 +238,7 @@
                     </font>
                    </property>
                    <property name="toolTip">
-                    <string>The fps for the created videos</string>
+                    <string>Value between 0.0 - 1.0 (represents the percentage to drop)</string>
                    </property>
                    <property name="text">
                     <string>0.309</string>
@@ -238,6 +260,9 @@
                      <pointsize>20</pointsize>
                     </font>
                    </property>
+                   <property name="toolTip">
+                    <string>Drop values from the bottom</string>
+                   </property>
                    <property name="text">
                     <string>High Cut</string>
                    </property>
@@ -252,7 +277,7 @@
                     </font>
                    </property>
                    <property name="toolTip">
-                    <string>The fps for the created videos</string>
+                    <string>Value between 0.0 - 1.0 (represents the percentage to drop)</string>
                    </property>
                    <property name="text">
                     <string>1.0</string>
@@ -294,7 +319,7 @@
                   </font>
                  </property>
                  <property name="toolTip">
-                  <string>Select the plots you wish to create</string>
+                  <string>Select superpixel segmentation (if selected then instead of indiviual pixels the results will be calculated with superpixels)</string>
                  </property>
                  <property name="text">
                   <string>Superpixel segmentation</string>
@@ -313,6 +338,9 @@
                  <family>GE Inspira</family>
                  <pointsize>20</pointsize>
                 </font>
+               </property>
+               <property name="toolTip">
+                <string>Superpixel segmentation methods</string>
                </property>
                <property name="currentIndex">
                 <number>0</number>
@@ -372,7 +400,7 @@
               </font>
              </property>
              <property name="toolTip">
-              <string>Select the videos you wish to create</string>
+              <string>Other options</string>
              </property>
              <property name="text">
               <string>Other</string>
@@ -396,7 +424,7 @@
                 </font>
                </property>
                <property name="toolTip">
-                <string>Video of depth estimation</string>
+                <string>Save the comparison between the calculated speed and the ground truth speed in a csv file</string>
                </property>
                <property name="text">
                 <string>Create CSV from Speed Error</string>
@@ -435,6 +463,9 @@
                    <pointsize>20</pointsize>
                   </font>
                  </property>
+                 <property name="toolTip">
+                  <string>The currently selected colours hex code</string>
+                 </property>
                  <property name="text">
                   <string/>
                  </property>
@@ -454,7 +485,7 @@
                 </font>
                </property>
                <property name="toolTip">
-                <string>Video of depth estimation</string>
+                <string>Calculate optical flow arrows (you can view them in the video player)</string>
                </property>
                <property name="text">
                 <string>Calculate optical flow arrows</string>
@@ -479,7 +510,7 @@
           </font>
          </property>
          <property name="toolTip">
-          <string>Video of depth estimation</string>
+          <string>Calculate optical flow directions with colours (you can view them in the video player)</string>
          </property>
          <property name="text">
           <string>Create optical flow directions with colours</string>
@@ -487,6 +518,19 @@
         </widget>
        </item>
       </layout>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>30</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_14">
@@ -522,6 +566,9 @@
                  <family>GE Inspira</family>
                  <pointsize>20</pointsize>
                 </font>
+               </property>
+               <property name="toolTip">
+                <string>Frame per second</string>
                </property>
                <property name="text">
                 <string>Fps</string>
@@ -618,6 +665,9 @@
                  <pointsize>20</pointsize>
                 </font>
                </property>
+               <property name="toolTip">
+                <string>Video of error plot</string>
+               </property>
                <property name="text">
                 <string>Error Plot</string>
                </property>
@@ -634,6 +684,9 @@
                  <pointsize>20</pointsize>
                 </font>
                </property>
+               <property name="toolTip">
+                <string>Video of speed plot</string>
+               </property>
                <property name="text">
                 <string>Speed Plot</string>
                </property>
@@ -649,6 +702,9 @@
                  <family>GE Inspira</family>
                  <pointsize>20</pointsize>
                 </font>
+               </property>
+               <property name="toolTip">
+                <string>Video of superpixel segmentation</string>
                </property>
                <property name="text">
                 <string>Super Pixel</string>
@@ -705,6 +761,9 @@
                <pointsize>20</pointsize>
               </font>
              </property>
+             <property name="toolTip">
+              <string>Plot the calculated speed</string>
+             </property>
              <property name="text">
               <string>Speed Plot</string>
              </property>
@@ -720,6 +779,9 @@
                <family>GE Inspira</family>
                <pointsize>20</pointsize>
               </font>
+             </property>
+             <property name="toolTip">
+              <string>Plot the error between the calculated speed and the ground truth speed</string>
              </property>
              <property name="text">
               <string>Error Plot</string>

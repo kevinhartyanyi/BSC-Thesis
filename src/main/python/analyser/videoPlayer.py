@@ -14,6 +14,7 @@ class VideoPlayer(QtWidgets.QLabel):
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self.setText("")
         self.setMinimumSize(1,1)
+    
 
     def resizeEvent(self, event):
         self.resizeSignal.emit(self.width(), self.height())

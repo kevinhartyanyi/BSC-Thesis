@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>723</width>
-    <height>604</height>
+    <width>1189</width>
+    <height>761</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="layout_vid">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -96,7 +96,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QHBoxLayout" name="horizontalLayout_5">
         <item>
          <layout class="QVBoxLayout" name="layout_plot">
@@ -127,7 +127,7 @@
                </sizepolicy>
               </property>
               <property name="toolTip">
-               <string>Change Plot</string>
+               <string>Change plot</string>
               </property>
               <property name="text">
                <string>PushButton</string>
@@ -145,7 +145,7 @@
             <item>
              <widget class="QLabel" name="l_fps">
               <property name="toolTip">
-               <string>Frame rate per second</string>
+               <string>Frames per second</string>
               </property>
               <property name="text">
                <string>FPS:</string>
@@ -169,6 +169,19 @@
              </widget>
             </item>
            </layout>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
           </item>
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -204,6 +217,19 @@
              </layout>
             </item>
             <item>
+             <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
              <widget class="QPushButton" name="b_rerun">
               <property name="toolTip">
                <string>Start a new run</string>
@@ -228,7 +254,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>723</width>
+     <width>1189</width>
      <height>36</height>
     </rect>
    </property>

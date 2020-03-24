@@ -11,7 +11,7 @@ import videoPlayer
 import utils
 import speed.utils as sutils
 import worker
-#import vid
+import qdarkgraystyle
 import imageHolder
 import cycleVid
 import skvideo.io
@@ -33,8 +33,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.worker = None
         self.user = None
         self.vid_player = videoPlayer.VideoPlayer()
+        self.vid_player.setToolTip("Video player")
         self.ui.layout_vid.insertWidget(1, self.vid_player) # Insert video player into layout
         self.plot_player = videoPlayer.VideoPlayer()
+        self.plot_player.setToolTip("Plot player")        
         self.ui.layout_plot.insertWidget(1, self.plot_player)
         self.thread = None
         self.vid_opened = False
@@ -450,7 +452,7 @@ class MainWindow(QtWidgets.QMainWindow):
 if __name__ == '__main__':
     appctxt = ApplicationContext()
     #stylesheet = appctxt.get_resource('styles.qss')
-    #appctxt.app.setStyleSheet(open(stylesheet).read())
+    appctxt.app.setStyleSheet(qdarkgraystyle.load_stylesheet())
     window = MainWindow(app=appctxt)
     window.show()
     exit_code = appctxt.app.exec_()
