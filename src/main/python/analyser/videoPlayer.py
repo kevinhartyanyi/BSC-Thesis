@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import pyqtSignal, QObject
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import pyqtSignal
 
 class VideoPlayer(QtWidgets.QLabel):
     """QLabel with a custom resizeEvent
@@ -17,4 +17,9 @@ class VideoPlayer(QtWidgets.QLabel):
     
 
     def resizeEvent(self, event):
+        """Override resizeEvent to send a signal
+        
+        Arguments:
+            event {event which started resizeEvent}
+        """
         self.resizeSignal.emit(self.width(), self.height())

@@ -282,8 +282,14 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionPlay"/>
+   <addaction name="actionOriginal"/>
    <addaction name="actionOF"/>
+   <addaction name="actionBackOF"/>
    <addaction name="actionDepth"/>
+   <addaction name="actionMask"/>
+   <addaction name="actionOFArrows"/>
+   <addaction name="actionOFDirections"/>
+   <addaction name="actionSuperPixel"/>
   </widget>
   <action name="actionPlay">
    <property name="text">
@@ -320,6 +326,54 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionOriginal">
+   <property name="text">
+    <string>Original</string>
+   </property>
+   <property name="toolTip">
+    <string>Jump to original video</string>
+   </property>
+  </action>
+  <action name="actionBackOF">
+   <property name="text">
+    <string>BackOF</string>
+   </property>
+   <property name="toolTip">
+    <string>Jump to backward optical flow video</string>
+   </property>
+  </action>
+  <action name="actionOFDirections">
+   <property name="text">
+    <string>OFDirections</string>
+   </property>
+   <property name="toolTip">
+    <string>Jump to optical flow directions video</string>
+   </property>
+  </action>
+  <action name="actionMask">
+   <property name="text">
+    <string>Mask</string>
+   </property>
+   <property name="toolTip">
+    <string>Jump to speed mask video</string>
+   </property>
+  </action>
+  <action name="actionOFArrows">
+   <property name="text">
+    <string>OFArrows</string>
+   </property>
+   <property name="toolTip">
+    <string>Jump to optical flow arrows video</string>
+   </property>
+  </action>
+  <action name="actionSuperPixel">
+   <property name="text">
+    <string>SuperPixel</string>
+   </property>
+   <property name="toolTip">
+    <string>Jump to super pixel video</string>
    </property>
   </action>
  </widget>

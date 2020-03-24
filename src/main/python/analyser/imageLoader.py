@@ -18,6 +18,8 @@ class Worker(QRunnable):
 
     @pyqtSlot()
     def run(self):
+        """Executes the function (fn) which was given in the constructor and emits a signal with the result
+        """
         result = self.fn(*self.args, **self.kwargs)
         self.signals.result.emit(result)  # Return the result of the processing
     

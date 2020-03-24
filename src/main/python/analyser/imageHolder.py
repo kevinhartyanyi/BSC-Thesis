@@ -1,14 +1,11 @@
-from collections import deque
 import utils
 from PIL import Image
 import imageLoader
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+#from PyQt5.QtGui import *
+#from PyQt5.QtWidgets import *
+#from PyQt5.QtCore import *
+from PyQt5.QtCore import QThread, QThreadPool
 from multiprocessing import Pool
-import time
-
-
 
 class imageHolder:
 
@@ -28,6 +25,20 @@ class imageHolder:
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
 
     def setup(self, img_list, width, height, colour, n_frame=None):
+        """Setup for the class to function properly
+        
+        Arguments:
+            img_list {[str]} -- list of paths to the individual images
+            width {int} -- the width of the image to be resized after loaded
+            height {int} -- the height of the image to be resized after loaded
+            colour {str} -- hex code of colour to fill the empty parts of the image
+        
+        Keyword Arguments:
+            n_frame {int} -- if given then the load starts from this frame (default: {None})
+        
+        Returns:
+            PIL Image -- the current image after loaded and resized
+        """
         self.img_list = img_list
         self.vidLen = len(img_list)
         self.list_idx = 0
@@ -51,6 +62,11 @@ class imageHolder:
         return img
 
     def getCurrent(self):
+        """Returns the current image
+        
+        Returns:
+            PIL Image -- the current image
+        """
         img = None
         if self.cur_idx > -1:
             img = Image.open(self.img_list[self.cur_idx])
@@ -60,10 +76,17 @@ class imageHolder:
         return img
 
     def increment(self):
+        """Increments the counters for the cur_idx and list_idx
+        """
         self.cur_idx += 1
         self.list_idx += 1
 
     def changeFps(self, fps):
+        """Change fps to the given value and store it
+        
+        Arguments:
+            fps {int} -- frame per second
+        """
         self.fps = fps
 
     def getStartData(self):
@@ -72,11 +95,19 @@ class imageHolder:
         This function is used for initializing the worker in startVideo.
         
         Returns:
-            (int, int, int) -- current index, end index and fps
+            (int, int, int) -- Tuple: current index, end index and fps
         """
         return self.cur_idx, self.vidLen, self.fps
 
     def jump(self, n_frame):
+        """Jump to the given frame
+        
+        Arguments:
+            n_frame {int} -- the frame number to jump to
+        
+        Returns:
+            PIL Image -- the image at the frame number
+        """
         cur_idx = n_frame
         if n_frame >= self.vidLen:
             n_frame = self.vidLen - 1
@@ -86,23 +117,53 @@ class imageHolder:
         return self.prepareImg(Image.open(self.img_list[n_frame]))
 
     def resize(self, width, height):
+        """Change resize values for images
+        
+        Arguments:
+            width {int} -- width of the image
+            height {int} -- height of the image
+        
+        Returns:
+            PIL Image -- the current image resized with the new values
+        """
         self.width = width
         self.height = height
         self.load()
         return self.prepareImg(self.getCurrent())
     
     def prepareImg(self, img):
+        """Resize image keeping the aspect ratio 
+        and fill the empty space (if any) between the desired size and the resized image
+        
+        Arguments:
+            img {PIL Image} -- the image to be resized
+        
+        Returns:
+            PIL Image -- the resized image
+        """
         img = utils.resizeImg(img, self.width, self.height)
         img = utils.fillImg(img, fill_colour=self.colour, size=(self.width, self.height))
         return img
 
     def loadImg(self, img_path, idx):
+        """Load the image at the img_path
+        
+        Arguments:
+            img_path {str} -- path to the image
+            idx {int} -- the index of the image
+        """
         img = Image.open(img_path)
         img = self.prepareImg(img)
         print("Added: ", idx)
         self.img_dict[idx] = (img, idx)
 
     def load(self, begin=None, end=None):
+        """Load in images in separate threads for efficiency
+        
+        Keyword Arguments:
+            begin {int} -- from where the load should start (default: {None})
+            end {int} -- where the load should end (default: {None})
+        """
         self.img_dict.clear()
         if begin == None:        
             start = self.list_idx if self.list_idx < self.maxLen else self.list_idx - self.maxLen
@@ -130,7 +191,7 @@ class imageHolder:
 
     def reset(self):
         """
-        Empty images in frameHolder.
+        Clear images
         """
         self.images.clear()
         self.idx = -1
@@ -138,6 +199,11 @@ class imageHolder:
         self.img_list = None
     
     def prevImg(self):
+        """Returns the previous image from the image list
+        
+        Returns:
+            PIL Image -- the previous image
+        """
         self.cur_idx -= 1
         if self.cur_idx >= self.vidLen:
             return self.current
@@ -149,6 +215,11 @@ class imageHolder:
         return img  
 
     def nextImg(self):
+        """Returns the next image from the image list
+        
+        Returns:
+            PIL Image -- the next image
+        """
         self.cur_idx += 1
         cur = self.cur_idx % self.maxLen
         if self.cur_idx >= self.vidLen:

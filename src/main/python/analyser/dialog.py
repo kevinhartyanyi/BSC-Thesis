@@ -7,26 +7,22 @@ import platform
 import json
 import calcRunner
 import os
+import re
 import shutil
 import speed.speed_vectors as speed
-from speed.utils import list_directory
-import re
-import cv2
+from speed.utils import list_directory, getResultDirs
+import readline
 
-import speed.pwc.run as pwc
-
-
-RESULTS = 'results'
-OTHER_DIR = os.path.join(RESULTS, 'other')
-VL_DIR = os.path.join(RESULTS, 'velocity')
-NP_DIR = os.path.join(RESULTS, 'numbers')
-MASK_DIR = os.path.join(RESULTS, 'mask')
-DRAW_DIR = os.path.join(RESULTS, 'draw')
-SUPER_PIXEL_DIR = os.path.join(RESULTS, 'super_pixel')
-PLOT_SPEED_DIR = os.path.join(RESULTS, 'plot_speed')
-PLOT_ERROR_DIR = os.path.join(RESULTS, 'plot_error')
-
-
+result_dir = getResultDirs()
+RESULTS = result_dir["Results"]
+OTHER_DIR = result_dir["Other"]
+VL_DIR = result_dir["Velocity"]
+NP_DIR = result_dir["Numbers"]
+MASK_DIR = result_dir["Mask"]
+DRAW_DIR = result_dir["Draw"]
+SUPER_PIXEL_DIR = result_dir["SuperPixel"]
+PLOT_SPEED_DIR = result_dir["Plot_Speed"]
+PLOT_ERROR_DIR = result_dir["Plot_Error"]
 class Dialog(QDialog, Ui_Dialog):
     sendUser = pyqtSignal(object)
     sendCreated = pyqtSignal(object)
@@ -60,8 +56,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.low = 0.309
         self.high = 1.0 
         self.run_dict = {}
-        self.super_pixel_method = ""
-        
+        self.super_pixel_method = ""        
         self.app = app
 
         self.signalSetup()
@@ -92,12 +87,24 @@ class Dialog(QDialog, Ui_Dialog):
         #self.ui.c_depth.stateChanged.connect(self.checkVideoCreation)
     
     def changeLow(self):
+        """Change the value of the low drop based on the text inside t_low
+        """
         self.changeLowHigh(self.ui.t_low, t_type="low")
         
     def changeHigh(self):
+        """Change the value of the high drop based on the text inside t_high
+        """
         self.changeLowHigh(self.ui.t_high, t_type="high")
     
     def changeLowHigh(self, text_widget, t_type="low"):
+        """Change the value of low/high drop
+        
+        Arguments:
+            text_widget {QLineEdit} -- t_low or t_high
+        
+        Keyword Arguments:
+            t_type {str} -- which line edit was given (default: {"low"})
+        """
         check = re.search("(0[.][0-9]+|1)", text_widget.text())
         print(self.ui.t_low.text(), self.ui.t_high.text())
         if check and self.ui.t_low.text() != self.ui.t_high.text():
@@ -118,6 +125,11 @@ class Dialog(QDialog, Ui_Dialog):
                 self.high = 1
 
     def changeSuperPixelMethod(self, index):
+        """Change the super pixel method
+        
+        Arguments:
+            index {int} -- index of the selected super pixel method
+        """
         if index == 0:
             self.super_pixel_method = ""
         elif index == 1:
@@ -163,10 +175,10 @@ class Dialog(QDialog, Ui_Dialog):
         """Split the given path based on filesystem
         
         Arguments:
-            path {str  } -- path you want to split
+            path {str} -- path you want to split
         
         Returns:
-            path splitted on / or \ -- only use \ on windows
+            path splitted on / or \ -- only uses \ on windows
         """
         sep = "/"
         if platform.system() == "Windows": 
@@ -186,7 +198,8 @@ class Dialog(QDialog, Ui_Dialog):
             self.checkFiles()
 
     def checkFiles(self):
-        """Checks if there are folders from previous runs, so we don't need to create them. 
+        """Checks if there are folders from previous runs, so we don't need to create them.
+        Also, checks condotions for checkboxes and buttons 
         """
         self.of_exist = os.path.exists(os.path.join(self.user["Save"], "Of"))
         self.back_of_exist = os.path.exists(os.path.join(self.user["Save"], "Back_Of"))
@@ -231,19 +244,19 @@ class Dialog(QDialog, Ui_Dialog):
             self.ui.l_vid.setText("Load: " + self.vid_name)
             self.checkFiles()
 
-    def openOf(self):
-        fname = self.openFile(self.user["Of"], file_filter="Python files (*.py);;All files (*)")
-        self.user["Of"] = fname
-        name = self.splitPath(fname)[-1]
-        self.ui.l_of.setText("Load: " + name)
-        self.checkFiles()
-
-    def openDepth(self):
-        fname = self.openFile(self.user["Depth"], file_filter="Python files (*.py);;All files (*)")
-        self.user["Depth"] = fname
-        name = self.splitPath(fname)[-1]
-        self.ui.l_depth.setText("Load: " + name)
-        self.checkFiles()
+    #def openOf(self):
+    #    fname = self.openFile(self.user["Of"], file_filter="Python files (*.py);;All files (*)")
+    #    self.user["Of"] = fname
+    #    name = self.splitPath(fname)[-1]
+    #    self.ui.l_of.setText("Load: " + name)
+    #    self.checkFiles()
+#
+    #def openDepth(self):
+    #    fname = self.openFile(self.user["Depth"], file_filter="Python files (*.py);;All files (*)")
+    #    self.user["Depth"] = fname
+    #    name = self.splitPath(fname)[-1]
+    #    self.ui.l_depth.setText("Load: " + name)
+    #    self.checkFiles()
 
     def openFile(self, folder, title="Open Video", file_filter="Video Files (*.mp4 *.avi *.mkv);;All files (*)"):
         """Open QFileDialog with the given parameters, returns selected file
@@ -288,8 +301,6 @@ class Dialog(QDialog, Ui_Dialog):
             #self.vid_name = self.splitPath(self.user["Video"])[-1]
             self.ui.l_colour.setText(self.user["Colour"])
             
-            
-    
     def loadUser(self):
         """Load user file if exists, create empty otherwise
         """ 
@@ -310,6 +321,11 @@ class Dialog(QDialog, Ui_Dialog):
             json.dump(self.user, json_file, indent=4)
 
     def errorChecks(self):
+        """Check for errors and inform the user in a QMessageBox if found any
+        
+        Returns:
+            bool -- if true then the execution stops
+        """
         stop_calculation = False
         #ret = QMessageBox.question(self, "Solving Errors", "Click a button", QMessageBox.Ok | QMessageBox.Abort, QMessageBox.Ok)
         found_error = False
@@ -452,13 +468,18 @@ class Dialog(QDialog, Ui_Dialog):
 
         return (answer == int("0x00040000", 16) or stop_calculation)
 
-
     def calculateError(self, errorMessage):
+        """Called if there were errors while calculating the results, creates QMessageBox
+        
+        Arguments:
+            errorMessage {str} -- error message to be shown in the QMessageBox
+        """
         self.no_error = False
         QMessageBox.warning(self, "Found Error", errorMessage, QMessageBox.Ok, QMessageBox.Ok)
 
-
     def buildParamsDict(self):
+        """Build parameter dictionary to forward parameters for the calcRunner class
+        """
         self.params_dict = {
             "img_dir": self.savePathJoin("Images"),
             "depth_dir": self.savePathJoin("Depth"),
@@ -486,7 +507,7 @@ class Dialog(QDialog, Ui_Dialog):
         }
 
     def startRun(self):
-        """Start calculations
+        """Check for errors and start calculations
         """
         self.checkFiles()
         if self.errorChecks():
@@ -498,8 +519,6 @@ class Dialog(QDialog, Ui_Dialog):
         self.createDirs()
         self.buildRunDict()
         
-
-    
     def startCalcThread(self):
         """Starting calculations on another thread
         """
@@ -550,6 +569,8 @@ class Dialog(QDialog, Ui_Dialog):
         self.accept()
 
     def cleanThread(self):
+        """Cleans the active thread
+        """
         print("Clean Thread")
         self.worker.stop()
         self.thread.quit()
@@ -566,9 +587,8 @@ class Dialog(QDialog, Ui_Dialog):
         self.progressBar.setMaximum(run_dict["Progress"])
         self.progressLabel.setText(run_dict["Text"])
 
-
     def showProgressBar(self):
-        """Create two progressbars to show how the calculations progresses
+        """Creates two progressbars to show how the calculation progresses
         """
         print("Show progress bar")
         self.progressLabel = QLabel(self)
@@ -585,6 +605,8 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.layout_v.addWidget(self.progressBar)
 
     def addAllProgressBar(self):
+        """Adds the progress bar which tracks the progress of all calculations
+        """
         all_run = sum([self.run_dict[key]["Progress"] for key in self.run_dict if self.run_dict[key]["Run"]])
         print("All run:", all_run)
         self.progressAllBar = QProgressBar(self) # Progress bar created
@@ -604,13 +626,8 @@ class Dialog(QDialog, Ui_Dialog):
             self.created["Error_Plot"] = self.savePathJoin(PLOT_ERROR_DIR)
         self.sendCreated.emit(self.created)
 
-
     def buildRunDict(self):
-        """Build dictionary with all calculations
-        Dictionary fields:
-            -Run: {bool} true if needs to be calculated, false otherwise
-            -Progress: {int} the amount of steps to complete the calculation (used to update the progressbar)
-            -Text: {str} the text to be showed in the progressbar label's when the calculation is running   
+        """Create images from video in another thread, loads the image number otherwise
         """
         self.showProgressBar()
         ori_images = 0
@@ -638,11 +655,21 @@ class Dialog(QDialog, Ui_Dialog):
             self.thread.start()
 
     def setVidFrame(self, ori_images):
+        """Gets called when the image creation from video finishes
+        
+        Arguments:
+            ori_images {int} -- number of images in the video
+        """
         self.cleanThread()
         self.buildRunDictMain(ori_images)
 
     def buildRunDictMain(self, ori_images):        
-
+        """Build dictionary with all calculations
+        Dictionary fields:
+            -Run: {bool} true if needs to be calculated, false otherwise
+            -Progress: {int} the amount of steps to complete the calculation (used to update the progressbar)
+            -Text: {str} the text to be showed in the progressbar label's when the calculation is running   
+        """
         self.run_dict["Of"] = {"Run": not self.of_exist, "Progress":ori_images, "Text":"Running optical flow"}
         self.run_dict["Back_Of"] = {"Run": not self.back_of_exist, "Progress":ori_images, "Text":"Running back optical flow"}
         self.run_dict["Depth"] = {"Run": not self.depth_exist, "Progress":ori_images, "Text":"Running depth estimation"}
@@ -678,10 +705,25 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.b_run.setEnabled(False)
         self.ui.b_colour.setEnabled(False)
         self.ui.b_ground_truth.setEnabled(False)
-        #self.ui.b_depth.setEnabled(False)
-        #self.ui.b_of.setEnabled(False)
         self.ui.b_vid.setEnabled(False)
         self.ui.b_save.setEnabled(False)
+        self.ui.t_low.setEnabled(False)
+        self.ui.t_high.setEnabled(False)
+        self.ui.t_fps.setEnabled(False)
+        self.ui.combo_superpixel.setEnabled(False)
+        self.ui.c_super_pixel_video.setEnabled(False)
+        self.ui.c_csv.setEnabled(False)
+        self.ui.c_draw.setEnabled(False)
+        self.ui.c_velocity.setEnabled(False)
+        self.ui.c_of.setEnabled(False)
+        self.ui.c_back_of.setEnabled(False)
+        self.ui.c_depth.setEnabled(False)
+        self.ui.c_speed_plot.setEnabled(False)
+        self.ui.c_error_plot.setEnabled(False)
+        self.ui.c_error_plot_video.setEnabled(False)
+        self.ui.c_speed_plot_video.setEnabled(False)
+        #self.ui.b_depth.setEnabled(False)
+        #self.ui.b_of.setEnabled(False)
 
     def savePathJoin(self, path):
         """Join the given path with the save path (stored in user info)

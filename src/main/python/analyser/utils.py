@@ -25,7 +25,6 @@ def resizeImg(img, new_width, new_height):
         height = new_height
         pheight = (height/float(h))
         width = int((float(w)*float(pheight)))
-    #image.resize((width,hsize), Image.BICUBIC).show()
     img = img.resize((width,height), Image.ANTIALIAS)
     return img
 
@@ -97,16 +96,16 @@ def video_from_images(img_dir, out_dir, fps=30):
         vid_out.write(img)
     vid_out.release()
 
-def readImg(img_dir):
-    """Reads the png file names in the given directory and returns them sorted.
-    
-    Arguments:
-        img_dir {string} -- path to dir
-    
-    Returns:
-        [string] -- list containing paths to the files sorted by name
-    """
-    onlyfiles = glob.glob(img_dir +"/*.png")
-    onlyfiles = natsorted(onlyfiles)
-    return onlyfiles
+#def readImg(img_dir):
+#    """Reads the png file names in the given directory and returns them sorted.
+#    
+#    Arguments:
+#        img_dir {string} -- path to dir
+#    
+#    Returns:
+#        [string] -- list containing paths to the files sorted by name
+#    """
+#    onlyfiles = glob.glob(img_dir +"/*.png")
+#    onlyfiles = natsorted(onlyfiles)
+#    return onlyfiles
 
