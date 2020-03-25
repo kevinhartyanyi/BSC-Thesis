@@ -1,7 +1,7 @@
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
-from PyQt5.QtWidgets import QMainWindow, QAction
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QThread
+from PyQt5.QtWidgets import QMainWindow, QAction, QApplication, QStyle
+from PyQt5 import QtGui, QtWidgets
+from PyQt5.QtCore import QThread, QSize
 
 # https://github.com/pypa/setuptools/issues/1963
 from mainwindowUI import Ui_MainWindow
@@ -20,6 +20,7 @@ import sys
 import re
 import os
 from dialog import Dialog
+from mainwindowInfo import MainWindowInfo
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -83,7 +84,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.b_video_down.setIcon(QtGui.QIcon(self.app.get_resource("down_arrow.png")))
         self.ui.b_plot_left.setIcon(QtGui.QIcon(self.app.get_resource("left_arrow.png")))
         self.ui.b_plot_right.setIcon(QtGui.QIcon(self.app.get_resource("right_arrow.png")))
-        
+
+        self.ui.b_info.setIconSize(QSize(50,50))
+        self.ui.b_info.setIcon(QApplication.style().standardIcon(QStyle.SP_MessageBoxInformation))
+
     def changeDescription(self):
         """Change the video description based on the current video
         """
@@ -104,7 +108,7 @@ class MainWindow(QtWidgets.QMainWindow):
         elif vid_type == "draw":
             self.ui.l_description.setText("Optical flow directions with arrows (after throwing away the inconsistent optical flow)")
         elif vid_type == "super_pixel":
-            self.ui.l_description.setText("Speed values in the super pixel segmentation")
+            self.ui.l_description.setText("Speed values in the super pixel segmentations")
 
     def disableSetup(self):
         """Disable widgets on startup (before calculations)
@@ -144,6 +148,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.b_jump.setEnabled(True)
         self.ui.t_frame.setEnabled(True)
         self.ui.t_fps.setEnabled(True)
+
+    def showInfo(self):
+        """Show information dialog
+        """
+        widget = MainWindowInfo(app=self.app, parent=self)
+        widget.exec_()
 
     def showDialog(self):
         """Open dialog where the user can choose the run options
@@ -237,6 +247,7 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         self.ui.b_video_right.clicked.connect(self.changeVideoToNextFrame)
         self.ui.b_video_left.clicked.connect(self.changeVideoToPrevFrame)
+        self.ui.b_info.clicked.connect(self.showInfo)
         self.ui.actionPlay.triggered.connect(self.startVideo)
         self.ui.actionOF.triggered.connect(self.cycleToSelected)
         self.ui.actionDepth.triggered.connect(self.cycleToSelected)

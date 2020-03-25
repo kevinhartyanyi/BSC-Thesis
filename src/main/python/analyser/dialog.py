@@ -1,8 +1,9 @@
-from PyQt5.QtWidgets import QDialog, QFileDialog, QColorDialog, QProgressBar, QLabel, QMessageBox
+from PyQt5.QtWidgets import QDialog, QFileDialog, QColorDialog, QProgressBar, QLabel, QMessageBox, QApplication, QStyle
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QFont
-from PyQt5.QtCore import Qt, QThread
+from PyQt5.QtCore import Qt, QThread, QSize
 from dialogUI import Ui_Dialog
+from dialogInfo import DialogInfo
 import platform
 import json
 import calcRunner
@@ -58,6 +59,8 @@ class Dialog(QDialog, Ui_Dialog):
         self.run_dict = {}
         self.super_pixel_method = ""        
         self.app = app
+        self.ui.b_info.setIconSize(QSize(50,50))
+        self.ui.b_info.setIcon(QApplication.style().standardIcon(QStyle.SP_MessageBoxInformation))
 
         self.signalSetup()
         self.loadUser()
@@ -67,6 +70,7 @@ class Dialog(QDialog, Ui_Dialog):
         """
         Setup for signal connections
         """
+        self.ui.b_info.clicked.connect(self.showInfo)
         self.ui.b_save.clicked.connect(self.openSave)
         self.ui.b_vid.clicked.connect(self.openVideo)
         #self.ui.b_of.clicked.connect(self.openOf)
@@ -86,6 +90,13 @@ class Dialog(QDialog, Ui_Dialog):
         #self.ui.c_back_of.stateChanged.connect(self.checkVideoCreation)
         #self.ui.c_depth.stateChanged.connect(self.checkVideoCreation)
     
+    def showInfo(self):
+        """Show information dialog
+        """
+        widget = DialogInfo(app=self.app, parent=self)
+        widget.exec_()
+
+
     def changeLow(self):
         """Change the value of the low drop based on the text inside t_low
         """

@@ -20,6 +20,9 @@ class Ui_Dialog(object):
         self.horizontalLayout_10.setObjectName("horizontalLayout_10")
         self.verticalLayout_9 = QtWidgets.QVBoxLayout()
         self.verticalLayout_9.setObjectName("verticalLayout_9")
+        self.b_info = QtWidgets.QToolButton(Dialog)
+        self.b_info.setObjectName("b_info")
+        self.verticalLayout_9.addWidget(self.b_info)
         self.label_5 = QtWidgets.QLabel(Dialog)
         font = QtGui.QFont()
         font.setFamily("GE Inspira")
@@ -399,6 +402,7 @@ class Ui_Dialog(object):
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        self.b_info.setText(_translate("Dialog", "..."))
         self.label_5.setToolTip(_translate("Dialog", "Data Save/Load options"))
         self.label_5.setText(_translate("Dialog", "Data Save/Load"))
         self.b_save.setToolTip(_translate("Dialog", "Save path for results"))
