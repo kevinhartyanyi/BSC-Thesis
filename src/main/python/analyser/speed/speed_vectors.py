@@ -100,27 +100,11 @@ class VelocityCalculator(object):
 
 
     def calculate_velocity_and_orientation(self):        
-        if self.super_pixel_method != "":
-            # Read superpixel labels
-            #if self.use_slic:
-            #    labels = utils.read_gslic_labels(self.label_fn, n_sps=self.n_sps)
-            #else:
-            #    labels = utils.read_boruvka_labels(self.label_fn, n_sps=self.n_sps)
-            
+        if self.super_pixel_method != "":           
 
             # Read left and right images
             fst_img = cv2.imread(self.fst_img_fn, cv2.IMREAD_COLOR)  # height x width x channels
             snd_img = cv2.imread(self.snd_img_fn, cv2.IMREAD_COLOR)  # height x width x channels
-
-            #if self.super_pixel_method == "Felzenszwalb":
-            #    labels = felzenszwalb(fst_img, scale=100, sigma=0.5, min_size=50)                
-            #elif self.super_pixel_method == "Quickshift":
-            #    labels = quickshift(fst_img, kernel_size=3, max_dist=6, ratio=0.5)
-            #elif self.super_pixel_method == "Slic":
-            #    labels = slic(fst_img, n_segments=250, compactness=10, sigma=1)
-            #elif self.super_pixel_method == "Watershed":
-            #    gradient = sobel(rgb2gray(fst_img))
-            #    labels = watershed(gradient, markers=250, compactness=0.001)
 
             # Read optical flow
             flow = self.read_flow(self.flow_fn)
@@ -156,8 +140,6 @@ class VelocityCalculator(object):
                                                                 avg_fst_depth, 
                                                                 avg_shifted_depth)
 
-            
-
             speed, speed_mask = utils.vector_speedOF_Simple(velocity, low=self.low, high=self.high) # Speed calculation
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_speed.npy'), speed)
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_mask.npy'), speed_mask)
@@ -181,29 +163,6 @@ class VelocityCalculator(object):
             plt.matshow(speed_superpixel)
             plt.colorbar()
             plt.savefig(os.path.join(base_fn, SUPER_PIXEL_DIR, "{0}_superpixel.png".format(img_num)), bbox_inches='tight', dpi=150)
-
-            # Visualize the results if needed
-            #if self.visualize_results:
-            #    velocity[velocity > utils.max_velocity] = utils.max_velocity
-            #    velocity[velocity < -utils.max_velocity] = -utils.max_velocity
-            #    # Save velocity vectors as image
-            #    for idx, file_id in enumerate(['x', 'y', 'z']):
-            #        utils.save_as_image('{}_{}.png'.format(base_fn, file_id), 
-            #                            velocity[:, :, idx], max_val=utils.max_velocity)
-            #    # Save depth vectors as image
-            #    for file_id, data in zip(['d1', 'd2', 'd1_avg', 'd2_avg'],
-            #                            [fst_depth, snd_depth, 
-            #                            avg_fst_depth, avg_fst_depth]):
-            #        utils.save_as_image('{}_{}.png'.format(base_fn, file_id), 
-            #                            data, min_val=utils.min_depth, max_val=utils.max_depth)
-            #    # Speed
-            #    utils.save_as_image(base_fn + '_speed.png', speed, min_val=0, max_val=utils.max_depth)  
-            #    # Save optical flow as image
-            #    cv2.imwrite(base_fn + '_flow.png', computeColor.computeImg(flow))
-            #    # Save the final image
-            #    visualize(base_fn + '_viz.png', labels, velocity, base_fn + '_z.png', 
-            #            fst_img, snd_img, base_fn + '_d1.png', base_fn + '_d2.png', 
-            #            base_fn + '_flow.png')
         else:
             # Read left and right images
             fst_img = cv2.imread(self.fst_img_fn, cv2.IMREAD_COLOR)  # height x width x channels
@@ -221,33 +180,33 @@ class VelocityCalculator(object):
             back_flow = self.read_flow(self.back_flow)            
 
             of_mask, next_position, prev_position = utils.calc_bidi_errormap(flow, back_flow, tau=0.8)
-            good_flow = flow.copy()
-            good_flow_snd = flow.copy()
-            good_flow[of_mask] = 0
-            good_flow_snd[next_position[..., 0], next_position[..., 1]] = back_flow
+            #good_flow = flow.copy()
+            #good_flow_snd = flow.copy()
+            #good_flow[of_mask] = 0
+            #good_flow_snd[next_position[..., 0], next_position[..., 1]] = back_flow
 
-            fst_mono = fst_depth
-            fst_mono[of_mask] = 0
+            #fst_mono = fst_depth
+            #fst_mono[of_mask] = 0
 
-            snd_depth_for_mono = snd_depth.copy()
-            snd_depth_for_mono[of_mask] = 0
-            snd_mono = np.full_like(fst_mono, 0)
-            snd_mono[next_position[..., 0], next_position[..., 1]] = snd_depth_for_mono
+            #snd_depth_for_mono = snd_depth.copy()
+            #snd_depth_for_mono[of_mask] = 0
+            #snd_mono = np.full_like(fst_mono, 0)
+            #snd_mono[next_position[..., 0], next_position[..., 1]] = snd_depth_for_mono
 
-            snd_mono_2 = np.full_like(fst_mono, 0)
-            snd_mono_2 = snd_depth[prev_position[..., 0], prev_position[..., 1]]
-            snd_mono_2[of_mask] = 0
+            #snd_mono_2 = np.full_like(fst_mono, 0)
+            #snd_mono_2 = snd_depth[prev_position[..., 0], prev_position[..., 1]]
+            #snd_mono_2[of_mask] = 0
 
-            back = np.full_like(fst_mono, 0)
-            back[prev_position[..., 0], prev_position[..., 1]] = snd_mono
+            #back = np.full_like(fst_mono, 0)
+            #back[prev_position[..., 0], prev_position[..., 1]] = snd_mono
 
             incons_img = np.tile(255*of_mask[..., None], (1, 1, 3)).astype(np.uint8)
             incons_img = utils.draw_velocity_vectors(incons_img, next_position, relative_disp=False, color=(0, 0, 255))
             
-            tmp = snd_mono - fst_mono
+            #tmp = snd_mono - fst_mono
 
-            fst_zeros = fst_mono.copy()
-            fst_zeros[snd_mono == 0] = 0
+            #fst_zeros = fst_mono.copy()
+            #fst_zeros[snd_mono == 0] = 0
             
             # Save the results
             base_fn = self.out_dir# + self.vid_name
@@ -265,14 +224,11 @@ class VelocityCalculator(object):
                 plt.imsave(os.path.join(base_fn, VL_DIR, img_num + '_velocity.png'), image.astype('uint8'))
 
 
-            #inaccurate_mono = fst_depth > 115
-            inaccurate_mono = fst_depth > 30
-            fst_depth[inaccurate_mono] = 0
-            velocity[inaccurate_mono] = 0
+            #inaccurate_mono = fst_depth > 30
+            #fst_depth[inaccurate_mono] = 0
+            #velocity[inaccurate_mono] = 0
 
             
-            #np.save(base_fn + '_vel.npy', velocity)
-            #np.save(base_fn + '_ori.npy', orientation)
             if self.create_draw:
                 plt.imsave(os.path.join(base_fn, DRAW_DIR, img_num + '_draw.png'), incons_img.astype('uint8'))
 
@@ -280,26 +236,7 @@ class VelocityCalculator(object):
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_speed.npy'), speed)
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_mask.npy'), speed_mask)
 
-            #image = velocity.copy()
-            ##image = image + abs(image.min())
-            ##image *= 255.0/image.max()
-            #plt.imsave(os.path.join(base_fn, VL_DIR, img_num + '_velocity.png'), image.astype('uint8'))
-            #utils.save_as_image(base_fn + '_velocity.png', image, min_val=0, max_val=utils.max_depth) 
-
-
-            # Visualize the results if needed
-            if self.visualize_results:
-                utils.save_as_image(os.path.join(base_fn, OTHER_DIR, img_num + '_snd_mono_2.png'), snd_mono_2, min_val=0, max_val=utils.max_depth) 
-                utils.save_as_image(os.path.join(base_fn, OTHER_DIR, img_num + '_back.png'), back, min_val=0, max_val=utils.max_depth) 
-                utils.save_as_image(os.path.join(base_fn, OTHER_DIR, img_num + '_fst_zeros.png'), fst_zeros, min_val=0, max_val=utils.max_depth) 
-                #velocity[velocity > utils.max_velocity] = utils.max_velocity
-                #velocity[velocity < -utils.max_velocity] = -utils.max_velocity
-                
-                # Save speed vectors as image
-                #masked_speed = speed
-                #masked_speed[~speed_mask] = 0
-                
-                utils.save_as_image(os.path.join(base_fn, MASK_DIR, img_num + '_speed_masked.png'), speed_mask*50, min_val=0, max_val=utils.max_depth) 
+            utils.save_as_image(os.path.join(base_fn, MASK_DIR, img_num + '_speed_masked.png'), speed_mask*50, min_val=0, max_val=utils.max_depth) 
 
 def calculate_velocity_and_orientation_wrapper(params):
     velocity_calculator = VelocityCalculator(*params)

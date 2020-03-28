@@ -509,7 +509,7 @@ def vector_speed(vectors, low, high):
         mUpper = np.sqrt(add3)    
         speed3 = np.mean(mUpper)"""    
 
-def vector_speedOF_Simple(vectors, high=1, low=0):
+def vector_speedOF_Simple(vectors, high=1, low=0, optimal_of=True):
     """Estimate speed from the x,y vectors
     
     Arguments:
@@ -524,29 +524,12 @@ def vector_speedOF_Simple(vectors, high=1, low=0):
     """
     x = vectors[:,:,0]
     y = vectors[:,:,1]
-
-    #mask_y_thr = reduce_sort(y)
-    only_good_of = x != 0
-    #x_negative = x < 0
-
-    mask_uni = only_good_of    
-    mask_y_thr = reduce_sort(y,low=low,high=high) # 0.5 - 0.6: 26
-
-    # Speed throwing
-    """
-    x_0 = x.copy()
-    y_0 = y.copy()
-    x_0[~only_good_of] = 1000
-    y_0[~only_good_of] = 1000
-    x_abs_0 = np.abs(x_0)
-    y_abs_0 = np.abs(y_0)
-    avg_speed_raw = np.divide(np.add(x_abs_0, y_abs_0), 2)
-    mask_speed_thr = reduce_sort(avg_speed_raw,low=low,high=high, skip=1000)
-    #save_as_image('speed_mask_test.png', mask_speed_thr, min_val=0, max_val=max_depth) 
-    mask_uni = np.logical_and(mask_speed_thr, only_good_of)
-    """
-
-    mask_uni = np.logical_and(mask_y_thr, only_good_of)
+    #optimal_of=False#!
+    mask_uni = reduce_sort(y,low=low,high=high) # 0.5 - 0.6: 26
+    if optimal_of:
+        only_good_of = x != 0
+        mask_uni = np.logical_and(mask_uni, only_good_of)
+    #mask_uni = np.logical_and(mask_y_thr, only_good_of)
 
 
     x_thr = x[mask_uni]

@@ -227,6 +227,9 @@
                  <pointsize>20</pointsize>
                 </font>
                </property>
+               <property name="toolTip">
+                <string>Parameter optimization with grid search</string>
+               </property>
                <property name="text">
                 <string>Optimize parameters</string>
                </property>

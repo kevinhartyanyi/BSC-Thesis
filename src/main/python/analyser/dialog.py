@@ -6,7 +6,7 @@ from dialogUI import Ui_Dialog
 from dialogInfo import DialogInfo
 import platform
 import json
-#import calcRunner
+import calcRunner
 import os
 import re
 import shutil
@@ -531,7 +531,7 @@ class Dialog(QDialog, Ui_Dialog):
         """Starting calculations on another thread
         """
         # 1 - create Worker and Thread inside the Form
-        #self.worker = calcRunner.CalculationRunner(self.params_dict)
+        self.worker = calcRunner.CalculationRunner(self.params_dict)
             #, self.savePathJoin("Images"),
             #self.savePathJoin("Depth"), self.savePathJoin("Of"), self.savePathJoin("Back_Of"),
             #self.user["Save"], None, 1, 0.309, self.run_dict, self.app.get_resource(os.path.join("of_models", "network-default.pytorch")),
@@ -647,7 +647,7 @@ class Dialog(QDialog, Ui_Dialog):
 
             self.progressLabel.setText("Create images from video")
 
-            #self.worker = calcRunner.CalculationRunner(self.params_dict)  # no parent!
+            self.worker = calcRunner.CalculationRunner(self.params_dict)  # no parent!
             self.thread = QThread()  # no parent!
 
             self.worker.labelUpdate.connect(self.labelUpdate)
@@ -680,7 +680,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.run_dict["Back_Of"] = {"Run": not self.back_of_exist, "Progress":ori_images, "Text":"Running back optical flow"}
         self.run_dict["Depth"] = {"Run": not self.depth_exist, "Progress":ori_images, "Text":"Running depth estimation"}
         self.run_dict["Speed"] = {"Run": True, "Progress":ori_images, "Text":"Running speed estimation"}
-        self.run_dict["Optimization"] = {"Run": False, "Progress":ori_images, "Text":"Running parameter optimization"}
+        self.run_dict["Optimization"] = {"Run": self.ui.c_optimize.isChecked(), "Progress":ori_images*9, "Text":"Running parameter optimization"}
 
         self.run_dict["Of_Vid"] = {"Run": self.ui.c_of.isChecked(), "Progress":ori_images, "Text":"Creating optical flow video"}
         self.run_dict["Back_Of_Vid"] = {"Run": self.ui.c_back_of.isChecked(), "Progress":ori_images, "Text":"Creating backward optical flow video"}

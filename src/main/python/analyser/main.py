@@ -187,13 +187,16 @@ class MainWindow(QtWidgets.QMainWindow):
         Arguments:
             created {dictionary} -- Dictionary with the created plots
         """
+        print("Itt", created)
         if len(created) == 0:
             return
+        print("Itt")
         
         self.ui.b_plot_left.setEnabled(True)
         self.ui.b_plot_right.setEnabled(True)
 
         self.created = created
+        self.cycle_plot.reset()
         for key in created:
             if created[key] != "":
                 self.cycle_plot.add(key, created[key])
@@ -229,7 +232,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.cycle_vid.add("super_pixel", super_pixel)       
             self.ui.actionSuperPixel.setEnabled(True)
 
-        self.cycle_plot.reset()
         plot_dir = None
         if self.created != None:
             plot_dir = self.cycle_plot.current()
@@ -300,6 +302,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.openVideo(self.cycle_vid.get("mask"), n_frame=self.image_holder.cur_idx)
         elif text == "SuperPixel":
             self.openVideo(self.cycle_vid.get("super_pixel"), n_frame=self.image_holder.cur_idx)
+        self.changeDescription()
 
     def cyclePlotLeft(self):
         """Change plot (cycle left in the plot_holder)

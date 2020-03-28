@@ -12,13 +12,15 @@ import speed.pwc.run as pwc
 import speed.monodepth.monodepth_simple as monodepth
 from natsort import natsorted
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 import os
 import cv2
 import flowiz as fz
 from PIL import Image
 import logging
-from scipy.optimize import minimize
+from sklearn.model_selection import ParameterGrid
+import pandas
 
 def createSpeedErrorPlotMain(params):
     """Creates combined plot with speed and error values
@@ -203,8 +205,14 @@ class CalculationRunner(QObject):
         self.finished.emit()
 
     @pyqtSlot()
-    def startCalc(self):
+    def startCalc(self, update=0):
         """Start speed calculation with or without superpixels
+        
+        Keyword Arguments:
+            update {int} -- helper for accurate progress update with optimization (default: {0})
+        
+        Returns:
+            int -- helper for progress update (iteration number)
         """
         img_fns = utils.list_directory(self.img_dir)
         fst_img_fns, snd_img_fns = img_fns, img_fns
@@ -239,9 +247,10 @@ class CalculationRunner(QObject):
             with tqdm.tqdm(total=len(fst_img_fns)) as pbar:
                 count = 1
                 for _, i in enumerate(pool.imap_unordered(calculate_velocity, params)):
-                    self.update.emit(count)
+                    self.update.emit(count + update)
                     pbar.update()
                     count += 1
+        return count + update
         
     @pyqtSlot()
     def startOf(self):
@@ -267,27 +276,24 @@ class CalculationRunner(QObject):
     #    params = zip(of_list, itertools.repeat(self.of_dir), itertools.repeat(self.of_model)) 
     #    self.startMultiFunc(ofMain, params)
 
-    def con(params):
-        if params[1] > params[0]:
-            return 0
-        else:
-            return 1
 
-    def minFunc(self, params):
+
+    def minFunc(self, params, count):
+        """Optimization main function. Called by the grid search.
+        
+        Arguments:
+            params {(int,int)} -- Tuple: parameter for low and high
+            count {int} -- count helper for progress update
+        
+        Returns:
+            (float, int) -- Tuple: rmse result for the given parameter run and count helper for progress update
+        """
         self.low = params[0]
         self.high = params[1]
-        self.startCalc()
 
-    @pyqtSlot()
-    def startOptimization(self):
-        """Parameter optimization
-        """
-        #cons = {'type':'eq', 'fun': con}
-        #m = minimize(minFunc, [self.low, self.high], bounds=[(0.0,1.0), (0.0,1.0)], constraints=cons)
-        #print(m)
+        count = self.startCalc(count)
         np_dir = utils.getResultDirs()["Numbers"]
-        self.startCalc()
-        speeds_dir = utils.list_directory(np_dir, extension='speed.npy')
+        speeds_dir = utils.list_directory(os.path.join(self.out_dir, np_dir), extension='speed.npy')
         speeds = []
         for s in speeds_dir:
             speeds.append(np.load(s))
@@ -295,8 +301,30 @@ class CalculationRunner(QObject):
         #errors.append(rmse)
         for s in speeds_dir:
             os.remove(s)
-        print(rmse)
-        input("Wait")
+        print("RMSE {0}, Low {1} High {2}".format(rmse, self.low, self.high))
+        self.csv_list.append({"Low":self.low, "High": self.high, "RMSE": rmse})
+        return rmse, count
+
+    @pyqtSlot()
+    def startOptimization(self):
+        """Parameter optimization
+        """
+        self.csv_list = []
+        param_grid = {"low": [0.0, 0.1, 0.2], "high" : [0.8, 0.9, 1.0]}
+        grid = ParameterGrid(param_grid)
+        count = 0
+        for params in grid:
+            _, count = self.minFunc([params["low"], params["high"]], count)
+        csv_file = pandas.DataFrame(self.csv_list)
+        csv_file.index.name = "Iteration"
+        csv_file.to_csv(os.path.join(self.out_dir, "optimization.csv"), header=True)
+        print(sorted(self.csv_list, key=lambda k: k["RMSE"]))
+        print(sorted(self.csv_list, key=lambda k: k["RMSE"]))
+        best = sorted(self.csv_list, key=lambda k: k["RMSE"])[0]
+        self.low = best["Low"]
+        self.high = best["High"]
+        logging.info("Best low {0} high {1}, with rmse {2}".format(self.low, self.high, best["RMSE"]))
+        self.startCalc()
 
     @pyqtSlot()
     def startMultiFunc(self, run_func, params): # A slot takes no params

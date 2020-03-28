@@ -27,8 +27,11 @@ class cycleVid:
 
     def add(self, name, vid_path):
         self.container.append((name, vid_path))
+        print("Add", name)
 
     def current(self):
+        print(len(self.container))
+        print(self.idx)
         return self.container[self.idx][1]
     
     def currentType(self):
