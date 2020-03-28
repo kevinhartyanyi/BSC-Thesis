@@ -89,6 +89,20 @@ class DialogTester(unittest.TestCase):
         self.run.checkFiles()
         self.assertEqual(self.run.ui.c_super_pixel_video.isEnabled(), True)        
 
+    def test_optimize(self):
+        self.assertEqual(self.run.ui.t_low.isEnabled(), True)
+        self.assertEqual(self.run.ui.t_high.isEnabled(), True)
+        self.assertEqual(self.run.ui.c_optimize.isChecked(), False)
+        self.run.ui.c_optimize.setChecked(True)
+        self.assertEqual(self.run.ui.t_low.isEnabled(), False)
+        self.assertEqual(self.run.ui.t_high.isEnabled(), False)
+    
+    def test_optimize_enable(self):
+        self.assertEqual(self.run.ui.c_optimize.isEnabled(), False)
+        self.run.user["GT"] = "something.npy"
+        self.run.checkFiles()
+        self.assertEqual(self.run.ui.c_optimize.isEnabled(), True)        
+
 class MainTester(unittest.TestCase):
     def setUp(self):
         self.run = MainWindow(app=appctxt)

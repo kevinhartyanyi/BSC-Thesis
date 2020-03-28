@@ -86,6 +86,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.c_error_plot.stateChanged.connect(self.checkFiles)
         self.ui.c_speed_plot.stateChanged.connect(self.checkFiles)
         self.ui.combo_superpixel.currentIndexChanged.connect(self.changeSuperPixelMethod)
+        self.ui.c_optimize.stateChanged.connect(self.checkFiles)
 
         #self.ui.c_of.stateChanged.connect(self.checkVideoCreation)
         #self.ui.c_back_of.stateChanged.connect(self.checkVideoCreation)
@@ -157,7 +158,7 @@ class Dialog(QDialog, Ui_Dialog):
         """Open file with ground truth values for speed
         """
         gt_dir = self.openFile(self.user["GT"], title="Load Ground Truth Data", 
-                                file_filter="Numpy Files (*.npy);;All files (*)")
+                                file_filter="Numpy Files (*.npy)")
         if gt_dir != "":
             self.user["GT"] = gt_dir
             self.ui.l_ground_truth.setText("Load: " + self.splitPath(gt_dir)[-1])
@@ -222,7 +223,10 @@ class Dialog(QDialog, Ui_Dialog):
 
         self.create_super_pixel_label = (self.super_pixel_method != "" and not os.path.exists(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)))
 
-        self.ui.c_error_plot.setEnabled(self.user["GT"] != "")
+        self.ui.t_low.setEnabled(not self.ui.c_optimize.isChecked())
+        self.ui.t_high.setEnabled(not self.ui.c_optimize.isChecked())
+        self.ui.c_optimize.setEnabled(self.gt_exist)
+        self.ui.c_error_plot.setEnabled(self.gt_exist)
         self.ui.c_error_plot_video.setEnabled(self.ui.c_error_plot.isChecked())
         self.ui.c_speed_plot_video.setEnabled(self.ui.c_speed_plot.isChecked())
         self.ui.c_super_pixel_video.setEnabled(self.ui.combo_superpixel.currentIndex() != 0)
@@ -268,7 +272,7 @@ class Dialog(QDialog, Ui_Dialog):
     #    self.ui.l_depth.setText("Load: " + name)
     #    self.checkFiles()
 
-    def openFile(self, folder, title="Open Video", file_filter="Video Files (*.mp4 *.avi *.mkv);;All files (*)"):
+    def openFile(self, folder, title="Open Video", file_filter="Video Files (*.mp4 *.avi *.mkv)"):
         """Open QFileDialog with the given parameters, returns selected file
         
         Arguments:
@@ -276,7 +280,7 @@ class Dialog(QDialog, Ui_Dialog):
         
         Keyword Arguments:
             title {str} -- title of the file dialog (default: {"Open Video"})
-            file_filter {str} -- filter for file extensions (default: {"Video Files (*.mp4 *.avi *.mkv);;All files (*)"})
+            file_filter {str} -- filter for file extensions (default: {"Video Files (*.mp4 *.avi *.mkv)"})
         
         Returns:
             [str] -- path to file
@@ -506,6 +510,7 @@ class Dialog(QDialog, Ui_Dialog):
             "create_draw": self.ui.c_draw.isChecked(),
             "create_velocity": self.ui.c_velocity.isChecked(),
             "create_video_fps": int(self.ui.t_fps.text()),
+            "optimize_params": self.ui.c_optimize.isChecked(),
             "super_pixel_label_dir": os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)
         }
 
@@ -675,6 +680,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.run_dict["Back_Of"] = {"Run": not self.back_of_exist, "Progress":ori_images, "Text":"Running back optical flow"}
         self.run_dict["Depth"] = {"Run": not self.depth_exist, "Progress":ori_images, "Text":"Running depth estimation"}
         self.run_dict["Speed"] = {"Run": True, "Progress":ori_images, "Text":"Running speed estimation"}
+        self.run_dict["Optimization"] = {"Run": False, "Progress":ori_images, "Text":"Running parameter optimization"}
 
         self.run_dict["Of_Vid"] = {"Run": self.ui.c_of.isChecked(), "Progress":ori_images, "Text":"Creating optical flow video"}
         self.run_dict["Back_Of_Vid"] = {"Run": self.ui.c_back_of.isChecked(), "Progress":ori_images, "Text":"Creating backward optical flow video"}

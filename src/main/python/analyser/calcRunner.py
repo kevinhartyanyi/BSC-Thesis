@@ -133,6 +133,7 @@ class CalculationRunner(QObject):
         self.create_velocity = param_dict["create_velocity"]
         self.super_pixel_label_dir = param_dict["super_pixel_label_dir"]
         self.create_video_fps = param_dict["create_video_fps"]
+        self.optimize = param_dict["optimize_params"]
         self.ground_truth_error = False
         self.video_frame = 0
 
@@ -162,10 +163,16 @@ class CalculationRunner(QObject):
         self.checkRun("Depth", self.startDepth)
         self.checkRun("Super_Pixel_Label", self.createSuperPixel)
         #
-        self.labelUpdate.emit(self.run_dict["Speed"])
-        self.startCalc()
-
-        self.updateFin.emit()
+        if self.optimize:
+            logging.info("Start Paramter Optimization")
+            self.labelUpdate.emit(self.run_dict["Optimization"])
+            self.startOptimization()
+            self.updateFin.emit()
+        else:
+            logging.info("Start Calculation")
+            self.labelUpdate.emit(self.run_dict["Speed"])
+            self.startCalc()
+            self.updateFin.emit()
         #
         self.checkRun("Of_Vid", self.createVid, self.of_dir, self.out_dir, "of.mp4", self.create_video_fps)
         self.checkRun("Back_Of_Vid", self.createVid, self.back_of_dir, self.out_dir, "back_of.mp4", self.create_video_fps)
@@ -258,6 +265,21 @@ class CalculationRunner(QObject):
     #    of_list = [(img_list[ind], img_list[ind+1], ind) for ind in range(len(img_list) - 1)]
     #    params = zip(of_list, itertools.repeat(self.of_dir), itertools.repeat(self.of_model)) 
     #    self.startMultiFunc(ofMain, params)
+
+    @pyqtSlot()
+    def startOptimization(self):
+        np_dir = utils.getResultDirs()["Numbers"]
+        self.startCalc()
+        speeds_dir = utils.list_directory(np_dir, extension='speed.npy')
+        speeds = []
+        for s in speeds_dir:
+            speeds.append(np.load(s))
+        rmse = utils.error_comparison_Speed_Vecors(speeds,self.speed_gt[1:])
+        #errors.append(rmse)
+        for s in speeds_dir:
+            os.remove(s)
+        print(rmse)
+        input("Wait")
 
     @pyqtSlot()
     def startMultiFunc(self, run_func, params): # A slot takes no params
@@ -367,7 +389,7 @@ class CalculationRunner(QObject):
         
         csv = None
         if self.create_csv:
-            csv = os.path.join(self.out_dir, '_error_Simple_OF.csv')
+            csv = os.path.join(self.out_dir, "_error_Simple_OF.csv")
         try:
             _ = utils.error_comparison_Speed_Vecors(speeds,self.speed_gt[1:],csv=csv)
         except:
