@@ -18,6 +18,7 @@ import cv2
 import flowiz as fz
 from PIL import Image
 import logging
+from scipy.optimize import minimize
 
 def createSpeedErrorPlotMain(params):
     """Creates combined plot with speed and error values
@@ -266,8 +267,24 @@ class CalculationRunner(QObject):
     #    params = zip(of_list, itertools.repeat(self.of_dir), itertools.repeat(self.of_model)) 
     #    self.startMultiFunc(ofMain, params)
 
+    def con(params):
+        if params[1] > params[0]:
+            return 0
+        else:
+            return 1
+
+    def minFunc(self, params):
+        self.low = params[0]
+        self.high = params[1]
+        self.startCalc()
+
     @pyqtSlot()
     def startOptimization(self):
+        """Parameter optimization
+        """
+        #cons = {'type':'eq', 'fun': con}
+        #m = minimize(minFunc, [self.low, self.high], bounds=[(0.0,1.0), (0.0,1.0)], constraints=cons)
+        #print(m)
         np_dir = utils.getResultDirs()["Numbers"]
         self.startCalc()
         speeds_dir = utils.list_directory(np_dir, extension='speed.npy')
