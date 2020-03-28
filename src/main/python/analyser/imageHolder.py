@@ -6,6 +6,7 @@ import imageLoader
 #from PyQt5.QtCore import *
 from PyQt5.QtCore import QThread, QThreadPool
 from multiprocessing import Pool
+import logging
 
 class imageHolder:
 
@@ -22,7 +23,7 @@ class imageHolder:
         self.cur_idx = -1
         self.img_dict = {}
         self.threadpool = QThreadPool()
-        print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
+        logging.info("Multithreading with maximum {0} threads".format(self.threadpool.maxThreadCount()))
 
     def setup(self, img_list, width, height, colour, n_frame=None):
         """Setup for the class to function properly
@@ -154,7 +155,7 @@ class imageHolder:
         """
         img = Image.open(img_path)
         img = self.prepareImg(img)
-        print("Added: ", idx)
+        logging.info("Added: {0}".format(idx))
         self.img_dict[idx] = (img, idx)
 
     def load(self, begin=None, end=None):
@@ -174,7 +175,7 @@ class imageHolder:
             #    self.list_idx = start + self.maxLen + 1
             #    return
             if self.list_idx >= self.vidLen:
-                print("Skip Load", self.list_idx, self.vidLen, start)
+                logging.info("Skip Load {0} {1} {2}".format(self.list_idx, self.vidLen, start))
                 #self.list_idx = start + self.maxLen + 1
 
                 #return
@@ -183,7 +184,7 @@ class imageHolder:
         img = Image.open(self.img_list[start])
         img = self.prepareImg(img)
         self.current = img
-        print("Loading...", start, load_len)
+        logging.info("Loading... {0} {1}".format(start, load_len))
         for i in range(start, load_len):
             worker = imageLoader.Worker(self.loadImg, self.img_list[self.list_idx], self.list_idx % self.maxLen) # Any other args, kwargs are passed to the run function
             self.threadpool.start(worker) 
@@ -207,7 +208,7 @@ class imageHolder:
         self.cur_idx -= 1
         if self.cur_idx >= self.vidLen:
             return self.current
-        print("Prev: ", self.cur_idx)
+        logging.info("Prev: {0}".format(self.cur_idx))
         img = Image.open(self.img_list[self.cur_idx])
         self.load(self.cur_idx, self.cur_idx + self.maxLen + 1)
         img = self.prepareImg(img)
@@ -225,13 +226,13 @@ class imageHolder:
         if self.cur_idx >= self.vidLen:
             return self.current
         elif cur not in self.img_dict:
-            print("Warning: Not in dictionary. Returning previous image")
+            logging.warning("Not in dictionary. Returning previous image")
             worker = imageLoader.Worker(self.loadImg, self.img_list[self.list_idx], cur) # Any other args, kwargs are passed to the run function
             self.threadpool.start(worker) 
             self.list_idx += 1
             return self.current
         
-        print("Current: ", self.list_idx, cur, self.img_dict[cur][1], self.cur_idx)
+        logging.info("Current: {0} {1} {2} {3}".format(self.list_idx, cur, self.img_dict[cur][1], self.cur_idx))
         img = self.img_dict[cur][0]    
         self.current = img    
 

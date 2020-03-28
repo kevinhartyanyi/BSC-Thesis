@@ -51,8 +51,7 @@ def run(img_dir, depth_dir, of_dir, of_back_dir, save_dir, speed_gt=None, high=1
     #for s in speeds_mask:
     #    masks.append(np.load(s))
 #
-    #print(len(speeds))
-    #print(speed_gt.shape)
+
     #_ = utils.error_comparison_Speed_Vecors(speeds,speed_gt[1:],csv=OUT_PATH+str(vid_id)+'_error_Simple_OF.csv')
     #if flow == "pwc":
     #    utils.create_speed_video_Speed_Vectors(vid.video, str(vid_id)+'_video.mp4', speeds, speed_gt, masks,
@@ -86,7 +85,6 @@ class VelocityCalculator(object):
         self.fst_depth_fn = fst_depth_fn
         self.snd_depth_fn = snd_depth_fn
         self.label_fn = label_fn
-        #print(label_fn)
         self.flow_fn = flow_fn
         self.out_dir = out_dir
         self.use_slic = use_slic
@@ -139,13 +137,10 @@ class VelocityCalculator(object):
 
             assert fst_img.shape == snd_img.shape
             height, width, _ = fst_img.shape
-            
-            print("A")
             # Read disparity maps
             fst_depth = self.read_depth(self.fst_depth_fn, width, height)
             avg_fst_depth = self.average(fst_depth, labels)
             snd_depth = self.read_depth(self.snd_depth_fn, width, height)
-            print("B")
             
             avg_flow[:, :, 0] = self.average(flow[:, :, 0], labels)
             avg_flow[:, :, 1] = self.average(flow[:, :, 1], labels)
@@ -153,7 +148,6 @@ class VelocityCalculator(object):
             # Shift labels and depth values respect to the average optical flow
             shifted_labels = self.calculate_shifted_labels(labels, avg_flow)
             avg_shifted_depth = self.average(snd_depth, shifted_labels)
-            print("C")
 
             # Calculate the velocity and the orientation
             velocity, orientation = \
@@ -162,14 +156,12 @@ class VelocityCalculator(object):
                                                                 avg_fst_depth, 
                                                                 avg_shifted_depth)
 
-            print("D")
             
 
             speed, speed_mask = utils.vector_speedOF_Simple(velocity, low=self.low, high=self.high) # Speed calculation
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_speed.npy'), speed)
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_mask.npy'), speed_mask)
             utils.save_as_image(os.path.join(base_fn, MASK_DIR, img_num + '_speed_masked.png'), speed_mask*50, min_val=0, max_val=utils.max_depth) 
-            print("E")
 
             if self.create_draw:
                 back_flow = self.read_flow(self.back_flow) 
@@ -189,7 +181,6 @@ class VelocityCalculator(object):
             plt.matshow(speed_superpixel)
             plt.colorbar()
             plt.savefig(os.path.join(base_fn, SUPER_PIXEL_DIR, "{0}_superpixel.png".format(img_num)), bbox_inches='tight', dpi=150)
-            print("F")
 
             # Visualize the results if needed
             #if self.visualize_results:
@@ -272,9 +263,7 @@ class VelocityCalculator(object):
             if self.create_velocity:
                 image = velocity.copy()
                 plt.imsave(os.path.join(base_fn, VL_DIR, img_num + '_velocity.png'), image.astype('uint8'))
-            #print("")
-            #print(np.sort(np.unique(fst_depth)))
-            #print("")
+
 
             #inaccurate_mono = fst_depth > 115
             inaccurate_mono = fst_depth > 30

@@ -1,4 +1,4 @@
-
+import logging
 class cycleVid:
     def __init__(self):
         super().__init__()
@@ -14,10 +14,9 @@ class cycleVid:
 
     def get(self, name):
         re = None
-        print("L:", len(self.container))
+        logging.info("L: {0}".format(len(self.container)))
         self.idx = 0
         for n, vid in self.container:
-            print(n)
             if n == name:
                 re = vid
                 break
@@ -41,7 +40,7 @@ class cycleVid:
         else:
             self.idx = len(self.container) - 1
             
-        print("Cycle:",self.container[self.idx][0])
+        logging.info("Cycle: {0}".format(self.container[self.idx][0]))
         return self.container[self.idx][1]
 
     def up(self):
@@ -50,8 +49,8 @@ class cycleVid:
         else:
             self.idx = 0
             
-        print("Cycle:", self.container[self.idx][0])
-        print("Cycle:", self.idx, len(self.container))
+        logging.info("Cycle: {0}".format(self.container[self.idx][0]))
+        logging.info("Cycle: {0}".format(self.idx, len(self.container)))
         return self.container[self.idx][1]
     
 

@@ -6,13 +6,14 @@ from dialogUI import Ui_Dialog
 from dialogInfo import DialogInfo
 import platform
 import json
-import calcRunner
+#import calcRunner
 import os
 import re
 import shutil
 import speed.speed_vectors as speed
 from speed.utils import list_directory, getResultDirs
 import readline
+import logging
 
 result_dir = getResultDirs()
 RESULTS = result_dir["Results"]
@@ -106,6 +107,7 @@ class Dialog(QDialog, Ui_Dialog):
         """Change the value of the high drop based on the text inside t_high
         """
         self.changeLowHigh(self.ui.t_high, t_type="high")
+
     
     def changeLowHigh(self, text_widget, t_type="low"):
         """Change the value of low/high drop
@@ -117,7 +119,6 @@ class Dialog(QDialog, Ui_Dialog):
             t_type {str} -- which line edit was given (default: {"low"})
         """
         check = re.search("(0[.][0-9]+|1)", text_widget.text())
-        print(self.ui.t_low.text(), self.ui.t_high.text())
         if check and self.ui.t_low.text() != self.ui.t_high.text():
             num = check.group()
             i_num = float(num)    
@@ -127,7 +128,7 @@ class Dialog(QDialog, Ui_Dialog):
                 self.high = i_num
             text_widget.setText(str(i_num))
         else:
-            print("Wrong Input For low or high")
+            logging.info("Wrong Input For low or high")
             if t_type == "low":
                 text_widget.setText("0.309")
                 self.low = 0.309
@@ -172,12 +173,12 @@ class Dialog(QDialog, Ui_Dialog):
             num = check.group()
             fps = int(num)
             if fps > self.fps_limit:
-                print("Warning: Too big number for fps. Falling back to {} fps.".format(self.fps_limit))
+                logging.warning("Too big number for fps. Falling back to {0} fps.".format(self.fps_limit))
                 fps = self.fps_limit
             self.fps = fps
             self.ui.t_fps.setText(str(fps))
         else:
-            print("Wrong Input For Fps")
+            logging.info("Wrong Input For Fps")
             self.ui.t_fps.setText("30")
             self.fps = 30
 
@@ -220,8 +221,6 @@ class Dialog(QDialog, Ui_Dialog):
         self.gt_exist = self.user["GT"] != ""
 
         self.create_super_pixel_label = (self.super_pixel_method != "" and not os.path.exists(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)))
-        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", self.super_pixel_method != "")
-        print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", not os.path.exists(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)))
 
         self.ui.c_error_plot.setEnabled(self.user["GT"] != "")
         self.ui.c_error_plot_video.setEnabled(self.ui.c_error_plot.isChecked())
@@ -316,7 +315,7 @@ class Dialog(QDialog, Ui_Dialog):
         """Load user file if exists, create empty otherwise
         """ 
         if(os.path.isfile(self.user_file)):
-            print("Found User File")
+            logging.info("Found User File")
             with open(self.user_file, "r") as json_file:
                 self.user = json.load(json_file)            
             self.checkFiles()
@@ -355,9 +354,6 @@ class Dialog(QDialog, Ui_Dialog):
         #elif os.path.exists(self.user["Video"]):
         #    ori_images = count_frames(self.user["Video"])
 
-
-        #print(count_frames(self.user["Video"]))
-        print(os.path.exists(self.savePathJoin("Images")))
 
         # Check image folder
         if self.img_exist and not os.path.exists(self.savePathJoin("Images")):
@@ -426,10 +422,6 @@ class Dialog(QDialog, Ui_Dialog):
             ori_images)))
             error_types.append("LabelError")
 
-        for key in errors:
-            print(key)
-            for e in errors[key]:
-                print("     " + str(e))
 
         answer = ""
         if len(errors["Info"]) > 0 and len(errors["Critical"]) == 0:
@@ -458,7 +450,7 @@ class Dialog(QDialog, Ui_Dialog):
 
         if (answer != int("0x00040000", 16)):
             for ty in error_types:
-                print("Solve error:", ty)
+                logging.info("Solve error: {0}".format(ty))
                 if ty == "NoImage":
                     self.img_exist = False
                     self.of_exist = False
@@ -526,7 +518,7 @@ class Dialog(QDialog, Ui_Dialog):
         
         self.disableButtons()
         self.sendUser.emit(self.user)
-        print("Start Run")
+        logging.info("Start Run Class")
         self.createDirs()
         self.buildRunDict()
         
@@ -534,7 +526,7 @@ class Dialog(QDialog, Ui_Dialog):
         """Starting calculations on another thread
         """
         # 1 - create Worker and Thread inside the Form
-        self.worker = calcRunner.CalculationRunner(self.params_dict)
+        #self.worker = calcRunner.CalculationRunner(self.params_dict)
             #, self.savePathJoin("Images"),
             #self.savePathJoin("Depth"), self.savePathJoin("Of"), self.savePathJoin("Back_Of"),
             #self.user["Save"], None, 1, 0.309, self.run_dict, self.app.get_resource(os.path.join("of_models", "network-default.pytorch")),
@@ -564,17 +556,15 @@ class Dialog(QDialog, Ui_Dialog):
             value {int} -- current progress
         """
         self.progressBar.setValue(value)        
-        print("Update to:",self.run_count)
+        logging.info("Update progressbar to: {0}".format(self.run_count))
         if self.progressAllBar is not None:
             self.run_count += 1
             self.progressAllBar.setValue(self.run_count)
-        else:
-            print("None")
 
     def finishThread(self):
         """Clean up after calculations thread finished
         """
-        print("Fin Thread")
+        logging.info("Fin Thread")
         self.buildCreatedDict()    
         self.cleanThread()
         self.accept()
@@ -582,7 +572,7 @@ class Dialog(QDialog, Ui_Dialog):
     def cleanThread(self):
         """Cleans the active thread
         """
-        print("Clean Thread")
+        logging.info("Clean Thread")
         self.worker.stop()
         self.thread.quit()
         self.thread.wait()
@@ -601,7 +591,7 @@ class Dialog(QDialog, Ui_Dialog):
     def showProgressBar(self):
         """Creates two progressbars to show how the calculation progresses
         """
-        print("Show progress bar")
+        logging.info("Show progress bar")
         self.progressLabel = QLabel(self)
         font = QFont()
         font.setFamily("GE Inspira")
@@ -619,7 +609,7 @@ class Dialog(QDialog, Ui_Dialog):
         """Adds the progress bar which tracks the progress of all calculations
         """
         all_run = sum([self.run_dict[key]["Progress"] for key in self.run_dict if self.run_dict[key]["Run"]])
-        print("All run:", all_run)
+        logging.info("All run: {0}".format(all_run))
         self.progressAllBar = QProgressBar(self) # Progress bar created
         self.progressAllBar.setMinimum(1)
         self.progressAllBar.setMaximum(all_run)
@@ -652,7 +642,7 @@ class Dialog(QDialog, Ui_Dialog):
 
             self.progressLabel.setText("Create images from video")
 
-            self.worker = calcRunner.CalculationRunner(self.params_dict)  # no parent!
+            #self.worker = calcRunner.CalculationRunner(self.params_dict)  # no parent!
             self.thread = QThread()  # no parent!
 
             self.worker.labelUpdate.connect(self.labelUpdate)
@@ -699,8 +689,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.run_dict["Super_Pixel_Video"] = {"Run": self.ui.combo_superpixel.currentIndex() != 0 and self.ui.c_super_pixel_video.isChecked(), "Progress":ori_images, "Text":"Creating super pixel video"}
         self.run_dict["Super_Pixel_Label"] = {"Run": self.create_super_pixel_label, "Progress":ori_images, "Text":"Creating {0} superpixel labels".format(self.super_pixel_method)}
 
-        #print("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",self.super_pixel_method != "" and not os.path.exists(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)))
-        print("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT", self.create_super_pixel_label)
+        
         #self.ui.combo_superpixel.currentIndex() != 0
 
         self.addAllProgressBar()        
@@ -758,7 +747,7 @@ class Dialog(QDialog, Ui_Dialog):
     def createDirs(self):
         """Create or recreate (destroy and create) directories for the calculations
         """
-        print("Creating Directories")
+        logging.info("Creating Directories")
 
         if not self.img_exist:
             #self.createDir("Images")

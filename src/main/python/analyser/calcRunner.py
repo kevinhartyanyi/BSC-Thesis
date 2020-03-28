@@ -17,7 +17,7 @@ import os
 import cv2
 import flowiz as fz
 from PIL import Image
-
+import logging
 
 def createSpeedErrorPlotMain(params):
     """Creates combined plot with speed and error values
@@ -26,7 +26,7 @@ def createSpeedErrorPlotMain(params):
         params {tuple} -- parameters for the function
     """
     speeds, ground_truth, i, out_dir = params
-    print("Creating speed and error plot {0}".format(i))
+    logging.info("Creating speed and error plot {0}".format(i))
 
     est, = plt.plot(speeds[:i], "m", label="Estimated Speed")
     gt, = plt.plot(ground_truth[:i], "b", label="True Speed")
@@ -45,7 +45,7 @@ def createErrorPlotMain(params):
     """
     error, i, out_dir = params
 
-    print("Creating plot {0}".format(i))
+    logging.info("Creating plot {0}".format(i))
     plt.plot(error[:i], "r")
     plt.ylabel("Error in km/h")
     plt.xlabel("Frame number")
@@ -82,7 +82,7 @@ def createSpeedPlotMain(params):
         params {tuple} -- parameters for the function
     """
     speeds, i, out_dir = params
-    print("Creating speed plot {0}".format(i))
+    logging.info("Creating speed plot {0}".format(i))
 
     plt.plot(speeds[:i], "m")
     plt.ylabel("Speed in km/h")
@@ -91,17 +91,6 @@ def createSpeedPlotMain(params):
     plt.grid(axis='y', linestyle='-')
     plt.savefig(os.path.join(out_dir, "{0}_speed.png".format(i)), bbox_inches='tight', dpi=150)
         
-
-#def ofMain(params):
-#    (img1, img2, ind), of_dir, of_model = params
-#    print("Running optical flow on:", img1, img2)
-#    flo_file = os.path.join(of_dir,"{0}.flo".format(ind))
-#    pwc.setupArguments(model=of_model, first_img=img1,
-#    second_img=img2, save_path=flo_file)
-#    pwc.run()
-#    # Transform from flo to png
-#    flow = fz.convert_from_file(flo_file)
-#    Image.fromarray(flow).save(os.path.join(of_dir,"{0}.png".format(ind)))
 
 class CalculationRunner(QObject):
     finished = pyqtSignal()
@@ -154,11 +143,11 @@ class CalculationRunner(QObject):
         """Starts the calculations
         """   
         if self.send_video_frame:
-            print("Only run image create")
+            logging.info("Only run image create")
             self.imagesFromVideo(self.vid_path, self.img_dir, "vid")
             self.videoFrame.emit(self.video_frame)
             return
-        print("Start Main")
+        logging.info("Start Main Run")
         #if self.super_pixel_method != "" and len(os.path.join(self.out_dir, "Super_Pixel", self.super_pixel_method) == 0):
         #    self.createSuperPixel()
         
@@ -219,15 +208,7 @@ class CalculationRunner(QObject):
         calculate_velocity = calculate_velocity_and_orientation_wrapper
 
 
-        #print(len(flow_fns))
-        #print(len(fst_img_fns))
-        #print(len(snd_img_fns))
-        #print(len(fst_disp_fns))
-        #print(len(snd_disp_fns))
-        #print(len(label_fns))
-        #assert len(flow_fns) == len(fst_img_fns) 
         assert len(fst_img_fns) == len(snd_img_fns) 
-        #assert len(flow_fns) == len(fst_disp_fns)
         assert len(fst_disp_fns) == len(snd_disp_fns) 
         if self.back_of_dir != None:
             assert len(flow_fns) == len(back_flow)
@@ -261,7 +242,7 @@ class CalculationRunner(QObject):
         img_list = utils.list_directory(self.img_dir)
         of_list = [(img_list[ind], img_list[ind+1], ind) for ind in range(len(img_list) - 1)]
         for ind in range(len(img_list) - 1):
-            print("Running optical flow on:", img_list[ind], img_list[ind+1])
+            logging.info("Running optical flow on: {0} {1}".format(img_list[ind], img_list[ind+1]))
             flo_file = os.path.join(self.of_dir,"{0}.flo".format(ind))
             pwc.setupArguments(model=self.of_model, first_img=img_list[ind],
             second_img=img_list[ind+1], save_path=flo_file)
@@ -299,7 +280,7 @@ class CalculationRunner(QObject):
 
         img_list = utils.list_directory(self.img_dir)
         for ind in reversed(range(len(img_list) - 1)):
-            print("Running back optical flow on:", img_list[ind], img_list[ind-1])
+            logging.info("Running back optical flow on: {0} {1}".format(img_list[ind], img_list[ind-1]))
             back_flo_file = os.path.join(self.back_of_dir,"{0}.flo".format(ind))
             pwc.setupArguments(model=self.of_model, first_img=img_list[ind],
             second_img=img_list[ind-1], save_path=back_flo_file)
@@ -316,7 +297,7 @@ class CalculationRunner(QObject):
         """
         img_list = utils.list_directory(self.img_dir)
         for i, img in enumerate(img_list):
-            print("Running depth estimation on:", img)
+            logging.info("Running depth estimation on: {0}".format(img))
             monodepth.run(image_path=img, checkpoint_path=self.depth_model, save_path=os.path.join(self.depth_dir, ""))
             self.update.emit(i)
         
@@ -336,7 +317,6 @@ class CalculationRunner(QObject):
         ret,frame = cam.read() 
         while(ret):
             name = os.path.join(save_path, "{0}_{1}.png".format(currentframe, vid_name))
-            print ('Creating...' + name) 
     
             cv2.imwrite(name, frame) 
             currentframe += 1
@@ -353,7 +333,7 @@ class CalculationRunner(QObject):
     def createSuperPixel(self):
         """Start super pixel calculation on multiple cpu cores
         """
-        print("Create SUPER pixel label")
+        logging.info("Create SUPER pixel label")
         images = utils.list_directory(self.img_dir, extension=".png")
         params = zip(itertools.repeat(self.super_pixel_method), itertools.repeat(images), range(0, len(images)), itertools.repeat(self.super_pixel_label_dir))
         self.startMultiFunc(createSuperPixelMain, params)
@@ -371,24 +351,7 @@ class CalculationRunner(QObject):
         params = zip(itertools.repeat(speeds), range(1, len(speeds) + 1), itertools.repeat(os.path.join(self.out_dir, self.plot_speed_dir)))
         self.startMultiFunc(createSpeedPlotMain, params)
 
-#    @pyqtSlot()
-#    def createSpeedPlot_old(self):
-#        plt.clf()
-#        speeds_dir = utils.list_directory(os.path.join(self.out_dir, self.numbers_dir), extension='speed.npy')
-#        speeds_dir = natsorted(speeds_dir)
-#        speeds = []
-#        for i, s in enumerate(speeds_dir):
-#            speeds.append(np.load(s))
-#            print("Creating speed plot {0}".format(i))
-#
-#            plt.plot(speeds, "m")
-#            plt.ylabel("Speed in km/h")
-#            plt.xlabel("Frame number")
-#            #plt.xticks(np.arange(0, len(speeds), 1))
-#            plt.grid(axis='y', linestyle='-')
-#            plt.savefig(os.path.join(os.path.join(self.out_dir, self.plot_speed_dir), "{0}_speed.png".format(i)), bbox_inches='tight', dpi=150)
-#            
-#            self.update.emit(i)
+
 
 
     def createErrorPlot(self):
@@ -420,29 +383,7 @@ class CalculationRunner(QObject):
         self.startMultiFunc(createErrorPlotMain, params)
 
 
-#    @pyqtSlot()
-#    def createErrorPlot_old(self):
-#        plt.clf()
-#        speeds_dir = utils.list_directory(os.path.join(self.out_dir, self.numbers_dir), extension='speed.npy')
-#        speeds_dir = natsorted(speeds_dir)
-#        speeds = []
-#        for s in speeds_dir:
-#            speeds.append(np.load(s))
-#
-#        _ = utils.error_comparison_Speed_Vecors(speeds,self.speed_gt[1:],csv=os.path.join(self.out_dir, '_error_Simple_OF.csv'))
-#
-#        error = self.speed_gt[1:] - speeds
-#        for i in range(1, len(error) + 1):
-#            print("Creating plot {0}".format(i))
-#
-#            plt.plot(error[:i], "r")
-#            plt.ylabel("Error in km/h")
-#            plt.xlabel("Frame number")
-#            #plt.xticks(np.arange(0, len(speeds), 1))
-#            plt.grid(axis='y', linestyle='-')
-#            plt.savefig(os.path.join(os.path.join(self.out_dir, self.plot_error_dir), "{0}_error.png".format(i)), bbox_inches='tight', dpi=150)
-#            
-#            self.update.emit(i)
+
 #
 
     def createSpeedErrorPlot(self):
@@ -461,28 +402,7 @@ class CalculationRunner(QObject):
         params = zip(itertools.repeat(speeds), itertools.repeat(ground_truth), range(1, len(ground_truth) + 1), itertools.repeat(os.path.join(self.out_dir, self.plot_speed_dir)))
         self.startMultiFunc(createSpeedErrorPlotMain, params)
         
-#    @pyqtSlot()
-#    def createSpeedErrorPlot_old(self):
-#        plt.clf()
-#        speeds_dir = utils.list_directory(os.path.join(self.out_dir, self.numbers_dir), extension='speed.npy')
-#        speeds_dir = natsorted(speeds_dir)
-#        speeds = []
-#        for s in speeds_dir:
-#            speeds.append(np.load(s))
-#
-#        ground_truth = self.speed_gt[1:]
-#        for i in range(1, len(ground_truth) + 1):
-#            print("Creating speed and error plot {0}".format(i))
-#
-#            est, = plt.plot(speeds[:i], "m", label="Estimated Speed")
-#            gt, = plt.plot(ground_truth[:i], "b", label="True Speed")
-#            plt.ylabel("Speed in km/h")
-#            plt.xlabel("Frame number")
-#            plt.legend(handles=[est,gt])
-#            #plt.xticks(np.arange(0, len(speeds), 1))
-#            plt.grid(axis='y', linestyle='-')
-#            plt.savefig(os.path.join(os.path.join(self.out_dir, self.plot_speed_dir), "{0}_speed.png".format(i)), bbox_inches='tight', dpi=150)
-#            self.update.emit(i)
+
 
     @pyqtSlot()
     def checkRun(self, run_item, run_function, *args, **kwargs):
@@ -513,7 +433,7 @@ class CalculationRunner(QObject):
         height, width, layers = frame.shape
         out = cv2.VideoWriter(os.path.join(save_path, vid_name),cv2.VideoWriter_fourcc(*"mp4v"), fps, (width, height))
         for i in range(len(images)):
-            print("Writing frame: {0}".format(i))
+            logging.info("Writing frame: {0}".format(i))
             # writing to a image array
             img = cv2.imread(images[i])
             resized = cv2.resize(img,(width,height)) 

@@ -1,7 +1,7 @@
 import os
 import cv2
 import numpy as np
-import skvideo.io
+#import skvideo.io
 import tqdm
 import pandas
 import speed.readFlowFile as readFlowFile
@@ -152,21 +152,7 @@ def calculate_velocity_and_orientation_vectors_vectorised(of_mask, next_position
 
     z = (snd_mono_2 - fst_mono) * fps * 3.6
 
-    """
-    TC = None
-    h, w, _ = flow.shape
-    of_hor = flow.copy()
-    ofhor_left = of_hor[:, :int(w/2), 0]
-    ofhor_right = of_hor[:, int(w/2):, 0]
-    if np.mean(ofhor_left) * np.mean(ofhor_right) > 1: # left and right horizontal OF have the same sign, i.e. turning
-        print("Turning")
-        #of_left = np.abs(of_hor[:, :int(w/2),0])
-        #of_right = np.abs(of_hor[:, int(w/2):,0])
-        disp_left = md[i, :, :int(w/2)]
-        disp_right = md[i, :, int(w/2):]       
-        
-        TC = abs(np.mean(ofhor_left)-np.mean(ofhor_right)) / np.mean(avg_md)
-    """
+    
     v = flow[:,:,0]
     u = flow[:,:,1]
     h_angle, v_angle = calc_angle_of_view(width_to_focal[fst_depth.shape[1]], u, v)

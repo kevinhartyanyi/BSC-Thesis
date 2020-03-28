@@ -324,6 +324,7 @@
      <string>File</string>
     </property>
     <addaction name="actionNew_Run"/>
+    <addaction name="actionShow_Log"/>
     <addaction name="actionExit"/>
    </widget>
    <addaction name="menuFile"/>
@@ -441,6 +442,11 @@
    </property>
    <property name="toolTip">
     <string>Jump to super pixel video</string>
+   </property>
+  </action>
+  <action name="actionShow_Log">
+   <property name="text">
+    <string>Show Log</string>
    </property>
   </action>
  </widget>
