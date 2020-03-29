@@ -318,9 +318,10 @@ class CalculationRunner(QObject):
         csv_file = pandas.DataFrame(self.csv_list)
         csv_file.index.name = "Iteration"
         csv_file.to_csv(os.path.join(self.out_dir, "optimization.csv"), header=True)
-        print(sorted(self.csv_list, key=lambda k: k["RMSE"]))
-        print(sorted(self.csv_list, key=lambda k: k["RMSE"]))
-        best = sorted(self.csv_list, key=lambda k: k["RMSE"])[0]
+        print("Try1",sorted(self.csv_list, key=lambda k: k["RMSE"]))
+        print("Try2",sorted(self.csv_list, key=lambda k: k["RMSE"] if k["RMSE"] != 0 else 100))
+        print("Try3",sorted(self.csv_list, key=lambda k: k["RMSE"] if not math.isnan(k["RMSE"]) else 100))
+        best = sorted(self.csv_list, key=lambda k: k["RMSE"] if k["RMSE"] != 0 else 100)[0]
         self.low = best["Low"]
         self.high = best["High"]
         logging.info("Best low {0} high {1}, with rmse {2}".format(self.low, self.high, best["RMSE"]))
