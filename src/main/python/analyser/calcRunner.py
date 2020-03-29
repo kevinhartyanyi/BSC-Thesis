@@ -171,11 +171,11 @@ class CalculationRunner(QObject):
             self.labelUpdate.emit(self.run_dict["Optimization"])
             self.startOptimization()
             self.updateFin.emit()
-        else:
-            logging.info("Start Calculation")
-            self.labelUpdate.emit(self.run_dict["Speed"])
-            self.startCalc()
-            self.updateFin.emit()
+        
+        logging.info("Start Calculation")
+        self.labelUpdate.emit(self.run_dict["Speed"])
+        self.startCalc()
+        self.updateFin.emit()
         #
         self.checkRun("Of_Vid", self.createVid, self.of_dir, self.out_dir, "of.mp4", self.create_video_fps)
         self.checkRun("Back_Of_Vid", self.createVid, self.back_of_dir, self.out_dir, "back_of.mp4", self.create_video_fps)
@@ -318,14 +318,11 @@ class CalculationRunner(QObject):
         csv_file = pandas.DataFrame(self.csv_list)
         csv_file.index.name = "Iteration"
         csv_file.to_csv(os.path.join(self.out_dir, "optimization.csv"), header=True)
-        print("Try1",sorted(self.csv_list, key=lambda k: k["RMSE"]))
-        print("Try2",sorted(self.csv_list, key=lambda k: k["RMSE"] if k["RMSE"] != 0 else 100))
-        print("Try3",sorted(self.csv_list, key=lambda k: k["RMSE"] if not math.isnan(k["RMSE"]) else 100))
-        best = sorted(self.csv_list, key=lambda k: k["RMSE"] if k["RMSE"] != 0 else 100)[0]
+        best = sorted(self.csv_list, key=lambda k: k["RMSE"] if not math.isnan(k["RMSE"]) else 100)[0]
         self.low = best["Low"]
         self.high = best["High"]
         logging.info("Best low {0} high {1}, with rmse {2}".format(self.low, self.high, best["RMSE"]))
-        self.startCalc()
+
 
     @pyqtSlot()
     def startMultiFunc(self, run_func, params): # A slot takes no params

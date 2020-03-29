@@ -27,7 +27,7 @@ class DialogTester(unittest.TestCase):
         self.assertEqual(self.run.ui.c_back_of.isChecked(), False)
         self.assertEqual(self.run.ui.c_error_plot_video.isEnabled(), False)
         self.assertEqual(self.run.ui.c_speed_plot_video.isEnabled(), False)
-        self.assertEqual(self.run.ui.c_error_plot.isEnabled(), False)
+        self.assertEqual(self.run.ui.c_error_plot.isEnabled(), self.run.gt_exist)
         self.assertEqual(self.run.ui.c_speed_plot.isChecked(), False)
     
     def test_fps_change(self):   
@@ -75,7 +75,7 @@ class DialogTester(unittest.TestCase):
     
     def test_error_plot(self):
         self.assertEqual(self.run.ui.c_error_plot_video.isEnabled(), False)
-        self.assertEqual(self.run.ui.c_error_plot.isEnabled(), False)
+        self.assertEqual(self.run.ui.c_error_plot.isEnabled(), self.run.gt_exist)
         self.run.user["GT"] = "something.npy"
         self.run.checkFiles()
         self.assertEqual(self.run.ui.c_error_plot_video.isEnabled(), False)
@@ -98,7 +98,7 @@ class DialogTester(unittest.TestCase):
         self.assertEqual(self.run.ui.t_high.isEnabled(), False)
     
     def test_optimize_enable(self):
-        self.assertEqual(self.run.ui.c_optimize.isEnabled(), False)
+        self.assertEqual(self.run.ui.c_optimize.isEnabled(), self.run.gt_exist)
         self.run.user["GT"] = "something.npy"
         self.run.checkFiles()
         self.assertEqual(self.run.ui.c_optimize.isEnabled(), True)        
