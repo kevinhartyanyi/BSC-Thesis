@@ -316,7 +316,7 @@
      <x>0</x>
      <y>0</y>
      <width>1189</width>
-     <height>36</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -324,6 +324,7 @@
      <string>File</string>
     </property>
     <addaction name="actionNew_Run"/>
+    <addaction name="actionInformation"/>
     <addaction name="actionShow_Log"/>
     <addaction name="actionExit"/>
    </widget>
@@ -447,6 +448,11 @@
   <action name="actionShow_Log">
    <property name="text">
     <string>Show Log</string>
+   </property>
+  </action>
+  <action name="actionInformation">
+   <property name="text">
+    <string>Information</string>
    </property>
   </action>
  </widget>

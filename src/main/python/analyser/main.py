@@ -263,6 +263,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.actionMask.triggered.connect(self.cycleToSelected)
         self.ui.actionBackOF.triggered.connect(self.cycleToSelected)
         self.ui.actionShow_Log.triggered.connect(self.showLog)
+        self.ui.actionInformation.triggered.connect(self.showInfo)
         self.ui.t_fps.textChanged.connect(self.changeFps)
         self.ui.b_video_up.clicked.connect(self.cycleUp)
         self.ui.b_video_down.clicked.connect(self.cycleDown)
@@ -416,6 +417,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.b_plot_left.setEnabled(True)
             self.ui.b_plot_right.setEnabled(True)
             self.ui.t_fps.setEnabled(True)
+            self.ui.t_frame.setEnabled(True)
 
     def startVideo(self): 
         """
@@ -441,6 +443,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.b_plot_left.setEnabled(False)
             self.ui.b_plot_right.setEnabled(False)
             self.ui.t_fps.setEnabled(False)
+            self.ui.t_frame.setEnabled(False)
 
             # 1 - create Worker and Thread inside the Form
             self.worker = worker.Worker(*self.image_holder.getStartData())  # no parent!

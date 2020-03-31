@@ -728,6 +728,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.c_error_plot.setEnabled(False)
         self.ui.c_error_plot_video.setEnabled(False)
         self.ui.c_speed_plot_video.setEnabled(False)
+        self.ui.c_optimize.setEnabled(False)
         #self.ui.b_depth.setEnabled(False)
         #self.ui.b_of.setEnabled(False)
 

@@ -153,12 +153,16 @@ class VelocityCalculator(object):
             if self.create_draw:
                 back_flow = self.read_flow(self.back_flow) 
                 of_mask, next_position, prev_position = utils.calc_bidi_errormap(flow, back_flow, tau=0.8)
-                incons_img = np.tile(255*of_mask[..., None], (1, 1, 3)).astype(np.uint8)
+                #incons_img = np.tile(255*of_mask[..., None], (1, 1, 3)).astype(np.uint8)
+                incons_img = np.tile(255*np.ones(of_mask[..., None].shape), (1, 1, 3)).astype(np.uint8)
                 incons_img = utils.draw_velocity_vectors(incons_img, next_position, relative_disp=False, color=(0, 0, 255))
-            
+                plt.imsave(os.path.join(base_fn, DRAW_DIR, img_num + '_draw.png'), incons_img.astype('uint8'))
+
+
             if self.create_velocity:
                 image = velocity.copy()
                 plt.imsave(os.path.join(base_fn, VL_DIR, img_num + '_velocity.png'), image.astype('uint8'))
+
 
             x = velocity[:,:,0]
             y = velocity[:,:,1]
@@ -205,7 +209,8 @@ class VelocityCalculator(object):
             #back = np.full_like(fst_mono, 0)
             #back[prev_position[..., 0], prev_position[..., 1]] = snd_mono
 
-            incons_img = np.tile(255*of_mask[..., None], (1, 1, 3)).astype(np.uint8)
+            #incons_img = np.tile(255*of_mask[..., None], (1, 1, 3)).astype(np.uint8)
+            incons_img = np.tile(255*np.ones(of_mask[..., None].shape), (1, 1, 3)).astype(np.uint8)
             incons_img = utils.draw_velocity_vectors(incons_img, next_position, relative_disp=False, color=(0, 0, 255))
             
             #tmp = snd_mono - fst_mono
