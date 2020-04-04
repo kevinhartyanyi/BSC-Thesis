@@ -12,6 +12,7 @@ import speed.computeColor as computeColor
 import imageio
 from skimage import measure
 from natsort import natsorted
+from scipy import ndimage
 
 RESULTS = 'results'
 OTHER_DIR = os.path.join(RESULTS, 'other')
@@ -97,7 +98,7 @@ def calculate_shifted_labels(labels, avg_flow):
         shifted_labels[sp_x, sp_y] = sp_id
     return shifted_labels
 
-def calculate_velocity_and_orientation_vectors(labels, shifted_labels, avg_flow, 
+def calculate_velocity_and_orientation_vectors_old(labels, shifted_labels, avg_flow, 
                                             avg_fst_depth, avg_shifted_depth):
     """
     Calculate the velocity and the oriention of each superpixel 
@@ -109,7 +110,7 @@ def calculate_velocity_and_orientation_vectors(labels, shifted_labels, avg_flow,
     :return: velocity (in km/h) and oriention matrix
     """
     velocity = np.zeros((labels.shape[0], labels.shape[1], 3), dtype=np.float32)
-    orientation = np.zeros((labels.shape[0], labels.shape[1], 3), dtype=np.float32)
+
     for sp_id in np.unique(labels):
         sp_x, sp_y = np.unravel_index(np.argmax(labels == sp_id, axis=None), labels.shape)
         v, u = avg_flow[sp_x, sp_y]
@@ -126,21 +127,52 @@ def calculate_velocity_and_orientation_vectors(labels, shifted_labels, avg_flow,
 
         velocity[labels == sp_id] = (y, x, z)
         orientation[labels == sp_id] = normalize((y, x, z))
-    return velocity, orientation
+    return velocity
 
-def calculate_velocity_and_orientation_vectors_vectorised(of_mask, next_position, prev_position, flow, 
-                                            fst_depth, snd_depth):
+def calculate_velocity_and_orientation_vectors(labels, shifted_labels, avg_flow, 
+                                            avg_fst_depth, avg_shifted_depth):
     """
     Calculate the velocity and the oriention of each superpixel 
     :param labels: original superpixel labels
     :param shifted_labels: shifted superpixel labels
-    :param flow: average optical flow matrix
-    :param fst_depth: average depth matrix of the original image
-    :param snd_depth: average depth matrix of the shifted image
+    :param avg_flow: average optical flow matrix
+    :param avg_fst_depth: average depth matrix of the original image
+    :param avg_shifted_depth: average depth matrix of the shifted image
     :return: velocity (in km/h) and oriention matrix
     """
+    velocity = np.zeros((labels.shape[0], labels.shape[1], 3), dtype=np.float32)    
+
+    z = (avg_shifted_depth - avg_fst_depth) * fps * 3.6
+
+    v = avg_flow[:,:,0]
+    u = avg_flow[:,:,1]
+    h_angle, v_angle = calc_angle_of_view(width_to_focal[labels.shape[1]], u, v)
+    depth = avg_fst_depth
+    x, y = calc_size(h_angle, v_angle, depth)
+    x, y = (x * fps) * 3.6, (y * fps) * 3.6
+
+    velocity[:,:,0] = y
+    velocity[:,:,1] = x
+    velocity[:,:,2] = z
+
+    return velocity
+
+def calculate_velocity_and_orientation_vectors_vectorised(of_mask, next_position, prev_position, flow, 
+                                            fst_depth, snd_depth):
+    """Calculate velocity based on optical flow and depth
+    
+    Arguments:
+        of_mask {numpy array} -- optical flow mask
+        next_position {numpy array} -- position after shifting by optical flow
+        prev_position {numpy array} -- position before shifting by optical flow
+        flow {numpy array} -- optical flow values
+        fst_depth {numpy array} -- depth values on the current image
+        snd_depth {numpy array} -- depth values on the shifted image
+    
+    Returns:
+        numpy array -- velocity for each pixel
+    """
     velocity = np.zeros((fst_depth.shape[0], fst_depth.shape[1], 3), dtype=np.float32)
-    orientation = np.zeros((fst_depth.shape[0], fst_depth.shape[1], 3), dtype=np.float32)
     h,w = fst_depth.shape
 
     fst_mono = fst_depth
@@ -163,7 +195,7 @@ def calculate_velocity_and_orientation_vectors_vectorised(of_mask, next_position
     velocity[:,:,0] = y
     velocity[:,:,1] = x
     velocity[:,:,2] = z
-    return velocity#, orientation
+    return velocity
 
 # TODO np.meshgrid
 def calc_bidi_errormap(flowAB, flowBA, tau=1.0, consistent_flow=False):
@@ -309,7 +341,7 @@ def read_depth(depth_fn, width, height):
     """
     disparity = np.load(depth_fn)
     disparity = cv2.resize(disparity, (width, height), interpolation=cv2.INTER_LINEAR)
-    depth = width_to_focal[width] * baseline / (width * disparity)
+    depth = np.multiply(width_to_focal[width], np.divide(baseline, np.multiply(width, disparity)))
     #depth[depth > max_depth] = max_depth
     #depth[depth < min_depth] = min_depth
     return depth
@@ -585,7 +617,7 @@ def normalize(v):
         return v
     return v / norm
 
-def average(data, labels):
+def average(data, labels, index, masks):
     """Return data with values replaced by the mean value of the superpixel values
     
     Arguments:
@@ -595,10 +627,16 @@ def average(data, labels):
     Returns:
         numpy array -- same shape as data with values replaced by the mean value of the superpixel values
     """
+    #avg = np.zeros_like(data)
+    #regions = measure.regionprops(labels, intensity_image=data)
+    #for r in regions:
+    #    avg[labels == r.label] = r.mean_intensity
+    #return avg
     avg = np.zeros_like(data)
-    regions = measure.regionprops(labels, intensity_image=data)
-    for r in regions:
-        avg[labels == r.label] = r.mean_intensity
+    #index = np.unique(labels)
+    regions = ndimage.mean(data, labels=labels, index=index)
+    for i, reg in enumerate(regions):
+        avg[masks[i]] = reg
     return avg
 
 def error_comparison_Speed_Vecors(speed_est, speed_gt, csv=None, visualize=True):

@@ -118,23 +118,28 @@ class VelocityCalculator(object):
             #labels = np.load(os.path.join(self.label_fn, "{0}_{1}.npy".format(img_num, self.super_pixel_method)))
             #labels = np.load(self.label_fn)
             labels = self.label_fn
+            labels_unique = np.unique(labels)
+            label_masks = []
+            for uni in labels_unique:
+                label_masks.append(labels == uni)
+            
 
             assert fst_img.shape == snd_img.shape
             height, width, _ = fst_img.shape
             # Read disparity maps
             fst_depth = self.read_depth(self.fst_depth_fn, width, height)
-            avg_fst_depth = self.average(fst_depth, labels)
+            avg_fst_depth = self.average(fst_depth, labels, labels_unique, label_masks)
             snd_depth = self.read_depth(self.snd_depth_fn, width, height)
             
-            avg_flow[:, :, 0] = self.average(flow[:, :, 0], labels)
-            avg_flow[:, :, 1] = self.average(flow[:, :, 1], labels)
+            avg_flow[:, :, 0] = self.average(flow[:, :, 0], labels, labels_unique, label_masks)
+            avg_flow[:, :, 1] = self.average(flow[:, :, 1], labels, labels_unique, label_masks)
 
             # Shift labels and depth values respect to the average optical flow
             shifted_labels = self.calculate_shifted_labels(labels, avg_flow)
-            avg_shifted_depth = self.average(snd_depth, shifted_labels)
+            avg_shifted_depth = self.average(snd_depth, shifted_labels, labels_unique, label_masks)
 
             # Calculate the velocity and the orientation
-            velocity, orientation = \
+            velocity = \
                 utils.calculate_velocity_and_orientation_vectors(labels, shifted_labels, 
                                                                 avg_flow, 
                                                                 avg_fst_depth, 
@@ -148,19 +153,23 @@ class VelocityCalculator(object):
             if self.create_draw:
                 back_flow = self.read_flow(self.back_flow) 
                 of_mask, next_position, prev_position = utils.calc_bidi_errormap(flow, back_flow, tau=0.8)
-                incons_img = np.tile(255*of_mask[..., None], (1, 1, 3)).astype(np.uint8)
+                #incons_img = np.tile(255*of_mask[..., None], (1, 1, 3)).astype(np.uint8)
+                incons_img = np.tile(255*np.ones(of_mask[..., None].shape), (1, 1, 3)).astype(np.uint8)
                 incons_img = utils.draw_velocity_vectors(incons_img, next_position, relative_disp=False, color=(0, 0, 255))
-            
+                plt.imsave(os.path.join(base_fn, DRAW_DIR, img_num + '_draw.png'), incons_img.astype('uint8'))
+
+
             if self.create_velocity:
                 image = velocity.copy()
                 plt.imsave(os.path.join(base_fn, VL_DIR, img_num + '_velocity.png'), image.astype('uint8'))
+
 
             x = velocity[:,:,0]
             y = velocity[:,:,1]
             z = velocity[:,:,2]
             speed_superpixel = utils.vector_distance(x,y,z)
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_superpixel.npy'), speed_superpixel)
-            plt.matshow(speed_superpixel)
+            plt.matshow(speed_superpixel, vmin=0, vmax=100)
             plt.colorbar()
             plt.savefig(os.path.join(base_fn, SUPER_PIXEL_DIR, "{0}_superpixel.png".format(img_num)), bbox_inches='tight', dpi=150)
         else:
@@ -200,7 +209,8 @@ class VelocityCalculator(object):
             #back = np.full_like(fst_mono, 0)
             #back[prev_position[..., 0], prev_position[..., 1]] = snd_mono
 
-            incons_img = np.tile(255*of_mask[..., None], (1, 1, 3)).astype(np.uint8)
+            #incons_img = np.tile(255*of_mask[..., None], (1, 1, 3)).astype(np.uint8)
+            incons_img = np.tile(255*np.ones(of_mask[..., None].shape), (1, 1, 3)).astype(np.uint8)
             incons_img = utils.draw_velocity_vectors(incons_img, next_position, relative_disp=False, color=(0, 0, 255))
             
             #tmp = snd_mono - fst_mono
