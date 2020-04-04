@@ -724,7 +724,7 @@ class Dialog(QDialog, Ui_Dialog):
             os.makedirs(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method))
 
         self.reCreateDir(RESULTS)        
-        self.reCreateDir(OTHER_DIR)
+        #self.reCreateDir(OTHER_DIR)
         self.reCreateDir(NP_DIR)
         self.reCreateDir(MASK_DIR)
 
