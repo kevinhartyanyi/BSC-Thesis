@@ -4,6 +4,8 @@ from fbs_runtime.application_context.PyQt5 import ApplicationContext
 import qdarkgraystyle
 import unittest
 from PyQt5.QtTest import QTest
+import os
+from speed.utils import list_directory
 
 appctxt = ApplicationContext()
 appctxt.app.setStyleSheet(qdarkgraystyle.load_stylesheet())
@@ -101,7 +103,76 @@ class DialogTester(unittest.TestCase):
         self.assertEqual(self.run.ui.c_optimize.isEnabled(), False)
         self.run.user["GT"] = "something.npy"
         self.run.checkFiles()
-        self.assertEqual(self.run.ui.c_optimize.isEnabled(), True)        
+        self.assertEqual(self.run.ui.c_optimize.isEnabled(), True)  
+
+    def test_checkFiles(self):
+        self.test_defaults()
+        self.run.user["Save"] = "/test"
+        self.run.user["Of"] = "/tes2"
+        self.run.user["GT"] = "/ground_truth"
+        self.run.ui.c_optimize.setEnabled(True)
+        self.run.checkFiles()
+        self.assertEqual(self.run.gt_exist, True)
+        self.assertEqual(self.run.ui.t_low.isEnabled(), False)
+        self.assertEqual(self.run.ui.t_high.isEnabled(), False)
+        self.assertEqual(self.run.ui.c_optimize.isEnabled(), True)
+        self.assertEqual(self.run.ui.c_error_plot.isEnabled(), True)
+        self.assertEqual(self.run.ui.c_csv.isEnabled(), True)
+
+    def test_simple_run(self):
+        self.run.user["Save"] = "./test"
+
+        img = os.path.join(self.run.user["Save"], "Images")
+        depth = os.path.join(self.run.user["Save"], "Depth")
+        of = os.path.join(self.run.user["Save"], "Of")
+        back_of = os.path.join(self.run.user["Save"], "Back_Of")
+        result = os.path.join(self.run.user["Save"], "result")
+
+        numbers = os.path.join(result, "numbers")
+        mask = os.path.join(result, "mask")
+
+        self.assertEqual(os.path.exists(os.path.join(self.run.user["Save"], "Images")), True)
+        self.run.checkFiles()
+        self.run.startRun()
+
+        self.assertEqual(os.path.exists(depth), True)
+        self.assertEqual(os.path.exists(of), True)
+        self.assertEqual(os.path.exists(back_of), True)
+        self.assertEqual(os.path.exists(result), True)
+        self.assertEqual(os.path.exists(numbers, True))
+        self.assertEqual(os.path.exists(mask, True))
+
+        img_num = list_directory(img, extension=".png")
+        depth_num = list_directory(depth, extension=".png")
+        of_num = list_directory(of, extension=".png")
+        back_of_num = list_directory(back_of, extension=".png")
+
+        mask_num = list_directory(mask, extension=".png")
+
+        self.assertEqual(img_num, depth_num)
+        self.assertEqual(of_num, back_of_num)
+        self.assertEqual(img_num - 1, of_num)
+
+        self.assertEqual(img_num, mask_num)
+
+    def test_speed_plot_run(self):
+
+        self.run.user["Save"] = "./test"
+        img = os.path.join(self.run.user["Save"], "Images")
+
+        self.run.ui.c_speed_plot.setEnabled(True)  
+        
+        result = os.path.join(self.run.user["Save"], "result")
+        plot_speed = os.path.join(result, "plot_speed")
+
+        self.run.checkFiles()
+        self.run.startRun()
+
+        self.assertEqual(os.path.exists(plot_speed), True)
+        img_num = list_directory(img, extension=".png")
+        speed_num = list_directory(plot_speed, extension=".png")
+        self.assertEqual(img_num, speed_num)
+
 
 class MainTester(unittest.TestCase):
     def setUp(self):

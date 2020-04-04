@@ -269,13 +269,6 @@ class CalculationRunner(QObject):
             Image.fromarray(flow).save(os.path.join(self.of_dir,"{0}.png".format(ind)))
             self.update.emit(ind)
 
-    #@pyqtSlot()
-    #def startOf_new(self):
-    #    img_list = utils.list_directory(self.img_dir)
-    #    of_list = [(img_list[ind], img_list[ind+1], ind) for ind in range(len(img_list) - 1)]
-    #    params = zip(of_list, itertools.repeat(self.of_dir), itertools.repeat(self.of_model)) 
-    #    self.startMultiFunc(ofMain, params)
-
 
 
     def minFunc(self, params, count):
