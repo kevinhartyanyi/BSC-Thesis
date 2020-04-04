@@ -23,6 +23,7 @@ DRAW_DIR = os.path.join(RESULTS, 'draw')
 SUPER_PIXEL_DIR = os.path.join(RESULTS, 'super_pixel')
 PLOT_SPEED_DIR = os.path.join(RESULTS, 'plot_speed')
 PLOT_ERROR_DIR = os.path.join(RESULTS, 'plot_error')
+PLOT_CRASH_DIR = os.path.join(RESULTS, 'plot_crash')
 
 width_to_focal = dict()
 width_to_focal[1242] = 721.5377
@@ -43,7 +44,16 @@ def getResultDirs():
     Returns:
         dictionary -- Dictionary containing paths to the results
     """
-    results = {"Results": RESULTS, "Plot_Error": PLOT_ERROR_DIR, "Plot_Speed": PLOT_SPEED_DIR, "Other": OTHER_DIR, "Numbers": NP_DIR, "Velocity": VL_DIR, "Mask": MASK_DIR, "Draw": DRAW_DIR, "SuperPixel": SUPER_PIXEL_DIR}
+    results = {"Results": RESULTS,
+    "Plot_Crash": PLOT_CRASH_DIR,
+    "Plot_Error": PLOT_ERROR_DIR,
+    "Plot_Speed": PLOT_SPEED_DIR,
+    "Other": OTHER_DIR,
+    "Numbers": NP_DIR,
+    "Velocity": VL_DIR,
+    "Mask": MASK_DIR,
+    "Draw": DRAW_DIR, 
+    "SuperPixel": SUPER_PIXEL_DIR}
     return results
 
 def calc_angle_of_view(focal_length, width, height):
@@ -402,144 +412,6 @@ def reduce_sort(vector, low=0.1,high=0.9, skip=None):
         vector <= v_unique[int(len(v_unique) * high) - 1])
     return mask_vector
 
-def vector_speed(vectors, low, high):
-    x = vectors[:,:,0]
-    y = vectors[:,:,1]
-    z = vectors[:,:,2]
-    #######################x
-    #mask_z_thr = (z != 0)
-    #mask_z_thr = (z < 0)
-
-    #disp_mask = np.logical_and(disp >= disp_unique[int(len(disp_unique) * md_low)],
-    #    disp <= disp_unique[int(len(disp_unique) * md_high) - 1])
-
-    mask_y_thr = reduce_sort(y, low=low,high=high)
-    #mask_z_thr = reduce_sort(z,low=0.3,high=0.6) # 0.5 - 0.6: 26
-    only_good_of = z != 0
-    z_negative = z < 0
-
-    #print(np.unique(z[z_negative]))
-
-    mask_uni = only_good_of
-    #mask_uni = np.ones(x.shape, dtype=bool)
-    #mask_uni = np.logical_and(mask_z_thr, only_good_of)
-    mask_uni = np.logical_and(mask_y_thr, only_good_of)
-
-
-    #######################x
-    width = x.shape[1]
-    half = int(width / 2)
-    
-    # Left Side
-    mask_uni_left = mask_uni[:, 0:half]
-    x_thr_left    = x       [:, 0:half] [mask_uni_left]
-    y_thr_left    = y       [:, 0:half] [mask_uni_left]
-    z_thr_left    = z       [:, 0:half] [mask_uni_left]
-
-    print("Left Calculated:")
-    print_vectors(x_thr_left,y_thr_left,z_thr_left)
-    speed_left = vector_distance(x_thr_left,y_thr_left,z_thr_left)  
-    print("Speed Left Calculated: " + str(np.mean(speed_left)))
-    print("")
-
-    # Left Side
-    mask_uni_right = mask_uni[:, half:width]  
-    x_thr_right    = x       [:, half:width] [mask_uni_right]
-    y_thr_right    = y       [:, half:width] [mask_uni_right]
-    z_thr_right    = z       [:, half:width] [mask_uni_right]
-
-    print("Right Calculated:")
-    print_vectors(x_thr_right,y_thr_right,z_thr_right)
-    speed_right = vector_distance(x_thr_right,y_thr_right,z_thr_right)  
-    print("Speed Right Calculated: " + str(np.mean(speed_right)))
-    print("")
-
-    print("Average:")
-    speed_avg = np.average([np.mean(speed_left), np.mean(speed_right)])  
-    print("Speed Average: " + str(np.mean(speed_avg)))
-    print("")
-
-    return speed_avg, mask_uni
-
-    """
-    if slc == 0: 
-        print("Calculated:")
-        print_vectors(x_thr,y_thr,z_thr)
-        speed = vector_distance(x_thr,y_thr,z_thr)  
-        print("Speed Calculated: " + str(np.mean(speed)))
-        print("")
-        speed_img = vector_distance(x,y,z)  
-        return speed_img, mask_uni"""
-    """
-    if slc == 2: 
-        x = vectors[:,:,0]
-        height = x.shape[0]
-        height_2 = int(height / 2)
-        mask_z_thr = mask_z_thr[height_2:height,:]
-        print(mask_z_thr)
-        x = vectors[height_2:height,:,0][mask_z_thr]
-        y = vectors[height_2:height,:,1][mask_z_thr]
-        z = vectors[height_2:height,:,2][mask_z_thr]
-        print("Lower:")
-        print_vectors(x,y,z)
-        x = np.power(x, 2)
-        y = np.power(y, 2)
-        z = np.power(z, 2)
-        add2 = x + y + z
-        mLower = np.sqrt(add2)    
-        speed2 = np.mean(mLower)    
-        print("Speed Lower: " + str(speed2))
-        print("")
-    if slc == 1: 
-        x = vectors[:,:,0]
-        height = x.shape[0]        
-        mask_z_thr = mask_z_thr[0:height,:]
-        x = vectors[0:height,:,0][mask_z_thr]
-        y = vectors[0:height,:,1][mask_z_thr]
-        z = vectors[0:height,:,2][mask_z_thr]
-        print("Upper:")
-        print_vectors(x,y,z)
-        x = np.power(x, 2)
-        y = np.power(y, 2)
-        z = np.power(z, 2)
-        add3 = x + y + z
-        mUpper = np.sqrt(add3)    
-        speed3 = np.mean(mUpper)    
-        print("Speed Upper: " + str(speed3))
-        print("")"""
-    """x = vectors[:,:,0]
-    y = vectors[:,:,1]
-    z = vectors[:,:,2]
-    if slc == 0: 
-        x = np.power(x, 2)
-        y = np.power(y, 2)
-        z = np.power(z, 2)
-        add1 = x + y + z
-        mOriginal = np.sqrt(add1)
-        speed1 = np.mean(mOriginal)    
-    if slc == 2: 
-        height = x.shape[0]
-        height_2 = int(height / 2)
-        x = vectors[height_2:height,:,0]
-        y = vectors[height_2:height,:,1]
-        z = vectors[height_2:height,:,2]
-        x = np.power(x, 2)
-        y = np.power(y, 2)
-        z = np.power(z, 2)
-        add2 = x + y + z
-        mLower = np.sqrt(add2)    
-        speed2 = np.mean(mLower)    
-    if slc == 1: 
-        height = x.shape[0]
-        x = vectors[0:height,:,0]
-        y = vectors[0:height,:,1]
-        z = vectors[0:height,:,2]
-        x = np.power(x, 2)
-        y = np.power(y, 2)
-        z = np.power(z, 2)
-        add3 = x + y + z
-        mUpper = np.sqrt(add3)    
-        speed3 = np.mean(mUpper)"""    
 
 def vector_speedOF_Simple(vectors, high=1, low=0, optimal_of=True):
     """Estimate speed from the x,y vectors
@@ -598,8 +470,8 @@ def vector_speedOF_Simple(vectors, high=1, low=0, optimal_of=True):
     #######################x
 
     #print("Average:")
-    speed_avg = np.average([np.mean(x_abs), np.mean(y_abs)])   
-    speed = np.mean(speed_avg) # Don't ask why this is here
+    speed = np.average([np.mean(x_abs), np.mean(y_abs)])   
+    #speed = np.mean(speed_avg) # Don't ask why this is here
 
     #print("Raw ", np.mean(avg_speed_raw[avg_speed_raw != 1000]))
     #print("Speed ", speed)s

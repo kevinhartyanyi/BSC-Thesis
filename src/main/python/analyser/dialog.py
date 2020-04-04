@@ -25,6 +25,7 @@ DRAW_DIR = result_dir["Draw"]
 SUPER_PIXEL_DIR = result_dir["SuperPixel"]
 PLOT_SPEED_DIR = result_dir["Plot_Speed"]
 PLOT_ERROR_DIR = result_dir["Plot_Error"]
+PLOT_CRASH_DIR = result_dir["Plot_Crash"]
 class Dialog(QDialog, Ui_Dialog):
     sendUser = pyqtSignal(object)
     sendCreated = pyqtSignal(object)
@@ -85,6 +86,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.t_high.editingFinished.connect(self.changeHigh)
         self.ui.c_error_plot.stateChanged.connect(self.checkFiles)
         self.ui.c_speed_plot.stateChanged.connect(self.checkFiles)
+        self.ui.c_crash_plot.stateChanged.connect(self.checkFiles)
         self.ui.combo_superpixel.currentIndexChanged.connect(self.changeSuperPixelMethod)
         self.ui.c_optimize.stateChanged.connect(self.checkFiles)
 
@@ -223,6 +225,7 @@ class Dialog(QDialog, Ui_Dialog):
 
         self.create_super_pixel_label = (self.super_pixel_method != "" and not os.path.exists(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)))
 
+        self.ui.c_crash_plot_video.setEnabled(self.ui.c_crash_plot.isChecked())
         self.ui.t_low.setEnabled(not self.ui.c_optimize.isChecked())
         self.ui.t_high.setEnabled(not self.ui.c_optimize.isChecked())
         self.ui.c_optimize.setEnabled(self.gt_exist)
@@ -257,20 +260,6 @@ class Dialog(QDialog, Ui_Dialog):
             self.vid_name = name.split(".")[0]
             self.ui.l_vid.setText("Load: " + self.vid_name)
             self.checkFiles()
-
-    #def openOf(self):
-    #    fname = self.openFile(self.user["Of"], file_filter="Python files (*.py);;All files (*)")
-    #    self.user["Of"] = fname
-    #    name = self.splitPath(fname)[-1]
-    #    self.ui.l_of.setText("Load: " + name)
-    #    self.checkFiles()
-#
-    #def openDepth(self):
-    #    fname = self.openFile(self.user["Depth"], file_filter="Python files (*.py);;All files (*)")
-    #    self.user["Depth"] = fname
-    #    name = self.splitPath(fname)[-1]
-    #    self.ui.l_depth.setText("Load: " + name)
-    #    self.checkFiles()
 
     def openFile(self, folder, title="Open Video", file_filter="Video Files (*.mp4 *.avi *.mkv)"):
         """Open QFileDialog with the given parameters, returns selected file
@@ -396,12 +385,12 @@ class Dialog(QDialog, Ui_Dialog):
 
         # Check backward optical flow
         if self.back_of_exist and not os.path.exists(self.savePathJoin("Back_Of")):
-            errors["Info"].append(("Backward optical flow folder {0} doesn't exist -> Recalculating optical flow".format(self.savePathJoin("Back_Of"))))
+            errors["Info"].append(("Backward optical flow folder {0} doesn't exist -> Recalculating backward optical flow".format(self.savePathJoin("Back_Of"))))
             error_types.append("NoOf")
         elif self.back_of_exist:
             back_of_images = len(list_directory(self.savePathJoin("Back_Of"), extension="png"))
             if back_of_images != of_images:
-                errors["Info"].append(("Backward optical flow image number {0} doesn't match optical flow image number {1} -> Recalculating optical flow".format(back_of_images, of_images)))
+                errors["Info"].append(("Backward optical flow image number {0} doesn't match optical flow image number {1} -> Recalculating backward optical flow".format(back_of_images, of_images)))
                 error_types.append("NoOf")
 
         # Check depth estimation
@@ -499,6 +488,7 @@ class Dialog(QDialog, Ui_Dialog):
             "of_model": self.app.get_resource(os.path.join("of_models", "network-default.pytorch")),
             "depth_model": self.app.get_resource(os.path.join("depth_models", "model_city2kitti.meta")),
             "plot_speed_dir": PLOT_SPEED_DIR,
+            "plot_crash_dir": PLOT_CRASH_DIR,
             "numbers_dir": NP_DIR,
             "plot_error_dir": PLOT_ERROR_DIR,
             "speed_gt": self.user["GT"],
@@ -538,7 +528,7 @@ class Dialog(QDialog, Ui_Dialog):
             #self.user["Save"], None, 1, 0.309, self.run_dict, self.app.get_resource(os.path.join("of_models", "network-default.pytorch")),
             #self.app.get_resource(os.path.join("depth_models", "model_city2kitti.meta")), PLOT_SPEED_DIR,
             #NP_DIR, PLOT_ERROR_DIR, speed_gt=self.user["GT"], vid_path=self.user["Video"], super_pixel_method=self.super_pixel_method)  # no parent!
-        self.thread = QThreadcalcRunner()  # no parent!
+        self.thread = QThread()  # no parent!
 
         self.worker.labelUpdate.connect(self.labelUpdate)
 
@@ -631,6 +621,8 @@ class Dialog(QDialog, Ui_Dialog):
             self.created["Speed_Plot"] = self.savePathJoin(PLOT_SPEED_DIR)
         if self.ui.c_error_plot.isChecked() and self.no_error:
             self.created["Error_Plot"] = self.savePathJoin(PLOT_ERROR_DIR)
+        if self.ui.c_crash_plot.isChecked():
+            self.created["Crash_Plot"] = self.savePathJoin(PLOT_CRASH_DIR)
         self.sendCreated.emit(self.created)
 
     def buildRunDict(self):
@@ -688,10 +680,12 @@ class Dialog(QDialog, Ui_Dialog):
         self.run_dict["Depth_Vid"] = {"Run": self.ui.c_depth.isChecked(), "Progress":ori_images, "Text":"Creating depth estimation video"}
 
         self.run_dict["Speed_Plot"] = {"Run": self.ui.c_speed_plot.isChecked(), "Progress":ori_images, "Text":"Creating plot for speed values"}
+        self.run_dict["Crash_Plot"] = {"Run": self.ui.c_crash_plot.isChecked(), "Progress":ori_images, "Text":"Creating plot for time to crash"}
         self.run_dict["Error_Plot"] = {"Run": self.ui.c_error_plot.isChecked() and self.gt_exist, "Progress":ori_images, "Text":"Creating plot for speed error"}
 
         self.run_dict["Speed_Plot_Video"] = {"Run": self.ui.c_speed_plot_video.isChecked(), "Progress":ori_images, "Text":"Creating speed plot video"}
         self.run_dict["Error_Plot_Video"] = {"Run": self.ui.c_error_plot_video.isChecked() and self.gt_exist, "Progress":ori_images, "Text":"Creating error plot video"}
+        self.run_dict["Crash_Plot_Video"] = {"Run": self.ui.c_crash_plot_video.isChecked(), "Progress":ori_images, "Text":"Creating time to crash plot video"}
 
         self.run_dict["Super_Pixel_Video"] = {"Run": self.ui.combo_superpixel.currentIndex() != 0 and self.ui.c_super_pixel_video.isChecked(), "Progress":ori_images, "Text":"Creating super pixel video"}
         self.run_dict["Super_Pixel_Label"] = {"Run": self.create_super_pixel_label, "Progress":ori_images, "Text":"Creating {0} superpixel labels".format(self.super_pixel_method)}
@@ -779,6 +773,8 @@ class Dialog(QDialog, Ui_Dialog):
         self.reCreateDir(NP_DIR)
         self.reCreateDir(MASK_DIR)
 
+        if self.ui.c_crash_plot.isChecked():
+            self.reCreateDir(PLOT_CRASH_DIR)
         if self.ui.c_draw.isChecked():
             self.reCreateDir(DRAW_DIR)
         if self.ui.c_velocity.isChecked():

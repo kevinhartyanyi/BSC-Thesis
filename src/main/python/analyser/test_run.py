@@ -200,9 +200,13 @@ class DialogTester(unittest.TestCase):
 
         self.run.run_dict["Speed_Plot"] = {"Run": self.run.ui.c_speed_plot.isChecked(), "Progress":ori_images, "Text":"Creating plot for speed values"}
         self.run.run_dict["Error_Plot"] = {"Run": self.run.ui.c_error_plot.isChecked() and self.gt_exist, "Progress":ori_images, "Text":"Creating plot for speed error"}
+        self.run.run_dict["Crash_Plot"] = {"Run": self.run.ui.c_crash_plot.isChecked(), "Progress":ori_images, "Text":"Creating plot for time to crash"}
+
 
         self.run.run_dict["Speed_Plot_Video"] = {"Run": self.run.ui.c_speed_plot_video.isChecked(), "Progress":ori_images, "Text":"Creating speed plot video"}
         self.run.run_dict["Error_Plot_Video"] = {"Run": self.run.ui.c_error_plot_video.isChecked() and self.gt_exist, "Progress":ori_images, "Text":"Creating error plot video"}
+        self.run.run_dict["Crash_Plot_Video"] = {"Run": self.run.ui.c_crash_plot_video.isChecked(), "Progress":ori_images, "Text":"Creating time to crash plot video"}
+
 
         self.run.run_dict["Super_Pixel_Video"] = {"Run": self.run.ui.combo_superpixel.currentIndex() != 0 and self.run.ui.c_super_pixel_video.isChecked(), "Progress":ori_images, "Text":"Creating super pixel video"}
         self.run.run_dict["Super_Pixel_Label"] = {"Run": self.run.create_super_pixel_label, "Progress":ori_images, "Text":"Creating {0} superpixel labels".format(self.run.super_pixel_method)}

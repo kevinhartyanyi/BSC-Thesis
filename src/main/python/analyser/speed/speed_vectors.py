@@ -21,55 +21,15 @@ import matplotlib.image as mpimg
 from PIL import Image
 import matplotlib.pyplot as plt
 
-RESULTS = 'results'
-OTHER_DIR = os.path.join(RESULTS, 'other')
-VL_DIR = os.path.join(RESULTS, 'velocity')
-NP_DIR = os.path.join(RESULTS, 'numbers')
-MASK_DIR = os.path.join(RESULTS, 'mask')
-DRAW_DIR = os.path.join(RESULTS, 'draw')
-SUPER_PIXEL_DIR = os.path.join(RESULTS, 'super_pixel')
-
-
-
-def run(img_dir, depth_dir, of_dir, of_back_dir, save_dir, speed_gt=None, high=1, low=0.309, super_pixel_method=""):
-
-    
-    main(super_pixel_method, img_dir=img_dir, disp_dir=depth_dir, disp2_dir=None, test_number = 6, back_flow_dir=of_back_dir, flow_dir=of_dir, out_dir=save_dir, label_dir=img_dir,
-    high=high, low=low, visualize = True)
-    
-    
-    #speeds_dir = utils.list_directory(OUT_PATH, extension='speed.npy')
-    #speeds_dir = natsorted(speeds_dir)
-    #speeds = []
-    #for s in speeds_dir:
-    #    speeds.append(np.load(s))
-    #
-    #speeds_mask = utils.list_directory(OUT_PATH, extension='mask.npy')
-    #speeds_mask = natsorted(speeds_mask)
-    #masks = []
-#
-    #for s in speeds_mask:
-    #    masks.append(np.load(s))
-#
-
-    #_ = utils.error_comparison_Speed_Vecors(speeds,speed_gt[1:],csv=OUT_PATH+str(vid_id)+'_error_Simple_OF.csv')
-    #if flow == "pwc":
-    #    utils.create_speed_video_Speed_Vectors(vid.video, str(vid_id)+'_video.mp4', speeds, speed_gt, masks,
-    #            vid.pwc_video, vid.back_pwc_video, vid.mono_video)
-    #else:
-    #    utils.create_speed_video_Speed_Vectors(vid.video, str(vid_id)+'_video.mp4', speeds, speed_gt, masks,
-    #            vid.hd3_video, vid.back_hd3_video, vid.mono_video, hd3=True)
-    #
-    ##video = Video("0001")
-    ##main(img_dir= DATA + 'origin', disp_dir=DATA + 'monodepth', flow_dir=DATA + 'pwc', label_dir=DATA + 'boruvka', visualize = True)
-    
-    #main(img_dir= IMAGES, disp_dir=DISP1, disp2_dir=DISP2, flow_dir=FLOW_DIR, label_dir=SLIC_OUT_TRAIN, visualize = True, back_flow_dir=None)
-    #main(img_dir= IMAGES, disp_dir=MD_OUT_TRAIN, disp2_dir=None, test_number = 2, back_flow_dir=BACKOF, flow_dir=PWC_OUT_TRAIN, label_dir=BORUVKA_OUT_TRAIN, visualize = True)
-
-    #vid = Video(VIDEOS[0])
-
-    
-    #main(img_dir= IMAGES_SINGLE, disp_dir=MONO_SINGLE, disp2_dir=None, test_number = 6, back_flow_dir=BACKPWC_SINGLE, flow_dir=PWC_SINGLE, label_dir=BORUVKA_OUT_TRAIN, visualize = True)
+result_dir = utils.getResultDirs()
+RESULTS = result_dir["Results"]
+OTHER_DIR = result_dir["Other"]
+VL_DIR = result_dir["Velocity"]
+NP_DIR = result_dir["Numbers"]
+MASK_DIR = result_dir["Mask"]
+DRAW_DIR = result_dir["Draw"]
+SUPER_PIXEL_DIR = result_dir["SuperPixel"]
+PLOT_CRASH_DIR = result_dir["Plot_Crash"]
 
 class VelocityCalculator(object):
     def __init__(self,fst_img_fn, snd_img_fn, fst_depth_fn, snd_depth_fn, 
@@ -93,7 +53,6 @@ class VelocityCalculator(object):
         self.back_flow = back_flow
         self.high = high
         self.low = low
-        #self.vid_name = vid_name
         self.super_pixel_method = super_pixel_method
         self.create_draw = create_draw
         self.create_velocity = create_velocity
@@ -169,6 +128,7 @@ class VelocityCalculator(object):
             z = velocity[:,:,2]
             speed_superpixel = utils.vector_distance(x,y,z)
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_superpixel.npy'), speed_superpixel)
+            speed_superpixel[~speed_mask] = 0
             plt.matshow(speed_superpixel, vmin=0, vmax=100)
             plt.colorbar()
             plt.savefig(os.path.join(base_fn, SUPER_PIXEL_DIR, "{0}_superpixel.png".format(img_num)), bbox_inches='tight', dpi=150)
@@ -189,34 +149,11 @@ class VelocityCalculator(object):
             back_flow = self.read_flow(self.back_flow)            
 
             of_mask, next_position, prev_position = utils.calc_bidi_errormap(flow, back_flow, tau=0.8)
-            #good_flow = flow.copy()
-            #good_flow_snd = flow.copy()
-            #good_flow[of_mask] = 0
-            #good_flow_snd[next_position[..., 0], next_position[..., 1]] = back_flow
-
-            #fst_mono = fst_depth
-            #fst_mono[of_mask] = 0
-
-            #snd_depth_for_mono = snd_depth.copy()
-            #snd_depth_for_mono[of_mask] = 0
-            #snd_mono = np.full_like(fst_mono, 0)
-            #snd_mono[next_position[..., 0], next_position[..., 1]] = snd_depth_for_mono
-
-            #snd_mono_2 = np.full_like(fst_mono, 0)
-            #snd_mono_2 = snd_depth[prev_position[..., 0], prev_position[..., 1]]
-            #snd_mono_2[of_mask] = 0
-
-            #back = np.full_like(fst_mono, 0)
-            #back[prev_position[..., 0], prev_position[..., 1]] = snd_mono
-
-            #incons_img = np.tile(255*of_mask[..., None], (1, 1, 3)).astype(np.uint8)
+            
             incons_img = np.tile(255*np.ones(of_mask[..., None].shape), (1, 1, 3)).astype(np.uint8)
             incons_img = utils.draw_velocity_vectors(incons_img, next_position, relative_disp=False, color=(0, 0, 255))
             
-            #tmp = snd_mono - fst_mono
-
-            #fst_zeros = fst_mono.copy()
-            #fst_zeros[snd_mono == 0] = 0
+            
             
             # Save the results
             base_fn = self.out_dir# + self.vid_name
@@ -245,6 +182,7 @@ class VelocityCalculator(object):
             speed, speed_mask = utils.vector_speedOF_Simple(velocity,low=self.low,high=self.high) # Speed calculation
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_speed.npy'), speed)
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_mask.npy'), speed_mask)
+            np.save(os.path.join(base_fn, NP_DIR, img_num + '_velocity.npy'), velocity)
 
             utils.save_as_image(os.path.join(base_fn, MASK_DIR, img_num + '_speed_masked.png'), speed_mask*50, min_val=0, max_val=utils.max_depth) 
 

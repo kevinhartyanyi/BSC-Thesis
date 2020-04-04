@@ -93,7 +93,21 @@ def createSpeedPlotMain(params):
     #plt.xticks(np.arange(0, len(speeds), 1))
     plt.grid(axis='y', linestyle='-')
     plt.savefig(os.path.join(out_dir, "{0}_speed.png".format(i)), bbox_inches='tight', dpi=150)
-        
+
+def createCrashPlotMain(params):
+    """Creates crash plot
+    
+    Arguments:
+        params {tuple} -- parameters for the function
+    """
+    speeds, i, out_dir = params
+    logging.info("Creating crash plot {0}".format(i))
+
+    plt.plot(speeds[:i], "b")
+    plt.ylabel("Time to Crash in Seconds")
+    plt.xlabel("Frame number")
+    plt.grid(axis='y', linestyle='-')
+    plt.savefig(os.path.join(out_dir, "{0}_crash.png".format(i)), bbox_inches='tight', dpi=150)
 
 class CalculationRunner(QObject):
     finished = pyqtSignal()
@@ -130,6 +144,7 @@ class CalculationRunner(QObject):
         self.of_dir = param_dict["of_dir"]
         self.back_of_dir = param_dict["back_of_dir"]
         self.plot_speed_dir = param_dict["plot_speed_dir"]
+        self.plot_crash_dir = param_dict["plot_crash_dir"]                
         self.send_video_frame = param_dict["send_video_frame"]
         self.create_csv = param_dict["create_csv"]
         self.create_draw = param_dict["create_draw"]
@@ -152,13 +167,6 @@ class CalculationRunner(QObject):
             self.videoFrame.emit(self.video_frame)
             return
         logging.info("Start Main Run")
-        #if self.super_pixel_method != "" and len(os.path.join(self.out_dir, "Super_Pixel", self.super_pixel_method) == 0):
-        #    self.createSuperPixel()
-        
-        
-
-
-        #self.checkRun("Video", self.imagesFromVideo, self.vid_path, self.img_dir, "vid")
 
         self.checkRun("Of", self.startOf)
 
@@ -194,8 +202,10 @@ class CalculationRunner(QObject):
         else:
             self.checkRun("Error_Plot", self.createErrorPlot)
             self.checkRun("Speed_Plot", self.createSpeedPlot)
-            
+
+        self.checkRun("Crash_Plot", self.createCrashPlot)
         self.checkRun("Speed_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_speed_dir), self.out_dir, "speed_plot.mp4", self.create_video_fps)
+        self.checkRun("Crash_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_crash_dir), self.out_dir, "crash_plot.mp4", self.create_video_fps)
         if not self.ground_truth_error:
             self.checkRun("Error_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_error_dir), self.out_dir, "error_plot.mp4")
 
@@ -294,7 +304,7 @@ class CalculationRunner(QObject):
         #errors.append(rmse)
         for s in speeds_dir:
             os.remove(s)
-        print("RMSE {0}, Low {1} High {2}".format(rmse, self.low, self.high))
+        logging.info("RMSE {0}, Low {1} High {2}".format(rmse, self.low, self.high))
         self.csv_list.append({"Low":self.low, "High": self.high, "RMSE": rmse})
         return rmse, count
 
@@ -409,6 +419,33 @@ class CalculationRunner(QObject):
         params = zip(itertools.repeat(speeds), range(1, len(speeds) + 1), itertools.repeat(os.path.join(self.out_dir, self.plot_speed_dir)))
         self.startMultiFunc(createSpeedPlotMain, params)
 
+    def createCrashPlot(self):
+        """Start crash plot creation on multiple cpu cores
+        """
+        plt.clf()
+        speeds_dir = utils.list_directory(os.path.join(self.out_dir, self.numbers_dir), extension='speed.npy')
+        velocity_dir = utils.list_directory(os.path.join(self.out_dir, self.numbers_dir), extension='velocity.npy')
+        mask_dir = utils.list_directory(os.path.join(self.out_dir, self.numbers_dir), extension='mask.npy')
+        
+        speeds_dir = natsorted(speeds_dir)
+        velocity_dir = natsorted(velocity_dir)
+        mask_dir = natsorted(mask_dir)
+        speeds = []
+        for i in range(len(speeds_dir)):
+            v = np.load(speeds_dir[i])
+            mask = np.load(mask_dir[i])
+            s = np.load(velocity_dir[i])
+            # t = v / s
+
+            z = s[:,:,2]
+
+            z_thr = z[mask]
+            z_abs = np.abs(z_thr[z_thr != 0])
+            ttc = np.mean(np.divide(v, z_abs)) * 360
+            speeds.append(ttc)
+        
+        params = zip(itertools.repeat(speeds), range(1, len(speeds) + 1), itertools.repeat(os.path.join(self.out_dir, self.plot_crash_dir)))
+        self.startMultiFunc(createCrashPlotMain, params)
 
 
 
