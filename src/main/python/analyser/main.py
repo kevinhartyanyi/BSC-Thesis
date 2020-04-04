@@ -67,21 +67,9 @@ class MainWindow(QtWidgets.QMainWindow):
         """Load the button images and display them as an icon
         """
         left_arrow = QtGui.QPixmap(self.app.get_resource("left_arrow.png"))
-        #left_arrow_hover = QtGui.QPixmap(self.app.get_resource("left_arrow_hover.png"))
-        #left_arrow_pressed = QtGui.QPixmap(self.app.get_resource("left_arrow_pressed.png"))
-        
         right_arrow = QtGui.QPixmap(self.app.get_resource("right_arrow.png"))
-        #right_arrow_hover = QtGui.QPixmap(self.app.get_resource("right_arrow_hover.png"))
-        #right_arrow_pressed = QtGui.QPixmap(self.app.get_resource("right_arrow_pressed.png"))
-
         up_arrow = QtGui.QPixmap(self.app.get_resource("up_arrow.png"))
-        #up_arrow_hover = QtGui.QPixmap(self.app.get_resource("up_arrow_hover.png"))
-        #up_arrow_pressed = QtGui.QPixmap(self.app.get_resource("up_arrow_pressed.png"))
-
         down_arrow = QtGui.QPixmap(self.app.get_resource("down_arrow.png"))
-        #down_arrow_hover = QtGui.QPixmap(self.app.get_resource("down_arrow_hover.png"))
-        #down_arrow_pressed = QtGui.QPixmap(self.app.get_resource("down_arrow_pressed.png"))
-
         self.ui.b_video_left.setIcon(QtGui.QIcon(self.app.get_resource("left_arrow.png")))
         self.ui.b_video_right.setIcon(QtGui.QIcon(self.app.get_resource("right_arrow.png")))
         self.ui.b_video_up.setIcon(QtGui.QIcon(self.app.get_resource("up_arrow.png")))
@@ -228,7 +216,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if os.path.exists(draw):
             self.cycle_vid.add("draw", draw)
             self.ui.actionOFArrows.setEnabled(True)
-        if os.path.exists(super_pixel):#len(sutils.list_directory(super_pixel, extension="png")) > 0:
+        if os.path.exists(super_pixel):
             self.cycle_vid.add("super_pixel", super_pixel)       
             self.ui.actionSuperPixel.setEnabled(True)
 
@@ -477,7 +465,6 @@ class MainWindow(QtWidgets.QMainWindow):
         img = None
         if img_dir is not None:
             self.vid_opened = True
-            #self.images = utils.readImg(img_dir)
             self.images = sutils.list_directory(img_dir, extension=".png")
             width = self.vid_player.width()
             height = self.vid_player.height()
@@ -485,7 +472,6 @@ class MainWindow(QtWidgets.QMainWindow):
         
         plot_img = None
         if plot_dir != None:
-            #plots = utils.readImg(plot_dir)
             plots = sutils.list_directory(plot_dir, extension=".png")
             logging.info("Plots: {0}".format(len(plots)))
             width = self.plot_player.width()
@@ -515,7 +501,6 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         assert self.image_holder.cur_idx >= 0, ("Calling prevFrame at the beginning of video")
 
-        #self.image_holder.cur_idx -= 1
         img = self.image_holder.prevImg()  
         plot_img = None
         if self.created != None:
@@ -534,7 +519,6 @@ class MainWindow(QtWidgets.QMainWindow):
         assert self.vid_opened, ("Calling nextFrame before opening the video")
         assert self.image_holder.cur_idx < self.image_holder.vidLen - 1, ("Calling nextFrame at the end of video")
 
-        #self.image_holder.cur_idx += 1
         img = self.image_holder.nextImg()  
         plot_img = None
         if self.created != None:
@@ -566,11 +550,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
 if __name__ == '__main__':
     appctxt = ApplicationContext()
-    #stylesheet = appctxt.get_resource('styles.qss')
     appctxt.app.setStyleSheet(qdarkgraystyle.load_stylesheet())
     window = MainWindow(app=appctxt)
     window.show()
     exit_code = appctxt.app.exec_()
-    #window.closeVid()
     sys.exit(exit_code)
     

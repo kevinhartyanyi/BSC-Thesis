@@ -1,9 +1,6 @@
 import utils
 from PIL import Image
 import imageLoader
-#from PyQt5.QtGui import *
-#from PyQt5.QtWidgets import *
-#from PyQt5.QtCore import *
 from PyQt5.QtCore import QThread, QThreadPool
 from multiprocessing import Pool
 import logging
@@ -171,14 +168,9 @@ class imageHolder:
             load_len = self.maxLen + start if self.maxLen + start < self.vidLen else self.vidLen
         elif begin != None:
             start = begin
-            #if end > self.vidLen:
-            #    self.list_idx = start + self.maxLen + 1
-            #    return
             if self.list_idx >= self.vidLen:
                 logging.info("Skip Load {0} {1} {2}".format(self.list_idx, self.vidLen, start))
-                #self.list_idx = start + self.maxLen + 1
-
-                #return
+                
             load_len = start + self.maxLen + 1 if start + self.maxLen + 1 < self.vidLen else self.vidLen
         self.list_idx = start
         img = Image.open(self.img_list[start])
@@ -240,9 +232,6 @@ class imageHolder:
             worker = imageLoader.Worker(self.loadImg, self.img_list[self.list_idx], cur) # Any other args, kwargs are passed to the run function
             self.threadpool.start(worker) 
             self.list_idx += 1
-        #else:
-        #    self.list_idx += 1
-
         return img    
 
 

@@ -112,9 +112,6 @@ def createCrashPlotMain(params):
 class CalculationRunner(QObject):
     finished = pyqtSignal()
 
-    #ofStart = pyqtSignal()
-    #depthStart = pyqtSignal()
-    #runStart = pyqtSignal()
     updateFin = pyqtSignal()
     labelUpdate = pyqtSignal(object)
     update = pyqtSignal(int)
@@ -238,7 +235,6 @@ class CalculationRunner(QObject):
         assert len(fst_disp_fns) == len(snd_disp_fns) 
         if self.back_of_dir != None:
             assert len(flow_fns) == len(back_flow)
-        #label_fns = fst_img_fns # So it doesn't quit too early
         if self.super_pixel_method != "":
             label_fns_files = utils.list_directory(self.super_pixel_label_dir, extension=".npy")
             label_fns = []
@@ -301,7 +297,7 @@ class CalculationRunner(QObject):
         for s in speeds_dir:
             speeds.append(np.load(s))
         rmse = utils.error_comparison_Speed_Vecors(speeds,self.speed_gt[1:])
-        #errors.append(rmse)
+        
         for s in speeds_dir:
             os.remove(s)
         logging.info("RMSE {0}, Low {1} High {2}".format(rmse, self.low, self.high))
@@ -334,7 +330,6 @@ class CalculationRunner(QObject):
             run_func {function} -- the function to run
             params {tuple} -- parameters for the function
         """
-        #multiprocessing.set_start_method('spawn')
         with multiprocessing.Pool() as pool:
             count = 1
             for _, i in enumerate(pool.imap_unordered(run_func, params)):
@@ -380,7 +375,6 @@ class CalculationRunner(QObject):
         """
         cam = cv2.VideoCapture(path_to_video) 
         
-        # frame 
         currentframe = 0
         ret,frame = cam.read() 
         while(ret):
@@ -389,7 +383,6 @@ class CalculationRunner(QObject):
             cv2.imwrite(name, frame) 
             currentframe += 1
             
-            #self.update.emit(currentframe)
             ret,frame = cam.read() 
 
         
@@ -479,7 +472,7 @@ class CalculationRunner(QObject):
 
 
 
-#
+
 
     def createSpeedErrorPlot(self):
         """Start speed and ground truth speed comparison plot creation on multiple cpu cores
@@ -529,7 +522,7 @@ class CalculationRunner(QObject):
         out = cv2.VideoWriter(os.path.join(save_path, vid_name),cv2.VideoWriter_fourcc(*"mp4v"), fps, (width, height))
         for i in range(len(images)):
             logging.info("Writing frame: {0}".format(i))
-            # writing to a image array
+            # writing to an image array
             img = cv2.imread(images[i])
             resized = cv2.resize(img,(width,height)) 
             out.write(resized)

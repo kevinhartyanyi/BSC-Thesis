@@ -75,8 +75,6 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.b_info.clicked.connect(self.showInfo)
         self.ui.b_save.clicked.connect(self.openSave)
         self.ui.b_vid.clicked.connect(self.openVideo)
-        #self.ui.b_of.clicked.connect(self.openOf)
-        #self.ui.b_depth.clicked.connect(self.openDepth)
         self.ui.b_run.clicked.connect(self.startRun)
         self.ui.b_colour.clicked.connect(self.pickColour)
         self.ui.b_ground_truth.clicked.connect(self.openGroundTruth)
@@ -89,10 +87,6 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.c_crash_plot.stateChanged.connect(self.checkFiles)
         self.ui.combo_superpixel.currentIndexChanged.connect(self.changeSuperPixelMethod)
         self.ui.c_optimize.stateChanged.connect(self.checkFiles)
-
-        #self.ui.c_of.stateChanged.connect(self.checkVideoCreation)
-        #self.ui.c_back_of.stateChanged.connect(self.checkVideoCreation)
-        #self.ui.c_depth.stateChanged.connect(self.checkVideoCreation)
     
     def showInfo(self):
         """Show information dialog
@@ -282,26 +276,15 @@ class Dialog(QDialog, Ui_Dialog):
         """Label text setup if the user json is not empty
         """
         if self.user["Save"] == "":
-            #self.ui.b_vid.setEnabled(False)
-            #self.ui.b_of.setEnabled(False)
-            #self.ui.b_depth.setEnabled(False)
             self.ui.b_run.setEnabled(False)
         else:
             name_split = self.splitPath(self.user["Save"])[-1]
             name = name_split.split(".")[0]
             self.ui.l_save.setText("Save to: " + name)
-            #if self.user["Of"] != "":
-            #    self.ui.l_of.setText(self.user["Of"])
-            #if self.user["Depth"] != "":
-            #    self.ui.l_depth.setText(self.user["Depth"])
 
-
-            #if self.user["Video"] != "":
-            #    self.ui.l_vid.setText(self.user["Video"])
             if self.user["GT"] != "":
                 self.ui.l_ground_truth.setText(self.splitPath(self.user["GT"])[-1])
             
-            #self.vid_name = self.splitPath(self.user["Video"])[-1]
             self.ui.l_colour.setText(self.user["Colour"])
             
     def loadUser(self):
@@ -330,7 +313,6 @@ class Dialog(QDialog, Ui_Dialog):
             bool -- if true then the execution stops
         """
         stop_calculation = False
-        #ret = QMessageBox.question(self, "Solving Errors", "Click a button", QMessageBox.Ok | QMessageBox.Abort, QMessageBox.Ok)
         found_error = False
         errors = {
             "Info": [],
@@ -344,9 +326,6 @@ class Dialog(QDialog, Ui_Dialog):
 
         if os.path.exists(self.savePathJoin("Images")):
             ori_images = len(list_directory(self.savePathJoin("Images"), extension="png"))
-        #elif os.path.exists(self.user["Video"]):
-        #    ori_images = count_frames(self.user["Video"])
-
 
         # Check image folder
         if self.img_exist and not os.path.exists(self.savePathJoin("Images")):
@@ -358,9 +337,6 @@ class Dialog(QDialog, Ui_Dialog):
                 errors["Critical"].append(("Images folder {0} and video file {1} don't exist -> Stopping run".format(self.savePathJoin("Images"), self.user["Video"])))
         elif self.img_exist and os.path.exists(self.user["Video"]):
             errors["Info"].append("Both the video {0} and Images folder {1} exist -> using Images folder by default".format(self.user["Video"], self.savePathJoin("Images")))
-        #elif not self.img_exist and os.path.exists(self.user["Video"]):
-        #    errors["Info"].append("Images folder {0} doesn't exist -> Create it and calculate optical flow and depth estimations".format(self.savePathJoin("Images")))
-        #    error_types.append("NoImages")
 
 
         # Check video file
@@ -523,24 +499,17 @@ class Dialog(QDialog, Ui_Dialog):
         """
         # 1 - create Worker and Thread inside the Form
         self.worker = calcRunner.CalculationRunner(self.params_dict)
-            #, self.savePathJoin("Images"),
-            #self.savePathJoin("Depth"), self.savePathJoin("Of"), self.savePathJoin("Back_Of"),
-            #self.user["Save"], None, 1, 0.309, self.run_dict, self.app.get_resource(os.path.join("of_models", "network-default.pytorch")),
-            #self.app.get_resource(os.path.join("depth_models", "model_city2kitti.meta")), PLOT_SPEED_DIR,
-            #NP_DIR, PLOT_ERROR_DIR, speed_gt=self.user["GT"], vid_path=self.user["Video"], super_pixel_method=self.super_pixel_method)  # no parent!
         self.thread = QThread()  # no parent!
 
         self.worker.labelUpdate.connect(self.labelUpdate)
 
         self.worker.update.connect(self.progressUpdate)
-        #self.worker.updateFin.connect(self.progressAllUpdate)
 
         self.worker.error.connect(self.calculateError)
 
         self.worker.finished.connect(self.finishThread)
 
         self.worker.moveToThread(self.thread)
-        #self.worker.finished.connect(self.stopVideo)
         self.thread.started.connect(self.worker.startThread)
         # 6 - Start the thread
         self.thread.start()
@@ -646,7 +615,6 @@ class Dialog(QDialog, Ui_Dialog):
             self.worker.labelUpdate.connect(self.labelUpdate)
 
             self.worker.update.connect(self.progressUpdate)
-            #self.worker.updateFin.connect(self.progressAllUpdate)
             self.worker.videoFrame.connect(self.setVidFrame)
 
             self.worker.moveToThread(self.thread)
@@ -690,9 +658,6 @@ class Dialog(QDialog, Ui_Dialog):
         self.run_dict["Super_Pixel_Video"] = {"Run": self.ui.combo_superpixel.currentIndex() != 0 and self.ui.c_super_pixel_video.isChecked(), "Progress":ori_images, "Text":"Creating super pixel video"}
         self.run_dict["Super_Pixel_Label"] = {"Run": self.create_super_pixel_label, "Progress":ori_images, "Text":"Creating {0} superpixel labels".format(self.super_pixel_method)}
 
-        
-        #self.ui.combo_superpixel.currentIndex() != 0
-
         self.addAllProgressBar()        
         self.buildParamsDict()
         self.saveUser()
@@ -701,8 +666,6 @@ class Dialog(QDialog, Ui_Dialog):
     def disableButtons(self):
         """Disable widgets while the calculation is running
         """
-        #self.setEnabled(False)
-        #self.progressLabel.setEnabled(True)
         self.ui.b_run.setEnabled(False)
         self.ui.b_colour.setEnabled(False)
         self.ui.b_ground_truth.setEnabled(False)
@@ -724,8 +687,6 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.c_error_plot_video.setEnabled(False)
         self.ui.c_speed_plot_video.setEnabled(False)
         self.ui.c_optimize.setEnabled(False)
-        #self.ui.b_depth.setEnabled(False)
-        #self.ui.b_of.setEnabled(False)
 
     def savePathJoin(self, path):
         """Join the given path with the save path (stored in user info)
@@ -752,19 +713,13 @@ class Dialog(QDialog, Ui_Dialog):
         logging.info("Creating Directories")
 
         if not self.img_exist:
-            #self.createDir("Images")
             self.reCreateDir(self.savePathJoin("Images")) 
         if not self.of_exist:
-            #self.createDir("Of")
             self.reCreateDir(self.savePathJoin("Of")) 
         if not self.back_of_exist:
-            #self.createDir("Back_Of")
             self.reCreateDir(self.savePathJoin("Back_Of")) 
         if not self.depth_exist:
-            #self.createDir("Depth")
             self.reCreateDir(self.savePathJoin("Depth"))
-        #if not os.path.exists(self.savePathJoin("Super_Pixel")):
-        #    self.createDir("Super_Pixel")
         if self.super_pixel_method != "" and not os.path.exists(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)):
             os.makedirs(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method))
 

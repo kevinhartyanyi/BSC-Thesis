@@ -95,17 +95,3 @@ def video_from_images(img_dir, out_dir, fps=30):
         img = cv2.imread(onlyfiles[i])
         vid_out.write(img)
     vid_out.release()
-
-#def readImg(img_dir):
-#    """Reads the png file names in the given directory and returns them sorted.
-#    
-#    Arguments:
-#        img_dir {string} -- path to dir
-#    
-#    Returns:
-#        [string] -- list containing paths to the files sorted by name
-#    """
-#    onlyfiles = glob.glob(img_dir +"/*.png")
-#    onlyfiles = natsorted(onlyfiles)
-#    return onlyfiles
-

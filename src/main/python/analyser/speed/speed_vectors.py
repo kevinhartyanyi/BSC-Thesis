@@ -9,6 +9,7 @@ from skimage.filters import sobel
 import cv2
 import numpy as np
 import tqdm
+from skimage.segmentation import mark_boundaries
 
 from natsort import natsorted # Run with python3
 
@@ -73,9 +74,6 @@ class VelocityCalculator(object):
             base_fn = self.out_dir
             img_num = os.path.splitext(os.path.basename(self.flow_fn))[0]
 
-            #labels = cv2.imread(self.label_fn, -1)
-            #labels = np.load(os.path.join(self.label_fn, "{0}_{1}.npy".format(img_num, self.super_pixel_method)))
-            #labels = np.load(self.label_fn)
             labels = self.label_fn
             labels_unique = np.unique(labels)
             label_masks = []
@@ -112,7 +110,7 @@ class VelocityCalculator(object):
             if self.create_draw:
                 back_flow = self.read_flow(self.back_flow) 
                 of_mask, next_position, prev_position = utils.calc_bidi_errormap(flow, back_flow, tau=0.8)
-                #incons_img = np.tile(255*of_mask[..., None], (1, 1, 3)).astype(np.uint8)
+                
                 incons_img = np.tile(255*np.ones(of_mask[..., None].shape), (1, 1, 3)).astype(np.uint8)
                 incons_img = utils.draw_velocity_vectors(incons_img, next_position, relative_disp=False, color=(0, 0, 255))
                 plt.imsave(os.path.join(base_fn, DRAW_DIR, img_num + '_draw.png'), incons_img.astype('uint8'))
@@ -127,9 +125,10 @@ class VelocityCalculator(object):
             y = velocity[:,:,1]
             z = velocity[:,:,2]
             speed_superpixel = utils.vector_distance(x,y,z)
+            #mask_edges = mark_boundaries(speed_superpixel.astype(np.int), speed_mask, color=(1,0,0))
+
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_superpixel.npy'), speed_superpixel)
-            speed_superpixel[~speed_mask] = 0
-            plt.matshow(speed_superpixel, vmin=0, vmax=100)
+            plt.imshow(speed_superpixel, vmin=0, vmax=100)
             plt.colorbar()
             plt.savefig(os.path.join(base_fn, SUPER_PIXEL_DIR, "{0}_superpixel.png".format(img_num)), bbox_inches='tight', dpi=150)
         else:
@@ -142,7 +141,6 @@ class VelocityCalculator(object):
             
             # Read disparity maps
             fst_depth = self.read_depth(self.fst_depth_fn, width, height)
-            #avg_fst_depth = self.average(fst_depth, labels)
             snd_depth = self.read_depth(self.snd_depth_fn, width, height)
             # Read optical flow
             flow = self.read_flow(self.flow_fn)
@@ -156,7 +154,7 @@ class VelocityCalculator(object):
             
             
             # Save the results
-            base_fn = self.out_dir# + self.vid_name
+            base_fn = self.out_dir
             img_num = os.path.splitext(os.path.basename(self.flow_fn))[0]
 
             # Calculate the velocity and the orientation
@@ -169,11 +167,6 @@ class VelocityCalculator(object):
             if self.create_velocity:
                 image = velocity.copy()
                 plt.imsave(os.path.join(base_fn, VL_DIR, img_num + '_velocity.png'), image.astype('uint8'))
-
-
-            #inaccurate_mono = fst_depth > 30
-            #fst_depth[inaccurate_mono] = 0
-            #velocity[inaccurate_mono] = 0
 
             
             if self.create_draw:

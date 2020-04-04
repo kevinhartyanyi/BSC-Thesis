@@ -1,7 +1,6 @@
 import os
 import cv2
 import numpy as np
-#import skvideo.io
 import tqdm
 import pandas
 import speed.readFlowFile as readFlowFile
@@ -30,7 +29,7 @@ width_to_focal[1242] = 721.5377
 width_to_focal[1241] = 718.856
 width_to_focal[1224] = 707.0493
 width_to_focal[1238] = 718.3351
-width_to_focal[1226] = 707.0493     # TODO check correct focal length
+width_to_focal[1226] = 707.0493 
 
 fps = 10
 baseline = 0.54
@@ -207,7 +206,7 @@ def calculate_velocity_and_orientation_vectors_vectorised(of_mask, next_position
     velocity[:,:,2] = z
     return velocity
 
-# TODO np.meshgrid
+
 def calc_bidi_errormap(flowAB, flowBA, tau=1.0, consistent_flow=False):
     """Calculates the inconsistent Optical Flow, and the transformation matrix given by the forward OF.
     
@@ -308,7 +307,7 @@ def draw_velocity_vectors(img, disparities, max_spin_size=5.0, step_size=20, rel
                 spin_size = max_spin_size * l / l_max
                 nx, ny = int(cx + dx), int(cy + dy)
 
-                # print((nx, ny))
+                
                 nx = min(max(0, nx), height - 1) 
                 ny = min(max(0, ny), width - 1)
 
@@ -352,8 +351,7 @@ def read_depth(depth_fn, width, height):
     disparity = np.load(depth_fn)
     disparity = cv2.resize(disparity, (width, height), interpolation=cv2.INTER_LINEAR)
     depth = np.multiply(width_to_focal[width], np.divide(baseline, np.multiply(width, disparity)))
-    #depth[depth > max_depth] = max_depth
-    #depth[depth < min_depth] = min_depth
+    
     return depth
 
 def list_directory(dir_name, extension=None):
@@ -428,12 +426,10 @@ def vector_speedOF_Simple(vectors, high=1, low=0, optimal_of=True):
     """
     x = vectors[:,:,0]
     y = vectors[:,:,1]
-    #optimal_of=False#!
-    mask_uni = reduce_sort(y,low=low,high=high) # 0.5 - 0.6: 26
+    mask_uni = reduce_sort(y,low=low,high=high)
     if optimal_of:
         only_good_of = x != 0
         mask_uni = np.logical_and(mask_uni, only_good_of)
-    #mask_uni = np.logical_and(mask_y_thr, only_good_of)
 
 
     x_thr = x[mask_uni]
@@ -460,21 +456,10 @@ def vector_speedOF_Simple(vectors, high=1, low=0, optimal_of=True):
         md_thr = md[mask_uni]
         
         TC = np.mean([abs(np.mean(ofhor_left)-np.mean(ofhor_right)), np.mean(y_abs)])
-        #TC = np.mean([abs(np.mean(ofhor_left_thr)-np.mean(ofhor_right_thr)), np.mean(y_abs)])
-
-        #print("Turning")
+        
         return TC, mask_uni
-    
-    
-    #print("Not Turning")
-    #######################x
 
-    #print("Average:")
-    speed = np.average([np.mean(x_abs), np.mean(y_abs)])   
-    #speed = np.mean(speed_avg) # Don't ask why this is here
-
-    #print("Raw ", np.mean(avg_speed_raw[avg_speed_raw != 1000]))
-    #print("Speed ", speed)s
+    speed = np.average([np.mean(x_abs), np.mean(y_abs)])
 
     return speed, mask_uni
 
@@ -499,13 +484,7 @@ def average(data, labels, index, masks):
     Returns:
         numpy array -- same shape as data with values replaced by the mean value of the superpixel values
     """
-    #avg = np.zeros_like(data)
-    #regions = measure.regionprops(labels, intensity_image=data)
-    #for r in regions:
-    #    avg[labels == r.label] = r.mean_intensity
-    #return avg
     avg = np.zeros_like(data)
-    #index = np.unique(labels)
     regions = ndimage.mean(data, labels=labels, index=index)
     for i, reg in enumerate(regions):
         avg[masks[i]] = reg
@@ -557,14 +536,6 @@ def create_speed_video_Speed_Vectors(vid_path, out_path, speed_simple, speed_gt,
         speed_gt ([numpy array]): [ground truth speed of the video]
         mask ([numpy array]): [mask of the pixels used for speed estimation]
     """
-    '''
-    vid_id = '2011_09_26_drive_0059'
-    
-    vid_path = DB_PATH[:-5] + vid_id + '.mp4'
-    pwcnet = DB_PATH + '/speed_400/' + vid_id + '/pwcnet.mp4'
-    monodepth = DB_PATH + '/speed_400/' + vid_id + '/monodepth.mp4'
-    crop = [700,100,400,240]
-    '''
     
     vid = cv2.VideoCapture(vid_path)            # 375 x 1242
     vid_pwcnet = cv2.VideoCapture(flow)       #  384 x 1248
@@ -579,9 +550,9 @@ def create_speed_video_Speed_Vectors(vid_path, out_path, speed_simple, speed_gt,
         _, f_flow = vid_pwcnet.read()
         _, f_back_flow = vid_back_pwcnet.read()
         _, f_depth = vid_monodepth.read()
-        #cv2.rectangle(f, (crop[0], crop[1]), (crop[0]+crop[2], crop[1]+crop[3]), (255, 255, 255), 2)
+        
         frame_mask = mask[i] # 375 x 1242
-        #save_as_image(TMP_IMG + str(i) + '.png', frame_mask)
+        
         frame_mask = np.expand_dims(frame_mask, axis=-1)
         z = np.zeros((1167, 2548, 3), dtype=np.uint8)
         if hd3 is False:
@@ -599,19 +570,13 @@ def create_speed_video_Speed_Vectors(vid_path, out_path, speed_simple, speed_gt,
         font = cv2.FONT_HERSHEY_DUPLEX
         fSize = 0.7
         fThick = 1
-        #cv2.putText(z, 'FlowNet2', (450, 440), font, fSize, (255, 255, 255), fThick)
-        #cv2.putText(z, 'MonoDepth', (900, 440), font, fSize, (255, 255, 255), fThick)
         cv2.putText(z, 'Frame ' + str(i), (50, 450), font, fSize, (255, 255, 255), fThick)
         cv2.putText(z, 'Speed estimation', (50, 480), font, fSize, (255, 255, 255), fThick)
         cv2.putText(z, 'GT:   ' + str(round(speed_gt[i], 3)), (50, 510), font, fSize, (255, 255, 255), fThick)
         cv2.putText(z, ' simple: ' + str(np.round(speed_simple[i], 3)), (50, 570), font, fSize, (255, 255, 255), fThick)
         cv2.putText(z, '    err: ' + str(round(speed_gt[i] - speed_simple[i], 3)), (220, 570), font, fSize, (255, 255, 255), fThick)
-        #str(round(gazeDataGyro[iz, 4], 2))
-        #vid_out.writeFrame(coloured)
-        #vid_out.writeFrame(coloured)
+        
         vid_out.writeFrame(cv2.cvtColor(z, cv2.COLOR_BGR2RGB))
-        #cv2.imshow('im', z)
-        #if cv2.waitKey() == 27:
-        #    break
+        
 
 
