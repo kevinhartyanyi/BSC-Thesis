@@ -519,6 +519,7 @@ class Dialog(QDialog, Ui_Dialog):
         """
         self.checkFiles()
         if self.errorChecks():
+            logging.info("Error Check Failed")
             return
         
         self.disableButtons()
@@ -537,7 +538,7 @@ class Dialog(QDialog, Ui_Dialog):
             #self.user["Save"], None, 1, 0.309, self.run_dict, self.app.get_resource(os.path.join("of_models", "network-default.pytorch")),
             #self.app.get_resource(os.path.join("depth_models", "model_city2kitti.meta")), PLOT_SPEED_DIR,
             #NP_DIR, PLOT_ERROR_DIR, speed_gt=self.user["GT"], vid_path=self.user["Video"], super_pixel_method=self.super_pixel_method)  # no parent!
-        self.thread = QThread()  # no parent!
+        self.thread = QThreadcalcRunner()  # no parent!
 
         self.worker.labelUpdate.connect(self.labelUpdate)
 

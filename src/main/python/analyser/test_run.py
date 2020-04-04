@@ -6,6 +6,10 @@ import unittest
 from PyQt5.QtTest import QTest
 import os
 from speed.utils import list_directory
+import time
+import shutil
+import calcRunner
+
 
 appctxt = ApplicationContext()
 appctxt.app.setStyleSheet(qdarkgraystyle.load_stylesheet())
@@ -110,68 +114,140 @@ class DialogTester(unittest.TestCase):
         self.run.user["Save"] = "/test"
         self.run.user["Of"] = "/tes2"
         self.run.user["GT"] = "/ground_truth"
-        self.run.ui.c_optimize.setEnabled(True)
+        self.run.ui.c_optimize.setChecked(True)
         self.run.checkFiles()
         self.assertEqual(self.run.gt_exist, True)
         self.assertEqual(self.run.ui.t_low.isEnabled(), False)
         self.assertEqual(self.run.ui.t_high.isEnabled(), False)
         self.assertEqual(self.run.ui.c_optimize.isEnabled(), True)
         self.assertEqual(self.run.ui.c_error_plot.isEnabled(), True)
-        self.assertEqual(self.run.ui.c_csv.isEnabled(), True)
 
-    def test_simple_run(self):
-        self.run.user["Save"] = "./test"
+    def test_createDirs_run(self):
+        self.run.user["Save"] = os.path.join(os.path.dirname(os.path.realpath(__file__)), "test")
 
         img = os.path.join(self.run.user["Save"], "Images")
         depth = os.path.join(self.run.user["Save"], "Depth")
         of = os.path.join(self.run.user["Save"], "Of")
         back_of = os.path.join(self.run.user["Save"], "Back_Of")
-        result = os.path.join(self.run.user["Save"], "result")
+        result = os.path.join(self.run.user["Save"], "results")
 
         numbers = os.path.join(result, "numbers")
         mask = os.path.join(result, "mask")
 
         self.assertEqual(os.path.exists(os.path.join(self.run.user["Save"], "Images")), True)
         self.run.checkFiles()
-        self.run.startRun()
+        self.run.createDirs()
 
         self.assertEqual(os.path.exists(depth), True)
         self.assertEqual(os.path.exists(of), True)
         self.assertEqual(os.path.exists(back_of), True)
         self.assertEqual(os.path.exists(result), True)
-        self.assertEqual(os.path.exists(numbers, True))
-        self.assertEqual(os.path.exists(mask, True))
+        self.assertEqual(os.path.exists(numbers), True)
+        self.assertEqual(os.path.exists(mask), True)
 
-        img_num = list_directory(img, extension=".png")
-        depth_num = list_directory(depth, extension=".png")
-        of_num = list_directory(of, extension=".png")
-        back_of_num = list_directory(back_of, extension=".png")
 
-        mask_num = list_directory(mask, extension=".png")
+    def test_plot_dir(self):
+        
+        self.run.user["Save"] = os.path.join(os.path.dirname(os.path.realpath(__file__)), "test")
+
+        img = os.path.join(self.run.user["Save"], "Images")
+
+        self.run.ui.c_speed_plot.setChecked(True)  
+        self.run.ui.c_error_plot.setChecked(True)  
+        
+        result = os.path.join(self.run.user["Save"], "results")
+        plot_speed = os.path.join(result, "plot_speed")
+        plot_error = os.path.join(result, "plot_error")
+
+        self.run.checkFiles()
+        self.run.disableButtons()
+        self.run.createDirs()
+
+        self.assertEqual(os.path.exists(plot_speed), True)
+        self.assertEqual(os.path.exists(plot_error), True)
+        
+
+    def prepare_run(self, empty=False):
+        self.run.user["Save"] = os.path.join(os.path.dirname(os.path.realpath(__file__)), "test")
+        self.img = os.path.join(self.run.user["Save"], "Images")
+        self.depth = os.path.join(self.run.user["Save"], "Depth")
+        self.of = os.path.join(self.run.user["Save"], "Of")
+        self.back_of = os.path.join(self.run.user["Save"], "Back_Of")
+        self.result = os.path.join(self.run.user["Save"], "results")
+        self.numbers = os.path.join(self.result, "numbers")
+        self.mask = os.path.join(self.result, "mask")
+        
+        if empty:
+            tmp = [self.depth, self.of, self.back_of, self.result]
+            for t in tmp:
+                if os.path.exists(t):
+                    shutil.rmtree(t)
+
+        self.run.checkFiles()
+        self.run.disableButtons()
+        self.run.createDirs()
+
+        ori_images = len(list_directory(self.img))
+        self.run.run_dict["Of"] = {"Run": not self.run.of_exist, "Progress":ori_images, "Text":"Running optical flow"}
+        self.run.run_dict["Back_Of"] = {"Run": not self.run.back_of_exist, "Progress":ori_images, "Text":"Running back optical flow"}
+        self.run.run_dict["Depth"] = {"Run": not self.run.depth_exist, "Progress":ori_images, "Text":"Running depth estimation"}
+        self.run.run_dict["Speed"] = {"Run": True, "Progress":ori_images, "Text":"Running speed estimation"}
+        self.run.run_dict["Optimization"] = {"Run": self.run.ui.c_optimize.isChecked(), "Progress":ori_images*9, "Text":"Running parameter optimization"}
+
+        self.run.run_dict["Of_Vid"] = {"Run": self.run.ui.c_of.isChecked(), "Progress":ori_images, "Text":"Creating optical flow video"}
+        self.run.run_dict["Back_Of_Vid"] = {"Run": self.run.ui.c_back_of.isChecked(), "Progress":ori_images, "Text":"Creating backward optical flow video"}
+        self.run.run_dict["Depth_Vid"] = {"Run": self.run.ui.c_depth.isChecked(), "Progress":ori_images, "Text":"Creating depth estimation video"}
+
+        self.run.run_dict["Speed_Plot"] = {"Run": self.run.ui.c_speed_plot.isChecked(), "Progress":ori_images, "Text":"Creating plot for speed values"}
+        self.run.run_dict["Error_Plot"] = {"Run": self.run.ui.c_error_plot.isChecked() and self.gt_exist, "Progress":ori_images, "Text":"Creating plot for speed error"}
+
+        self.run.run_dict["Speed_Plot_Video"] = {"Run": self.run.ui.c_speed_plot_video.isChecked(), "Progress":ori_images, "Text":"Creating speed plot video"}
+        self.run.run_dict["Error_Plot_Video"] = {"Run": self.run.ui.c_error_plot_video.isChecked() and self.gt_exist, "Progress":ori_images, "Text":"Creating error plot video"}
+
+        self.run.run_dict["Super_Pixel_Video"] = {"Run": self.run.ui.combo_superpixel.currentIndex() != 0 and self.run.ui.c_super_pixel_video.isChecked(), "Progress":ori_images, "Text":"Creating super pixel video"}
+        self.run.run_dict["Super_Pixel_Label"] = {"Run": self.run.create_super_pixel_label, "Progress":ori_images, "Text":"Creating {0} superpixel labels".format(self.run.super_pixel_method)}
+
+        self.run.addAllProgressBar() 
+        self.run.buildParamsDict()
+        runner = calcRunner.CalculationRunner(self.run.params_dict)
+        runner.startThread()
+
+    def test_simple_run(self):
+        self.prepare_run(empty=True)
+        img_num = len(list_directory(self.img, extension=".png"))
+        depth_num = len(list_directory(self.depth, extension=".png"))
+        of_num = len(list_directory(self.of, extension=".png"))
+        back_of_num = len(list_directory(self.back_of, extension=".png"))
+
+        mask_num = len(list_directory(self.mask, extension=".png"))
 
         self.assertEqual(img_num, depth_num)
         self.assertEqual(of_num, back_of_num)
         self.assertEqual(img_num - 1, of_num)
 
-        self.assertEqual(img_num, mask_num)
+        self.assertEqual(img_num - 1, mask_num)
 
-    def test_speed_plot_run(self):
-
-        self.run.user["Save"] = "./test"
-        img = os.path.join(self.run.user["Save"], "Images")
-
-        self.run.ui.c_speed_plot.setEnabled(True)  
-        
-        result = os.path.join(self.run.user["Save"], "result")
-        plot_speed = os.path.join(result, "plot_speed")
-
-        self.run.checkFiles()
-        self.run.startRun()
-
+    def test_plot_run(self):
+        self.run.ui.c_speed_plot.setChecked(True)
+        self.prepare_run(empty=True)
+        plot_speed = os.path.join(self.result, "plot_speed")
         self.assertEqual(os.path.exists(plot_speed), True)
-        img_num = list_directory(img, extension=".png")
-        speed_num = list_directory(plot_speed, extension=".png")
-        self.assertEqual(img_num, speed_num)
+
+        img_num = len(list_directory(self.img, extension=".png"))
+        speed_num = len(list_directory(plot_speed, extension=".png"))
+        self.assertEqual(img_num - 1, speed_num)
+    
+    def test_superpixel_run(self):
+        self.run.ui.combo_superpixel.setCurrentIndex(1)
+        self.run.changeSuperPixelMethod(1)
+        self.prepare_run()
+        superpixel_dir = os.path.join(self.result, "super_pixel")
+
+        self.assertEqual(os.path.exists(superpixel_dir), True)
+
+        img_num = len(list_directory(self.img, extension=".png"))
+        superpixel_num = len(list_directory(superpixel_dir, extension=".png"))
+        self.assertEqual(img_num - 1, superpixel_num)
 
 
 class MainTester(unittest.TestCase):
