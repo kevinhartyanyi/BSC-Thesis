@@ -450,7 +450,7 @@ class Ui_Dialog(object):
         self.label_7.setToolTip(_translate("Dialog", "Drop values from the top"))
         self.label_7.setText(_translate("Dialog", "Low Cut"))
         self.t_low.setToolTip(_translate("Dialog", "Value between 0.0 - 1.0 (represents the percentage to drop)"))
-        self.t_low.setText(_translate("Dialog", "0.309"))
+        self.t_low.setText(_translate("Dialog", "0.0"))
         self.label_8.setToolTip(_translate("Dialog", "Drop values from the bottom"))
         self.label_8.setText(_translate("Dialog", "High Cut"))
         self.t_high.setToolTip(_translate("Dialog", "Value between 0.0 - 1.0 (represents the percentage to drop)"))

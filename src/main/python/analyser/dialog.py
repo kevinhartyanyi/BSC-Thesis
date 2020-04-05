@@ -56,7 +56,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.run_count = 1
         self.fps = 30
         self.fps_limit = 60
-        self.low = 0.309
+        self.low = 0.0
         self.high = 1.0 
         self.run_dict = {}
         self.super_pixel_method = ""        
@@ -127,8 +127,8 @@ class Dialog(QDialog, Ui_Dialog):
         else:
             logging.info("Wrong Input For low or high")
             if t_type == "low":
-                text_widget.setText("0.309")
-                self.low = 0.309
+                text_widget.setText("0.0")
+                self.low = 0.0
             else:
                 text_widget.setText("1")
                 self.high = 1

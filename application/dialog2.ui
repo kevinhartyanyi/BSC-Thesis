@@ -267,7 +267,7 @@
                     <string>Value between 0.0 - 1.0 (represents the percentage to drop)</string>
                    </property>
                    <property name="text">
-                    <string>0.309</string>
+                    <string>0.0</string>
                    </property>
                    <property name="alignment">
                     <set>Qt::AlignCenter</set>
