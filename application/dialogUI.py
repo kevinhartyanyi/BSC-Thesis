@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(1620, 785)
+        Dialog.resize(1718, 785)
         self.verticalLayout_20 = QtWidgets.QVBoxLayout(Dialog)
         self.verticalLayout_20.setObjectName("verticalLayout_20")
         self.horizontalLayout_10 = QtWidgets.QHBoxLayout()
@@ -501,6 +501,6 @@ class Ui_Dialog(object):
         self.c_error_plot.setToolTip(_translate("Dialog", "Plot the error between the calculated speed and the ground truth speed"))
         self.c_error_plot.setText(_translate("Dialog", "Error Plot"))
         self.c_crash_plot.setToolTip(_translate("Dialog", "Plot time to crash based on speed and depth"))
-        self.c_crash_plot.setText(_translate("Dialog", "Time to Crash"))
+        self.c_crash_plot.setText(_translate("Dialog", "Time to Crash Plot"))
         self.b_run.setToolTip(_translate("Dialog", "Start the calculation"))
         self.b_run.setText(_translate("Dialog", "Run"))

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1620</width>
+    <width>1718</width>
     <height>785</height>
    </rect>
   </property>
@@ -855,7 +855,7 @@
             <string>Plot time to crash based on speed and depth</string>
            </property>
            <property name="text">
-            <string>Time to Crash</string>
+            <string>Time to Crash Plot</string>
            </property>
           </widget>
          </item>
