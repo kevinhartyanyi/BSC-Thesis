@@ -326,7 +326,7 @@ class Dialog(QDialog, Ui_Dialog):
 
         if os.path.exists(self.savePathJoin("Images")):
             ori_images = len(list_directory(self.savePathJoin("Images"), extension="png"))
-
+        print("AAAAAAAAAAAAAAAAAAAAAAAAAA ", self.img_exist)
         # Check image folder
         if self.img_exist and not os.path.exists(self.savePathJoin("Images")):
             if os.path.exists(self.user["Video"]):
@@ -337,7 +337,9 @@ class Dialog(QDialog, Ui_Dialog):
                 errors["Critical"].append(("Images folder {0} and video file {1} don't exist -> Stopping run".format(self.savePathJoin("Images"), self.user["Video"])))
         elif self.img_exist and os.path.exists(self.user["Video"]):
             errors["Info"].append("Both the video {0} and Images folder {1} exist -> using Images folder by default".format(self.user["Video"], self.savePathJoin("Images")))
-
+        elif not self.img_exist and not os.path.exists(self.savePathJoin("Images")):
+            stop_calculation = True
+            errors["Critical"].append(("Images folder {0} and video file {1} don't exist -> Stopping run".format(self.savePathJoin("Images"), self.user["Video"])))
 
         # Check video file
         if self.user["Video"] != "" and not os.path.isfile(self.user["Video"]):
