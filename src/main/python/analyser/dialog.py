@@ -12,7 +12,7 @@ import re
 import shutil
 import speed.speed_vectors as speed
 from speed.utils import list_directory, getResultDirs
-import readline
+#import readline
 import logging
 
 result_dir = getResultDirs()
@@ -189,11 +189,7 @@ class Dialog(QDialog, Ui_Dialog):
         Returns:
             path splitted on / or \ -- only uses \ on windows
         """
-        sep = "/"
-        if platform.system() == "Windows": 
-            sep = "\\"
-
-        return path.split(sep)
+        return os.path.split(path)
 
     def openSave(self):
         """Open directory to save results
@@ -337,7 +333,7 @@ class Dialog(QDialog, Ui_Dialog):
                 errors["Critical"].append(("Images folder {0} and video file {1} don't exist -> Stopping run".format(self.savePathJoin("Images"), self.user["Video"])))
         elif self.img_exist and os.path.exists(self.user["Video"]):
             errors["Info"].append("Both the video {0} and Images folder {1} exist -> using Images folder by default".format(self.user["Video"], self.savePathJoin("Images")))
-        elif not self.img_exist and not os.path.exists(self.savePathJoin("Images")):
+        elif not self.img_exist and not os.path.isfile(self.user["Video"]):
             stop_calculation = True
             errors["Critical"].append(("Images folder {0} and video file {1} don't exist -> Stopping run".format(self.savePathJoin("Images"), self.user["Video"])))
 

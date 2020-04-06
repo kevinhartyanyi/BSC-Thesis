@@ -1,0 +1,5 @@
+scikit-image==0.16.2
+scikit-learn==0.22.2.post1
+scikit-video==1.1.11
+scipy==1.1.0
+selenium==3.141.0
