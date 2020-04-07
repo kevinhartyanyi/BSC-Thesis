@@ -128,7 +128,7 @@ class VelocityCalculator(object):
             #mask_edges = mark_boundaries(speed_superpixel.astype(np.int), speed_mask, color=(1,0,0))
 
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_superpixel.npy'), speed_superpixel)
-            plt.imshow(speed_superpixel, vmin=0, vmax=100)
+            plt.matshow(speed_superpixel, vmin=0, vmax=100)
             plt.colorbar()
             plt.savefig(os.path.join(base_fn, SUPER_PIXEL_DIR, "{0}_superpixel.png".format(img_num)), bbox_inches='tight', dpi=150)
         else:
