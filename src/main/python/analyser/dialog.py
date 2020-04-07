@@ -682,8 +682,10 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.c_depth.setEnabled(False)
         self.ui.c_speed_plot.setEnabled(False)
         self.ui.c_error_plot.setEnabled(False)
+        self.ui.c_crash_plot.setEnabled(False)
         self.ui.c_error_plot_video.setEnabled(False)
         self.ui.c_speed_plot_video.setEnabled(False)
+        self.ui.c_crash_plot_video.setEnabled(False)
         self.ui.c_optimize.setEnabled(False)
 
     def savePathJoin(self, path):
