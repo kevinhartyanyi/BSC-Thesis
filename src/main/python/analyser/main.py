@@ -101,6 +101,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.l_description.setText("Optical flow directions with arrows (after throwing away the inconsistent optical flow)")
         elif vid_type == "super_pixel":
             self.ui.l_description.setText("Speed values in the super pixel segmentations")
+        elif vid_type == "object_detection":
+            self.ui.l_description.setText("Object detection with YOLO model")
 
     def disableSetup(self):
         """Disable widgets on startup (before calculations)
@@ -118,6 +120,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.actionOriginal.setEnabled(False)
         self.ui.actionSuperPixel.setEnabled(False)
         self.ui.actionBackOF.setEnabled(False)
+        self.ui.actionObjectDetection.setEnabled(False)
         self.ui.b_jump.setEnabled(False)
         self.ui.b_plot_left.setEnabled(False)
         self.ui.b_plot_right.setEnabled(False)
@@ -197,6 +200,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.of_dir = os.path.join(self.user["Save"], "Of") 
         self.back_of_dir = os.path.join(self.user["Save"], "Back_Of") 
         self.depth_dir = os.path.join(self.user["Save"], "Depth")
+        self.obj_det_dir = os.path.join(self.user["Save"], "ObjectDetection")
         
         results = sutils.getResultDirs()
         velocity = os.path.join(self.user["Save"], results["Velocity"])
@@ -219,6 +223,9 @@ class MainWindow(QtWidgets.QMainWindow):
         if os.path.exists(super_pixel):
             self.cycle_vid.add("super_pixel", super_pixel)       
             self.ui.actionSuperPixel.setEnabled(True)
+        if os.path.exists(self.obj_det_dir):
+            self.cycle_vid.add("object_detection", self.obj_det_dir)
+            self.ui.actionObjectDetection.setEnabled(True)
 
         plot_dir = None
         if self.created != None:
@@ -250,6 +257,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.actionSuperPixel.triggered.connect(self.cycleToSelected)
         self.ui.actionMask.triggered.connect(self.cycleToSelected)
         self.ui.actionBackOF.triggered.connect(self.cycleToSelected)
+        self.ui.actionObjectDetection.triggered.connect(self.cycleToSelected)
         self.ui.actionShow_Log.triggered.connect(self.showLog)
         self.ui.actionInformation.triggered.connect(self.showInfo)
         self.ui.t_fps.textChanged.connect(self.changeFps)
@@ -291,6 +299,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.openVideo(self.cycle_vid.get("mask"), n_frame=self.image_holder.cur_idx)
         elif text == "SuperPixel":
             self.openVideo(self.cycle_vid.get("super_pixel"), n_frame=self.image_holder.cur_idx)
+        elif text == "ObjectDetection":
+            self.openVideo(self.cycle_vid.get("object_detection"), n_frame=self.image_holder.cur_idx)
         self.changeDescription()
 
     def cyclePlotLeft(self):

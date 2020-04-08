@@ -36,7 +36,6 @@ def createSpeedErrorPlotMain(params):
     plt.ylabel("Speed in km/h")
     plt.xlabel("Frame number")
     plt.legend(handles=[est,gt])
-    #plt.xticks(np.arange(0, len(speeds), 1))
     plt.grid(axis='y', linestyle='-')
     plt.savefig(os.path.join(out_dir, "{0}_speed.png".format(i)), bbox_inches='tight', dpi=150) 
 
@@ -52,7 +51,6 @@ def createErrorPlotMain(params):
     plt.plot(error[:i], "r")
     plt.ylabel("Error in km/h")
     plt.xlabel("Frame number")
-    #plt.xticks(np.arange(0, len(speeds), 1))
     plt.grid(axis='y', linestyle='-')
     plt.savefig(os.path.join(out_dir, "{0}_error.png".format(i)), bbox_inches='tight', dpi=150)
     
@@ -76,7 +74,7 @@ def createSuperPixelMain(params):
         gradient = sobel(rgb2gray(img))
         labels = watershed(gradient, markers=250, compactness=0.001)
     
-    np.save(os.path.join(out_dir, "{0}_{1}.npy".format(i, super_pixel_method)), labels)
+    np.save(os.path.join(out_dir, "{0}_{1}.npy".format(i, super_pixel_method)), labels.astype(np.uint8))
 
 def createSpeedPlotMain(params):
     """Creates speed plot
@@ -90,7 +88,6 @@ def createSpeedPlotMain(params):
     plt.plot(speeds[:i], "m")
     plt.ylabel("Speed in km/h")
     plt.xlabel("Frame number")
-    #plt.xticks(np.arange(0, len(speeds), 1))
     plt.grid(axis='y', linestyle='-')
     plt.savefig(os.path.join(out_dir, "{0}_speed.png".format(i)), bbox_inches='tight', dpi=150)
 
@@ -108,6 +105,8 @@ def createCrashPlotMain(params):
     plt.xlabel("Frame number")
     plt.grid(axis='y', linestyle='-')
     plt.savefig(os.path.join(out_dir, "{0}_crash.png".format(i)), bbox_inches='tight', dpi=150)
+
+
 
 class CalculationRunner(QObject):
     finished = pyqtSignal()
@@ -149,6 +148,10 @@ class CalculationRunner(QObject):
         self.super_pixel_label_dir = param_dict["super_pixel_label_dir"]
         self.create_video_fps = param_dict["create_video_fps"]
         self.optimize = param_dict["optimize_params"]
+        self.yolo_weights = param_dict["yolo_weights"]
+        self.yolo_v = param_dict["yolo_v"]
+        self.coco_names = param_dict["coco_names"]
+        self.object_detection_dir = param_dict["object_detection_dir"]
         self.ground_truth_error = False
         self.video_frame = 0
 
@@ -157,7 +160,7 @@ class CalculationRunner(QObject):
     @pyqtSlot()
     def startThread(self): # A slot takes no params  
         """Starts the calculations
-        """   
+        """
         if self.send_video_frame:
             logging.info("Only run image create")
             self.imagesFromVideo(self.vid_path, self.img_dir, "vid")
@@ -207,7 +210,7 @@ class CalculationRunner(QObject):
             self.checkRun("Error_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_error_dir), self.out_dir, "error_plot.mp4")
 
         self.checkRun("Super_Pixel_Video", self.createVid, os.path.join(self.out_dir, self.super_pixel_dir), self.out_dir, "super_pixel.mp4", self.create_video_fps)
-        
+        self.checkRun("Object_Detection", self.startObjectDetection)
 
         self.finished.emit()
 
@@ -275,7 +278,70 @@ class CalculationRunner(QObject):
             Image.fromarray(flow).save(os.path.join(self.of_dir,"{0}.png".format(ind)))
             self.update.emit(ind)
 
+    @pyqtSlot()
+    def startObjectDetection(self):
+        # Load Yolo
+        logging.info("Starting Object Detection")
+        #cur = os.path.dirname(os.path.realpath(__file__))
+        net = cv2.dnn.readNet(self.yolo_weights, self.yolo_v)
+        classes = []
+        with open(self.coco_names, "r") as f:
+            classes = [line.strip() for line in f.readlines()]
+        layer_names = net.getLayerNames()
+        output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
+        colors = np.random.uniform(0, 255, size=(len(classes), 3))
 
+        # Loading image
+        img_list = utils.list_directory(self.img_dir)
+        
+
+        for ind in range(len(img_list)):
+            logging.info("Running Object Detection on: {0}".format(img_list[ind]))
+
+            img = cv2.imread(img_list[ind])
+            #img = cv2.resize(img, None, fx=0.4, fy=0.4)
+            height, width, channels = img.shape
+
+            # Detecting objects
+            blob = cv2.dnn.blobFromImage(img, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
+            net.setInput(blob)
+            outs = net.forward(output_layers)
+
+            # Showing informations on the screen
+            class_ids = []
+            confidences = []
+            boxes = []
+            for out in outs:
+                for detection in out:
+                    scores = detection[5:]
+                    class_id = np.argmax(scores)
+                    confidence = scores[class_id]
+                    if confidence > 0.5:
+                        # Object detected
+                        center_x = int(detection[0] * width)
+                        center_y = int(detection[1] * height)
+                        w = int(detection[2] * width)
+                        h = int(detection[3] * height)
+                        # Rectangle coordinates
+                        x = int(center_x - w / 2)
+                        y = int(center_y - h / 2)
+                        boxes.append([x, y, w, h])
+                        confidences.append(float(confidence))
+                        class_ids.append(class_id)
+
+            indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
+
+            font = cv2.FONT_HERSHEY_PLAIN
+            for i in range(len(boxes)):
+                if i in indexes:
+                    x, y, w, h = boxes[i]
+                    label = str(classes[class_ids[i]])
+                    color = colors[i]
+                    cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
+                    cv2.putText(img, label, (x, y + 30), font, 3, color, 3)
+            cv2.imwrite(os.path.join(self.object_detection_dir, "{0}.png".format(ind)), img)
+            self.update.emit(ind)        
+        cv2.destroyAllWindows()
 
     def minFunc(self, params, count):
         """Optimization main function. Called by the grid search.
@@ -469,8 +535,6 @@ class CalculationRunner(QObject):
         params = zip(itertools.repeat(error), range(1, len(error) + 1), itertools.repeat(os.path.join(self.out_dir, self.plot_error_dir)))
         
         self.startMultiFunc(createErrorPlotMain, params)
-
-
 
 
 

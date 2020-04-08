@@ -87,6 +87,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.c_crash_plot.stateChanged.connect(self.checkFiles)
         self.ui.combo_superpixel.currentIndexChanged.connect(self.changeSuperPixelMethod)
         self.ui.c_optimize.stateChanged.connect(self.checkFiles)
+        self.ui.c_object_detection.stateChanged.connect(self.checkFiles)
     
     def showInfo(self):
         """Show information dialog
@@ -322,7 +323,6 @@ class Dialog(QDialog, Ui_Dialog):
 
         if os.path.exists(self.savePathJoin("Images")):
             ori_images = len(list_directory(self.savePathJoin("Images"), extension="png"))
-        print("AAAAAAAAAAAAAAAAAAAAAAAAAA ", self.img_exist)
         # Check image folder
         if self.img_exist and not os.path.exists(self.savePathJoin("Images")):
             if os.path.exists(self.user["Video"]):
@@ -389,6 +389,13 @@ class Dialog(QDialog, Ui_Dialog):
             ori_images)))
             error_types.append("LabelError")
 
+        # Check object detection
+        if self.ui.c_object_detection.isChecked() and os.path.exists(self.savePathJoin("ObjectDetection")) \
+        and len(list_directory(self.savePathJoin("ObjectDetection"), extension=".png")) != ori_images:
+            errors["Info"].append("Object Detection image number {0} doesn't match image number of video {1} -> Recalculating object detection".format(len(list_directory(self.savePathJoin("ObjectDetection"), extension=".png")),
+            ori_images))
+            error_types.append("ObDetError")
+
 
         answer = ""
         if len(errors["Info"]) > 0 and len(errors["Critical"]) == 0:
@@ -434,6 +441,8 @@ class Dialog(QDialog, Ui_Dialog):
                 elif ty == "LabelError":
                     self.create_super_pixel_label = True
                     shutil.rmtree(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method))
+                elif ty == "ObDetError":
+                    shutil.rmtree(self.savePathJoin("ObjectDetection"))
 
 
         return (answer == int("0x00040000", 16) or stop_calculation)
@@ -461,6 +470,10 @@ class Dialog(QDialog, Ui_Dialog):
             "run_dict": self.run_dict,
             "of_model": self.app.get_resource(os.path.join("of_models", "network-default.pytorch")),
             "depth_model": self.app.get_resource(os.path.join("depth_models", "model_city2kitti.meta")),
+            "yolo_weights": self.app.get_resource(os.path.join("yolo", "yolov3.weights")),
+            "yolo_v": self.app.get_resource(os.path.join("yolo", "yolov3.cfg")),
+            "coco_names": self.app.get_resource(os.path.join("yolo", "coco.names")),
+            "object_detection_dir": self.savePathJoin("ObjectDetection"),
             "plot_speed_dir": PLOT_SPEED_DIR,
             "plot_crash_dir": PLOT_CRASH_DIR,
             "numbers_dir": NP_DIR,
@@ -655,6 +668,8 @@ class Dialog(QDialog, Ui_Dialog):
 
         self.run_dict["Super_Pixel_Video"] = {"Run": self.ui.combo_superpixel.currentIndex() != 0 and self.ui.c_super_pixel_video.isChecked(), "Progress":ori_images, "Text":"Creating super pixel video"}
         self.run_dict["Super_Pixel_Label"] = {"Run": self.create_super_pixel_label, "Progress":ori_images, "Text":"Creating {0} superpixel labels".format(self.super_pixel_method)}
+        
+        self.run_dict["Object_Detection"] = {"Run": self.ui.c_object_detection.isChecked() and not os.path.exists(self.savePathJoin("ObjectDetection")), "Progress":ori_images, "Text":"Running Object Detection"}
 
         self.addAllProgressBar()        
         self.buildParamsDict()
@@ -687,6 +702,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.c_speed_plot_video.setEnabled(False)
         self.ui.c_crash_plot_video.setEnabled(False)
         self.ui.c_optimize.setEnabled(False)
+        self.ui.c_object_detection.setEnabled(False)
 
     def savePathJoin(self, path):
         """Join the given path with the save path (stored in user info)
@@ -720,6 +736,8 @@ class Dialog(QDialog, Ui_Dialog):
             self.reCreateDir(self.savePathJoin("Back_Of")) 
         if not self.depth_exist:
             self.reCreateDir(self.savePathJoin("Depth"))
+        if not os.path.exists(self.savePathJoin("ObjectDetection")) and self.ui.c_object_detection.isChecked():
+            self.reCreateDir(self.savePathJoin("ObjectDetection"))
         if self.super_pixel_method != "" and not os.path.exists(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)):
             os.makedirs(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method))
 

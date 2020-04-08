@@ -153,12 +153,18 @@ def calculate_velocity_and_orientation_vectors(labels, shifted_labels, avg_flow,
 
     z = (avg_shifted_depth - avg_fst_depth) * fps * 3.6
 
-    v = avg_flow[:,:,0]
-    u = avg_flow[:,:,1]
-    h_angle, v_angle = calc_angle_of_view(width_to_focal[labels.shape[1]], u, v)
+    #v = avg_flow[:,:,0]
+    #u = avg_flow[:,:,1]
+    #h_angle, v_angle = calc_angle_of_view(width_to_focal[labels.shape[1]], u, v)
+    h_angle, v_angle = calc_angle_of_view(width_to_focal[labels.shape[1]], avg_flow[:,:,1], avg_flow[:,:,0])
+
     depth = avg_fst_depth
     x, y = calc_size(h_angle, v_angle, depth)
-    x, y = (x * fps) * 3.6, (y * fps) * 3.6
+    #x, y = (x * fps) * 3.6, (y * fps) * 3.6
+    np.multiply(x, fps, out=x)
+    np.multiply(x, 3.6, out=x)
+    np.multiply(y, fps, out=y)
+    np.multiply(y, 3.6, out=y)
 
     velocity[:,:,0] = y
     velocity[:,:,1] = x
@@ -187,7 +193,7 @@ def calculate_velocity_and_orientation_vectors_vectorised(of_mask, next_position
     fst_mono = fst_depth
     fst_mono[of_mask] = 0
 
-    snd_mono_2 = np.full_like(fst_mono, 0)
+    #snd_mono_2 = np.full_like(fst_mono, 0)
     snd_mono_2 = snd_depth[prev_position[..., 0], prev_position[..., 1]]
     snd_mono_2[of_mask] = 0
 
@@ -350,9 +356,10 @@ def read_depth(depth_fn, width, height):
     """
     disparity = np.load(depth_fn)
     disparity = cv2.resize(disparity, (width, height), interpolation=cv2.INTER_LINEAR)
-    depth = np.multiply(width_to_focal[width], np.divide(baseline, np.multiply(width, disparity)))
+    #depth = np.multiply(width_to_focal[width], np.divide(baseline, np.multiply(width, disparity)))
+    np.multiply(width_to_focal[width], np.divide(baseline, np.multiply(width, disparity)), out=disparity)
     
-    return depth
+    return disparity
 
 def list_directory(dir_name, extension=None):
     """
@@ -382,11 +389,11 @@ def vector_distance(x,y,z):
     Returns:
         float -- the euclidean distance
     """
-    x2 = np.power(x, 2)
-    y2 = np.power(y, 2)
-    z2 = np.power(z, 2)
-    added = x2 + y2 + z2
-    return np.sqrt(added)
+    x2 = np.power(x, 2, dtype=np.float32)
+    y2 = np.power(y, 2, dtype=np.float32)
+    z2 = np.power(z, 2, dtype=np.float32)
+    #added = x2 + y2 + z2
+    return np.sqrt(x2 + y2 + z2)
 
 def reduce_sort(vector, low=0.1,high=0.9, skip=None):
     """Drop values from the given vector
@@ -429,7 +436,8 @@ def vector_speedOF_Simple(vectors, high=1, low=0, optimal_of=True):
     mask_uni = reduce_sort(y,low=low,high=high)
     if optimal_of:
         only_good_of = x != 0
-        mask_uni = np.logical_and(mask_uni, only_good_of)
+        #mask_uni = np.logical_and(mask_uni, only_good_of)
+        np.logical_and(mask_uni, only_good_of, out=mask_uni)
 
 
     x_thr = x[mask_uni]
@@ -484,7 +492,7 @@ def average(data, labels, index, masks):
     Returns:
         numpy array -- same shape as data with values replaced by the mean value of the superpixel values
     """
-    avg = np.zeros_like(data)
+    avg = np.zeros_like(data, dtype=np.int16)
     regions = ndimage.mean(data, labels=labels, index=index)
     for i, reg in enumerate(regions):
         avg[masks[i]] = reg
@@ -578,5 +586,4 @@ def create_speed_video_Speed_Vectors(vid_path, out_path, speed_simple, speed_gt,
         
         vid_out.writeFrame(cv2.cvtColor(z, cv2.COLOR_BGR2RGB))
         
-
 

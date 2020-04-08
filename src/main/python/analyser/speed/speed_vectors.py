@@ -32,6 +32,7 @@ DRAW_DIR = result_dir["Draw"]
 SUPER_PIXEL_DIR = result_dir["SuperPixel"]
 PLOT_CRASH_DIR = result_dir["Plot_Crash"]
 
+
 class VelocityCalculator(object):
     def __init__(self,fst_img_fn, snd_img_fn, fst_depth_fn, snd_depth_fn, 
                 label_fn, flow_fn, back_flow, out_dir, use_slic, n_sps, visualize_results=True, high=1, low=0,
@@ -68,7 +69,7 @@ class VelocityCalculator(object):
 
             # Read optical flow
             flow = self.read_flow(self.flow_fn)
-            avg_flow = np.zeros_like(flow) 
+            avg_flow = np.zeros_like(flow, dtype=np.float32) 
 
             # Save the results
             base_fn = self.out_dir
