@@ -107,6 +107,7 @@ class VelocityCalculator(object):
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_speed.npy'), speed)
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_mask.npy'), speed_mask)
             utils.save_as_image(os.path.join(base_fn, MASK_DIR, img_num + '_speed_masked.png'), speed_mask*50, min_val=0, max_val=utils.max_depth) 
+            np.save(os.path.join(base_fn, NP_DIR, img_num + '_velocity.npy'), velocity)
 
             if self.create_draw:
                 back_flow = self.read_flow(self.back_flow) 

@@ -178,16 +178,18 @@ class MainWindow(QtWidgets.QMainWindow):
         Arguments:
             created {dictionary} -- Dictionary with the created plots
         """
-        print("Itt", created)
+        self.cycle_plot.reset()
+        self.ui.b_plot_left.setEnabled(False)
+        self.ui.b_plot_right.setEnabled(False)
+        self.created = created
+
         if len(created) == 0:
+            self.created = None
             return
-        print("Itt")
         
         self.ui.b_plot_left.setEnabled(True)
         self.ui.b_plot_right.setEnabled(True)
-
-        self.created = created
-        self.cycle_plot.reset()
+        
         for key in created:
             if created[key] != "":
                 self.cycle_plot.add(key, created[key])
@@ -207,6 +209,9 @@ class MainWindow(QtWidgets.QMainWindow):
         mask = os.path.join(self.user["Save"], results["Mask"])
         draw = os.path.join(self.user["Save"], results["Draw"])
         super_pixel = os.path.join(self.user["Save"], results["SuperPixel"])
+
+        self.vid_player.clear()
+        self.plot_player.clear()
 
         self.cycle_vid.reset()
         self.cycle_vid.add("original", self.img_dir)

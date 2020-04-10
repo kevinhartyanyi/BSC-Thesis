@@ -434,6 +434,7 @@ def vector_speedOF_Simple(vectors, high=1, low=0, optimal_of=True):
     x = vectors[:,:,0]
     y = vectors[:,:,1]
     mask_uni = reduce_sort(y,low=low,high=high)
+    print(low, high)
     if optimal_of:
         only_good_of = x != 0
         #mask_uni = np.logical_and(mask_uni, only_good_of)
