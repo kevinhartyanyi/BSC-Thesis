@@ -203,14 +203,16 @@ class CalculationRunner(QObject):
             self.checkRun("Error_Plot", self.createErrorPlot)
             self.checkRun("Speed_Plot", self.createSpeedPlot)
 
-        self.checkRun("Crash_Plot", self.createCrashPlot)
+        
+        self.checkRun("Object_Detection", self.startObjectDetection)
+
+        self.checkRun("Crash_Plot", self.createCrashPlot) # Only after object detection
         self.checkRun("Speed_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_speed_dir), self.out_dir, "speed_plot.mp4", self.create_video_fps)
         self.checkRun("Crash_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_crash_dir), self.out_dir, "crash_plot.mp4", self.create_video_fps)
         if not self.ground_truth_error:
             self.checkRun("Error_Plot_Video", self.createVid, os.path.join(self.out_dir, self.plot_error_dir), self.out_dir, "error_plot.mp4")
 
         self.checkRun("Super_Pixel_Video", self.createVid, os.path.join(self.out_dir, self.super_pixel_dir), self.out_dir, "super_pixel.mp4", self.create_video_fps)
-        self.checkRun("Object_Detection", self.startObjectDetection)
 
         self.finished.emit()
 
@@ -340,6 +342,8 @@ class CalculationRunner(QObject):
                     cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
                     cv2.putText(img, label, (x, y + 30), font, 3, color, 3)
             cv2.imwrite(os.path.join(self.object_detection_dir, "{0}.png".format(ind)), img)
+            np.save(os.path.join(self.object_detection_dir, "{0}.npy".format(ind)), np.asarray(boxes))
+
             self.update.emit(ind)        
         cv2.destroyAllWindows()
 
@@ -485,24 +489,49 @@ class CalculationRunner(QObject):
         speeds_dir = utils.list_directory(os.path.join(self.out_dir, self.numbers_dir), extension='speed.npy')
         velocity_dir = utils.list_directory(os.path.join(self.out_dir, self.numbers_dir), extension='velocity.npy')
         mask_dir = utils.list_directory(os.path.join(self.out_dir, self.numbers_dir), extension='mask.npy')
+        object_det_dir = utils.list_directory(self.object_detection_dir, extension='.npy')
         
         speeds_dir = natsorted(speeds_dir)
         velocity_dir = natsorted(velocity_dir)
         mask_dir = natsorted(mask_dir)
+        object_det_dir = natsorted(object_det_dir)
         speeds = []
         for i in range(len(speeds_dir)):
             v = np.load(speeds_dir[i])
-            mask = np.load(mask_dir[i])
+
+            box = np.load(object_det_dir[i])
+            simple_mask = np.load(mask_dir[i])
+            logging.info("Found boxes: {0}".format(box.shape[0]))
+            box_mask = np.zeros_like(simple_mask)
+            for j, b in enumerate(box):
+                x, y, w, h = b
+                x_high = x + w
+                y_high = y + h
+                box_mask[y : y_high, x : x_high] = 1
+                #tmp = np.zeros_like(simple_mask)
+                #tmp[y : y_high, x: x_high] = 1
+                #plt.matshow(tmp*200)
+                #plt.savefig(os.path.join(self.out_dir, "{0}_{1}_box.png".format(i, j)), bbox_inches='tight', dpi=150)
+
+            mask = box_mask
+            if box.shape[0] == 0:
+                mask = simple_mask
+
             s = np.load(velocity_dir[i])
             # t = v / s
 
             z = s[:,:,2]
 
+
             z_thr = z[mask]
             z_abs = np.abs(z_thr[z_thr != 0])
+            if len(z_abs) == 0:
+                z_thr = z[simple_mask]
+                z_abs = np.abs(z_thr[z_thr != 0])
+
             ttc = np.mean(np.divide(v, z_abs)) * 360
             speeds.append(ttc)
-        
+            
         params = zip(itertools.repeat(speeds), range(1, len(speeds) + 1), itertools.repeat(os.path.join(self.out_dir, self.plot_crash_dir)))
         self.startMultiFunc(createCrashPlotMain, params)
 
