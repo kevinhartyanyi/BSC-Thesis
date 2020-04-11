@@ -25,7 +25,7 @@ class RunTester(unittest.TestCase):
         self.assertEqual(self.run.ui.c_csv.isEnabled(), False)
         self.assertEqual(self.run.ui.c_draw.isChecked(), False)
         self.assertEqual(self.run.ui.c_velocity.isChecked(), False)
-        self.assertEqual(self.run.ui.t_low.text(), "0.309")
+        self.assertEqual(self.run.ui.t_low.text(), "0.0")
         self.assertEqual(self.run.ui.t_high.text(), "1.0")
         self.assertEqual(self.run.ui.t_fps.text(), "30")
         self.assertEqual(self.run.ui.c_of.isChecked(), False)
