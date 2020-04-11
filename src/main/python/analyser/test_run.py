@@ -16,7 +16,7 @@ appctxt.app.setStyleSheet(qdarkgraystyle.load_stylesheet())
 
 
 
-class DialogTester(unittest.TestCase):
+class RunTester(unittest.TestCase):
     def setUp(self):
         self.run = Dialog(app=appctxt)
 
