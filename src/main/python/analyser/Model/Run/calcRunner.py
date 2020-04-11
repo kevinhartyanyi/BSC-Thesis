@@ -282,6 +282,8 @@ class CalculationRunner(QObject):
 
     @pyqtSlot()
     def startObjectDetection(self):
+        """Starts object detection
+        """
         # Load Yolo
         logging.info("Starting Object Detection")
         #cur = os.path.dirname(os.path.realpath(__file__))
