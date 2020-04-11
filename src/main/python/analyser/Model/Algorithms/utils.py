@@ -472,9 +472,15 @@ def error_comparison_Speed_Vecors(speed_est, speed_gt, csv=None, visualize=True)
     """Visualize error between estimated speed and the ground truth speed
     
     Args:
-        speed_est (float): [The estimated speed]
-        speed_gt (float): [Ground truth speed]
-        csv ([str], optional): [If not None, then save results into a csv file with the path you entered.]. Defaults to None.
+        speed_est (float): The estimated speed
+        speed_gt (float): Ground truth speed
+    
+    Keyword Arguments:
+        csv ([str], optional): [f not None, then save results into a csv file with the path you entered. Defaults to None.
+        visualize {bool} -- If true, then visualize results in terminal (default: {True})
+    
+    Returns:
+        float -- Root-mean-squared-error
     """
     rmse = np.sqrt(np.mean(np.square(speed_est-speed_gt), 0)) # Root-mean-square deviation
     if visualize is False:
