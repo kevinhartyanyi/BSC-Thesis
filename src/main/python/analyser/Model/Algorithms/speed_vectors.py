@@ -13,10 +13,10 @@ from skimage.segmentation import mark_boundaries
 
 from natsort import natsorted # Run with python3
 
-import speed.readFlowFile as readFlowFile
-import speed.computeColor as computeColor
+import Model.Algorithms.readFlowFile as readFlowFile
+import Model.Algorithms.computeColor as computeColor
 
-import speed.utils as utils
+import Model.Algorithms.utils as utils
 
 import matplotlib.image as mpimg
 from PIL import Image

@@ -1,15 +1,15 @@
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QObject
-import speed.speed_vectors as speed
-import speed.utils as utils
-from speed.speed_vectors import calculate_velocity_and_orientation_wrapper
+import Model.Algorithms.speed_vectors as speed
+import Model.Algorithms.utils as utils
+from Model.Algorithms.speed_vectors import calculate_velocity_and_orientation_wrapper
 import itertools
 import tqdm
 from skimage.segmentation import felzenszwalb, slic, quickshift, watershed
 from skimage.color import rgb2gray
 from skimage.filters import sobel
 import multiprocessing
-import speed.pwc.run as pwc
-import speed.monodepth.monodepth_simple as monodepth
+import Model.Algorithms.pwc.run as pwc
+import Model.Algorithms.monodepth.monodepth_simple as monodepth
 from natsort import natsorted
 import numpy as np
 import math

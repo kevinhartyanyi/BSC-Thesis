@@ -2,16 +2,16 @@ from PyQt5.QtWidgets import QDialog, QFileDialog, QColorDialog, QProgressBar, QL
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, QThread, QSize
-from dialogUI import Ui_Dialog
-from dialogInfo import DialogInfo
+from View.Run.dialogUI import Ui_Dialog
+from View.Run.dialogInfo import DialogInfo
 import platform
 import json
-import calcRunner
+import Model.Run.calcRunner as calcRunner
 import os
 import re
 import shutil
-import speed.speed_vectors as speed
-from speed.utils import list_directory, getResultDirs
+import Model.Algorithms.speed_vectors as speed
+from Model.Algorithms.utils import list_directory, getResultDirs
 #import readline
 import logging
 

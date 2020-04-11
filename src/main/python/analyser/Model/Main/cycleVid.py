@@ -1,4 +1,5 @@
 import logging
+
 class cycleVid:
     def __init__(self):
         super().__init__()

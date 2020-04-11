@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QDialog
-from loggerUI import Ui_Dialog
+from View.Main.loggerUI import Ui_Dialog
 from PyQt5.QtWidgets import QPlainTextEdit
 from PyQt5.QtCore import QObject, pyqtSignal
 import logging

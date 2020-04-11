@@ -9,7 +9,7 @@ import os
 import PIL
 import PIL.Image
 import sys
-from speed.pwc.correlation import correlation
+from Model.Algorithms.pwc.correlation import correlation
 
 #try:
 #	from pytorch_pwc.correlation import correlation # the custom cost volume layer

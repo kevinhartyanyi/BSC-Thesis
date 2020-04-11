@@ -1,6 +1,6 @@
-import utils
+import Model.Main.utils as utils
 from PIL import Image
-import imageLoader
+import Model.Main.imageLoader as imageLoader
 from PyQt5.QtCore import QThread, QThreadPool
 from multiprocessing import Pool
 import logging
