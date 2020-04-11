@@ -119,7 +119,6 @@ class CalculationRunner(QObject):
 
     def __init__(self, param_dict):
         super(CalculationRunner, self).__init__()
-        self.running = True
         self.use_slic = False
         self.visualize = True
         self.vid_path = param_dict["vid_path"]
@@ -623,9 +622,3 @@ class CalculationRunner(QObject):
             out.write(resized)
             self.update.emit(i)
         out.release()
-
-    def stop(self):
-        """
-        Stops the counting
-        """
-        self.running = False
