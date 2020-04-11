@@ -3,11 +3,11 @@ import cv2
 import numpy as np
 import tqdm
 import pandas
-import Model.Algorithms.readFlowFile as readFlowFile
+import Model.Algorithms.speed.readFlowFile as readFlowFile
 import math
 import matplotlib.pyplot as plt
 from PIL import Image
-import Model.Algorithms.computeColor as computeColor
+import Model.Algorithms.speed.computeColor as computeColor
 import imageio
 from skimage import measure
 from natsort import natsorted

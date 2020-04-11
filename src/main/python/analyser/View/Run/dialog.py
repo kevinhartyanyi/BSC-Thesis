@@ -10,7 +10,6 @@ import Model.Run.calcRunner as calcRunner
 import os
 import re
 import shutil
-import Model.Algorithms.speed_vectors as speed
 from Model.Algorithms.utils import list_directory, getResultDirs
 #import readline
 import logging

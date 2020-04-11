@@ -1,7 +1,7 @@
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QObject
-import Model.Algorithms.speed_vectors as speed
+import Model.Algorithms.speed.speed_vectors as speed
 import Model.Algorithms.utils as utils
-from Model.Algorithms.speed_vectors import calculate_velocity_and_orientation_wrapper
+from Model.Algorithms.speed.speed_vectors import calculate_velocity_and_orientation_wrapper
 import itertools
 import tqdm
 from skimage.segmentation import felzenszwalb, slic, quickshift, watershed
