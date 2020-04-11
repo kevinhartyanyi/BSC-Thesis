@@ -107,37 +107,6 @@ def calculate_shifted_labels(labels, avg_flow):
         shifted_labels[sp_x, sp_y] = sp_id
     return shifted_labels
 
-def calculate_velocity_and_orientation_vectors_old(labels, shifted_labels, avg_flow, 
-                                            avg_fst_depth, avg_shifted_depth):
-    """
-    Calculate the velocity and the oriention of each superpixel 
-    :param labels: original superpixel labels
-    :param shifted_labels: shifted superpixel labels
-    :param avg_flow: average optical flow matrix
-    :param avg_fst_depth: average depth matrix of the original image
-    :param avg_shifted_depth: average depth matrix of the shifted image
-    :return: velocity (in km/h) and oriention matrix
-    """
-    velocity = np.zeros((labels.shape[0], labels.shape[1], 3), dtype=np.float32)
-
-    for sp_id in np.unique(labels):
-        sp_x, sp_y = np.unravel_index(np.argmax(labels == sp_id, axis=None), labels.shape)
-        v, u = avg_flow[sp_x, sp_y]
-
-        h_angle, v_angle = calc_angle_of_view(width_to_focal[labels.shape[1]], u, v)
-        depth = avg_fst_depth[sp_x, sp_y]
-        x, y = calc_size(h_angle, v_angle, depth)
-        x, y = (x * fps) * 3.6, (y * fps) * 3.6
-
-        shifted_sp_x, shifted_sp_y = np.unravel_index(np.argmax(shifted_labels == sp_id, 
-                                                                axis=None), labels.shape)
-        shifted_depth = avg_shifted_depth[shifted_sp_x, shifted_sp_y]
-        z = (shifted_depth - depth) * fps * 3.6
-
-        velocity[labels == sp_id] = (y, x, z)
-        orientation[labels == sp_id] = normalize((y, x, z))
-    return velocity
-
 def calculate_velocity_and_orientation_vectors(labels, shifted_labels, avg_flow, 
                                             avg_fst_depth, avg_shifted_depth):
     """
