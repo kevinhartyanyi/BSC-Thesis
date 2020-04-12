@@ -12,5 +12,3 @@ class MainWindowInfo(QDialog, Ui_Dialog):
         
         self.app = app
 
-        self.signalSetup()
-
