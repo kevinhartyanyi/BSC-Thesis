@@ -725,7 +725,7 @@ class Dialog(QDialog, Ui_Dialog):
         """Create directory with the given name in the save path (stored in user info)
         
         Arguments:
-            dir_name {[type]} -- [description]
+            dir_name {str} -- path to the newly created dir
         """
         os.mkdir(os.path.join(self.user["Save"], dir_name))
 
