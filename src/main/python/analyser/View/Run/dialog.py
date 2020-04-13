@@ -11,7 +11,6 @@ import os
 import re
 import shutil
 from Model.Algorithms.utils import list_directory, getResultDirs
-#import readline
 import logging
 
 result_dir = getResultDirs()
@@ -555,7 +554,6 @@ class Dialog(QDialog, Ui_Dialog):
         """Cleans the active thread
         """
         logging.info("Clean Thread")
-        self.worker.stop()
         self.thread.quit()
         self.thread.wait()
 
@@ -645,7 +643,10 @@ class Dialog(QDialog, Ui_Dialog):
             ori_images {int} -- number of images in the video
         """
         self.cleanThread()
-        self.buildRunDictMain(ori_images)
+        if ori_images == 0:
+            logging.critical("Video Image number 0")
+        else:
+            self.buildRunDictMain(ori_images)
 
     def buildRunDictMain(self, ori_images):        
         """Build dictionary with all calculations
@@ -747,8 +748,7 @@ class Dialog(QDialog, Ui_Dialog):
         if self.super_pixel_method != "" and not os.path.exists(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)):
             os.makedirs(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method))
 
-        self.reCreateDir(RESULTS)        
-        #self.reCreateDir(OTHER_DIR)
+        self.reCreateDir(RESULTS)    
         self.reCreateDir(NP_DIR)
         self.reCreateDir(MASK_DIR)
 
