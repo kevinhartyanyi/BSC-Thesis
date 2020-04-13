@@ -36,11 +36,14 @@ class LogInfo(QDialog, Ui_Dialog):
         self.ui.layout.insertWidget(1, log_handler.widget)
 
         homedir = os.path.expanduser('~')
-        
+
         if platform.system() == 'Windows':
             datadir = os.sep.join([homedir, 'Application Data', 'Analyser'])
         else:
             datadir = os.sep.join([homedir, '.analyser'])
+
+        if not os.path.exists(datadir):
+            os.makedirs(datadir)
 
         fh = logging.FileHandler(os.path.join(datadir, "log_info.log"))
         fh.setLevel(logging.DEBUG)
