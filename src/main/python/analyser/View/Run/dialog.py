@@ -12,6 +12,7 @@ import re
 import shutil
 from Model.Algorithms.utils import list_directory, getResultDirs
 import logging
+import cv2
 
 result_dir = getResultDirs()
 RESULTS = result_dir["Results"]
@@ -239,6 +240,8 @@ class Dialog(QDialog, Ui_Dialog):
         Returns:
             bool -- returns true if the requirements are satisfied
         """
+        print(self.user["Save"])
+        print(self.user["Video"])
         ready = (self.user["Save"] != "" and self.user["Video"] != "") or self.img_exist
         return ready
 
@@ -247,11 +250,30 @@ class Dialog(QDialog, Ui_Dialog):
         """
         fname = self.openFile(self.user["Video"])
         if fname != "":
-            self.user["Video"] = fname
-            name = self.splitPath(fname)[-1]
-            self.vid_name = name.split(".")[0]
-            self.ui.l_vid.setText("Load: " + self.vid_name)
-            self.checkFiles()
+            cam = cv2.VideoCapture(fname) 
+            logging.info("Opening video Check: {0}".format(fname))
+            
+            currentframe = 0
+            ret,frame = cam.read() 
+
+            if ret is False:
+                error_opening_video = True
+            # Release all space and windows once done 
+            cam.release() 
+            cv2.destroyAllWindows()
+            
+            if error_opening_video:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Information)
+                msg.setText("Error on opening the video: {0}".format(fname))
+                msg.setWindowTitle("Information")
+                msg.setStandardButtons(QMessageBox.Ok)
+            else:
+                self.user["Video"] = fname
+                name = self.splitPath(fname)[-1]
+                self.vid_name = name.split(".")[0]
+                self.ui.l_vid.setText("Load: " + self.vid_name)
+                self.checkFiles()
 
     def openFile(self, folder, title="Open Video", file_filter="Video Files (*.mp4 *.avi *.mkv)"):
         """Open QFileDialog with the given parameters, returns selected file
