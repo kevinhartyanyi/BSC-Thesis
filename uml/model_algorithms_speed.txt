@@ -1,0 +1,74 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Serif
+skinparam defaultFontSize 20
+skinparam defaultFontColor #3a3934
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor #eefbd8
+    BorderColor DarkSlateGray
+}
+
+
+class VelocityCalculator {
+    + read_depth: dictionary
+    + read_flow: object
+    + average: object
+    + calculate_shifted_labels: object
+    + fst_img_fn: str
+    + snd_img_fn: str
+    + fst_depth_fn: str
+    + snd_depth_fn: str
+    + label_fn: str
+    + flow_fn: str
+    + out_dir: str
+    + use_slic: bool
+    + n_sps: int
+    + visualize_results: bool
+    + back_flow: str
+    + high: float
+    + low: float
+    + super_pixel_method: str
+    + create_draw: bool
+    + create_velocity: bool
+
+    + calculate_velocity_and_orientation(): void
+}
+
+class utils {
+    + getResultDirs(): dictionary
+    + calc_angle_of_view(int, int, int): (int, int)
+    + calc_size(float, float, int): (int, int)
+    + calculate_shifted_labels(numpy array, float): numpy array
+    + calculate_velocity_and_orientation_vectors(numpy array, numpy array, numpy array, numpy array, numpy array): numpy array
+    + calculate_velocity_and_orientation_vectors_vectorised(numpy array, numpy array, numpy array, numpy array, numpy array, numpy array,): numpy array
+    + calc_bidi_errormap(numpy array, numpy array, float, bool): (numpy array, numpy array)
+    + draw_velocity_vectors(numpy array, numpy array, str, bool): numpy array
+    + save_as_image(str, numpy array, float, float): void
+    + read_depth(str, int, int): numpy array
+    + list_directory(str, str): [str]
+    + vector_distance(numpy array, numpy array, numpy array)
+    + reduce_sort(numpy array, float, float, float): numpy array
+    + vector_speedOF_Simple(numpy array, float, float): (float, numpy array)
+    + normalize(numpy array): numpy array
+    + average(numpy array, numpy array): numpy array
+    + error_comparison_Speed_Vectors(float, float, str, bool): float
+
+}
+
+class readFlowFile {
+
+}
+
+class computeColor {
+
+}
+
+readFlowFile <-- VelocityCalculator
+computeColor <-- VelocityCalculator
+utils <-- VelocityCalculator
+
+readFlowFile <-- utils
+computeColor <-- utils
+
+@enduml

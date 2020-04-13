@@ -140,7 +140,7 @@
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
-            <widget class="QWidget" name="">
+            <widget class="QWidget" name="layoutWidget">
              <layout class="QVBoxLayout" name="layout_plot">
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout">
@@ -192,7 +192,7 @@
               </item>
              </layout>
             </widget>
-            <widget class="QWidget" name="">
+            <widget class="QWidget" name="layoutWidget">
              <layout class="QVBoxLayout" name="verticalLayout">
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -371,6 +371,7 @@
    <addaction name="actionBackOF"/>
    <addaction name="actionDepth"/>
    <addaction name="actionMask"/>
+   <addaction name="actionObjectDetection"/>
    <addaction name="actionOFArrows"/>
    <addaction name="actionOFDirections"/>
    <addaction name="actionSuperPixel"/>
@@ -468,6 +469,14 @@
   <action name="actionInformation">
    <property name="text">
     <string>Information</string>
+   </property>
+  </action>
+  <action name="actionObjectDetection">
+   <property name="text">
+    <string>ObjectDetection</string>
+   </property>
+   <property name="toolTip">
+    <string>Jump to object detection video</string>
    </property>
   </action>
  </widget>

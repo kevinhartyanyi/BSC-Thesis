@@ -543,6 +543,24 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QCheckBox" name="c_object_detection">
+         <property name="font">
+          <font>
+           <family>GE Inspira</family>
+           <pointsize>20</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string>Run Object Detection on video</string>
+         </property>
+         <property name="text">
+          <string>Calculate Object Detection</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
      <item>

@@ -1,0 +1,42 @@
+@startuml
+
+
+namespace Model {
+}
+
+namespace Model.Main #fbd982 {
+}
+
+namespace Model.Run #fbd982 {
+}
+
+namespace Model.Algorithms #fbd982 {
+}
+
+namespace Model.Algorithms.Pwc #fbd982 {
+}
+
+namespace Model.Algorithms.Monodepth #fbd982 {
+}
+
+namespace Model.Algorithms.Speed #fbd982 {
+}
+
+namespace View  {
+}
+
+namespace View.Main #fbd982 {
+}
+
+namespace View.Run #fbd982 {
+}
+
+Model.Run <.. Model.Algorithms : <<import>>
+
+Model.Run <.. View.Run : <<import>>
+
+Model.Main <.. View.Main : <<import>>
+
+View.Run <.. View.Main : <<import>>
+
+@enduml

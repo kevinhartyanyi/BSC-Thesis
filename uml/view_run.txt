@@ -1,0 +1,113 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Serif
+skinparam defaultFontSize 20
+skinparam defaultFontColor #3a3934
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor #eefbd8
+    BorderColor DarkSlateGray
+}
+
+class Dialog {
+    + ui: Ui_Dialog
+    + dir: str
+    + user_file: str
+    + created: dictionary
+    + user: object = None
+    + thread: object = None
+    + progressBar: object = None
+    + progressAllBar: object = None
+    + progressLabel: object = None
+    + img_exist: bool = False
+    + params_dict: object = None
+    + of_exist: bool = False
+    + back_of_exist: bool = False
+    + depth_exist: bool = False
+    + gt_exist: bool = False
+    + create_super_pixel_label: bool = False
+    + no_error: bool = False
+    + object_detection_dir_exist: bool = False
+    + vid_name: object = None
+    + all_run: int = 1
+    + run_count: int = 1
+    + fps: int = 30
+    + fps_limit: int = 60
+    + low: float = 0.0
+    + high: float = 1.0
+    + run_dict: dictionary = {}
+    + super_pixel_method: str = ""
+    + app: object
+    
+    + signalSetup(): void
+    + showInfo(): void
+    + changeLow(): void
+    + changeHigh(): void
+    + changeLowHigh(QLineEdit, str): void
+    + changeSuperPixelMethod(int): void
+    + openGroundTruth(): void
+    + changeFps(): void
+    + splitPath(str): str
+    + openSave(): void
+    + checkFiles(): void
+    + runRequirements(): bool
+    + openVideo(): void
+    + openFile(str, str, str): str
+    + userSetup(): void
+    + loadUser(): void
+    + saveUser(): void
+    + errorChecks(): bool
+    + calculateError(str): void
+    + buildParamsDict(): void
+    + startRun(): void
+    + startCalcThread(): void
+    + progressUpdate(int): void
+    + finishThread(): void
+    + cleanThread(): void
+    + labelUpdate(dictionary): void
+    + showProgressBar(): void
+    + addAllProgressBar(): void
+    + buildCreatedDict(): void
+    + buildRunDict(): void
+    + setVidFrame(int): void
+    + buildRunDictMain(dictionary): void
+    + disableButtons(): void
+    + savePathJoin(str): str
+    + createDir(str): void
+    + createDirs(): void
+    + reCreateDir(str): void
+    + pickColour(): void
+}
+
+class DialogUI {
+
+}
+
+class DialogInfo {
+
+}
+
+class DialogInfoUI {
+
+}
+
+package "Qt" #DDDDDD {
+    class QObject << (Q,#bdf024) >>{
+    }
+    class QDialog << (Q,#bdf024) >>{
+
+    }
+    QObject <|--QDialog
+}
+
+DialogUI <|-- Dialog
+QDialog <|-- Dialog
+DialogInfo <-- Dialog
+
+QDialog <|-- DialogInfo
+DialogInfoUI <|-- DialogInfo
+
+Qt <-- DialogUI
+Qt <-- DialogInfoUI
+
+@enduml

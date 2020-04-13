@@ -9,6 +9,7 @@ env/
 *.npy
 *.csv
 src/main/resources/base/depth_models/ 
+src/main/resources/base/yolo/ 
 
 
 # Byte-compiled / optimized / DLL files
