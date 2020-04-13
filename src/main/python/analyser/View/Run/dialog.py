@@ -35,7 +35,7 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.setupUi(self)
         self.setWindowTitle("Process Video")
         self.dir = os.path.dirname(os.path.realpath(__file__))
-        self.user_file = os.path.join(self.dir, ".userInfo.json") 
+        self.user_file = os.path.join(os.getcwd(), ".userInfo.json") 
         self.created = {}
         self.user = None
         self.thread = None
