@@ -38,7 +38,7 @@ class LogInfo(QDialog, Ui_Dialog):
         homedir = os.path.expanduser('~')
 
         if platform.system() == 'Windows':
-            datadir = os.sep.join([homedir, 'Application Data', 'Analyser'])
+            datadir = os.sep.join([homedir, 'Analyser'])
         else:
             datadir = os.sep.join([homedir, '.analyser'])
 
