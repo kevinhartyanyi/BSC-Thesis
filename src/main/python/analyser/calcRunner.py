@@ -374,10 +374,14 @@ class CalculationRunner(QObject):
             vid_name {str} -- name of the video
         """
         cam = cv2.VideoCapture(path_to_video) 
+        logging.info("Opening video: {0}".format(path_to_video))
         
         currentframe = 0
         ret,frame = cam.read() 
+        print("A")
+
         while(ret):
+            print("A")
             name = os.path.join(save_path, "{0}_{1}.png".format(currentframe, vid_name))
     
             cv2.imwrite(name, frame) 
