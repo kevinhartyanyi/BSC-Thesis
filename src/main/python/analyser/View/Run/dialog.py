@@ -207,12 +207,13 @@ class Dialog(QDialog, Ui_Dialog):
         """Checks if there are folders from previous runs, so we don't need to create them.
         Also, checks condotions for checkboxes and buttons 
         """
-        self.of_exist = os.path.exists(os.path.join(self.user["Save"], "Of"))
-        self.back_of_exist = os.path.exists(os.path.join(self.user["Save"], "Back_Of"))
-        self.img_exist = os.path.exists(os.path.join(self.user["Save"], "Images"))
-        self.depth_exist = os.path.exists(os.path.join(self.user["Save"], "Depth"))
+        if self.user["Save"] != "":
+            self.of_exist = os.path.exists(os.path.join(self.user["Save"], "Of"))
+            self.back_of_exist = os.path.exists(os.path.join(self.user["Save"], "Back_Of"))
+            self.img_exist = os.path.exists(os.path.join(self.user["Save"], "Images"))
+            self.depth_exist = os.path.exists(os.path.join(self.user["Save"], "Depth"))
 
-        self.object_detection_dir_exist = os.path.exists(os.path.join(self.user["Save"], "ObjectDetection"))
+            self.object_detection_dir_exist = os.path.exists(os.path.join(self.user["Save"], "ObjectDetection"))
 
         self.gt_exist = self.user["GT"] != ""
 
@@ -240,8 +241,6 @@ class Dialog(QDialog, Ui_Dialog):
         Returns:
             bool -- returns true if the requirements are satisfied
         """
-        print(self.user["Save"])
-        print(self.user["Video"])
         ready = (self.user["Save"] != "" and self.user["Video"] != "") or self.img_exist
         return ready
 
@@ -250,6 +249,8 @@ class Dialog(QDialog, Ui_Dialog):
         """
         fname = self.openFile(self.user["Video"])
         if fname != "":
+            error_opening_video = False
+
             cam = cv2.VideoCapture(fname) 
             logging.info("Opening video Check: {0}".format(fname))
             
@@ -268,6 +269,7 @@ class Dialog(QDialog, Ui_Dialog):
                 msg.setText("Error on opening the video: {0}".format(fname))
                 msg.setWindowTitle("Information")
                 msg.setStandardButtons(QMessageBox.Ok)
+                msg.exec_()
             else:
                 self.user["Video"] = fname
                 name = self.splitPath(fname)[-1]
