@@ -468,7 +468,7 @@ def average(data, labels, index, masks):
         avg[masks[i]] = reg
     return avg
 
-def error_comparison_Speed_Vecors(speed_est, speed_gt, csv=None, visualize=True):
+def error_comparison_Speed_Vectors(speed_est, speed_gt, csv=None, visualize=True):
     """Visualize error between estimated speed and the ground truth speed
     
     Args:

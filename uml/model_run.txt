@@ -1,0 +1,81 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Serif
+skinparam defaultFontSize 20
+skinparam defaultFontColor #3a3934
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor #eefbd8
+    BorderColor DarkSlateGray
+}
+
+class CalculationRunner {
+    + finished: pyqtSignal
+    + updateFin: pyqtSignal
+    + {field} labelUpdate: pyqtSignal(object)
+    + {field} update: pyqtSignal(int)
+    + {field} videoFrame: pyqtSignal(int)
+    + {field} error: pyqtSignal(int) 
+
+    + use_slic: bool = False
+    + visualize: bool = True
+    + vid_path: str
+    + high: float
+    + low: float
+    + speed_gt: numpy array
+    + n_sps: int = 100
+    + run_dict: dictionary
+    + out_dir: str
+    + plot_error_dir: str
+    + numbers_dir: str
+    + super_pixel_dir: str
+    + super_pixel_method: str
+    + of_dir: str
+    + of_model: str
+    + img_dir: str
+    + depth_dir: str
+    + depth_model: str
+    + back_of_dir: str
+    + plot_speed_dir: str
+    + plot_crash_dir: str
+    + send_video_frame: bool
+    + create_csv: bool
+    + create_draw: bool
+    + create_velocity: bool
+    + super_pixel_label_dir: str
+    + create_video_fps: bool
+    + optimize: bool
+    + yolo_weights: str
+    + yolo_v: str
+    + coco_names: str
+    + object_detection_dir: str
+    + ground_truth_error: bool = False
+    + video_frame: int = 0
+
+    + startThread(): void
+    + startCalc(int): int
+    + startOf(): void
+    + startObjectDetection(): void
+    + minFunc((int, int), int): (float, int)
+    + startOptimization(): void
+    + startMultiFunc(object, tuple): void
+    + startBackOf(): void
+    + startDepth(): void
+    + imagesFromVideo(str, str, str): void
+    + createSuperPixel(): void
+    + createSpeedPlot(): void
+    + createCrashPlot(): void
+    + createErrorPlot(): void
+    + createSpeedErrorPlot(): void
+    + checkRun(str, object): void
+    + createVid(str, str, str, int): void
+}
+
+package "Qt" #DDDDDD {
+    class QObject << (Q,#bdf024) >>{
+    }
+}
+
+QObject <|-- CalculationRunner
+
+@enduml

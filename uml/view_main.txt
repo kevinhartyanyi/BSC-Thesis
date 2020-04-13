@@ -1,0 +1,133 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Serif
+skinparam defaultFontSize 20
+skinparam defaultFontColor #3a3934
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor #eefbd8
+    BorderColor DarkSlateGray
+}
+
+
+class LoggerText {
+    + {field} appendPlainText: pyqtSignal(str)
+    
+    + emit(object): void
+}
+
+class LogInfo {
+    
+}
+
+class LogInfoUI {
+
+}
+
+class MainWindowInfo {
+
+}
+
+class MainWindowInfoUI {
+
+}
+
+class MainWindowUI {
+
+}
+
+class MainWindow {
+    + MAX_LEN: int = 10
+    + worker: object = None
+    + user: None = None
+    + vid_player: VideoPlayer
+    + plot_player: VideoPlayer
+    + thread: object = None
+    + vid_opened: bool = False
+    + vid_running: bool = False
+    + fps_limit: int = 30
+    + images: object = None
+    + img_dir: object = None
+    + of_dir: object = None
+    + back_of_dir: object = None
+    + depth_dir: object = None
+    + created: object = None
+    + app: object
+    + cycle_vid: cycleVid
+    + cycle_plot: cycleVid
+    + image_holder: imageHolder
+    + plot_holder: imageHolder
+    + logInfo: LogInfo
+
+    + imageSetup(): void
+    + changeDescription(): void
+    + disableSetup(): void
+    + enableSetup(): void
+    + showInfo(): void
+    + showDialog(): void
+    + dialogAccept(): void
+    + dialogExit(): void
+    + setCreated(dictionary): void
+    + startSetup(): void
+    + changeUser(dictionary): void
+    + signalSetup(): void
+    + showLog(): void
+    + cycleToSelected(): void
+    + cyclePlotLeft(): void
+    + cyclePlotRight(): void
+    + changeFps(): void
+    + changeFrameTo(PIL Image, PIL Image): void 
+    + resizeVideo(int, int): void
+    + resizePlotVideo(int, int): void
+    + cycleUp(): void
+    + cycleDown(): void
+    + stopVideo(): void
+    + startVideo(): void
+    + openVideo(str, int, str): void
+    + jumpToFrame(): void
+    + prevFrame(): void
+    + nextFrame(): void
+    + changeVideoToNextFrame(): void
+    + changeVideoToPrevFrame(): void
+}
+
+package "Qt" #DDDDDD {
+    class QObject << (Q,#bdf024) >>{
+    }
+    class QMainWindow << (Q,#bdf024) >>{
+
+    }
+    class QDialog << (Q,#bdf024) >>{
+
+    }
+    QObject <|--QDialog
+    QObject <|--QMainWindow
+}
+
+package "logging" #DDDDDD {
+    class Handler{
+
+    }
+}
+
+QObject <|-- LoggerText
+Handler <|-- LoggerText
+
+LogInfoUI <|-- LogInfo
+QDialog <|-- LogInfo
+LoggerText <-- LogInfo
+
+QDialog <|-- MainWindowInfo
+MainWindowInfoUI <|-- MainWindowInfo
+
+QMainWindow <|-- MainWindow
+
+MainWindowUI <|-- MainWindow
+MainWindowInfo <-- MainWindow
+LogInfo <-- MainWindow
+
+Qt <-- MainWindowUI
+Qt <-- MainWindowInfoUI
+Qt <-- LogInfoUI
+
+@enduml

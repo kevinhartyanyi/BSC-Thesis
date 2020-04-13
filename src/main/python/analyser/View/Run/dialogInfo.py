@@ -10,12 +10,3 @@ class DialogInfo(QDialog, Ui_Dialog):
         self.ui.setupUi(self)
         self.setWindowTitle("Information")
         
-        self.app = app
-
-        self.signalSetup()
-    
-    def signalSetup(self):
-        """
-        Setup for signal connections
-        """
-        pass

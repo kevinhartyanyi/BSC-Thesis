@@ -367,7 +367,7 @@ class CalculationRunner(QObject):
         speeds = []
         for s in speeds_dir:
             speeds.append(np.load(s))
-        rmse = utils.error_comparison_Speed_Vecors(speeds,self.speed_gt[1:])
+        rmse = utils.error_comparison_Speed_Vectors(speeds,self.speed_gt[1:])
         
         for s in speeds_dir:
             os.remove(s)
@@ -553,7 +553,7 @@ class CalculationRunner(QObject):
         if self.create_csv:
             csv = os.path.join(self.out_dir, "_error_Simple_OF.csv")
         try:
-            _ = utils.error_comparison_Speed_Vecors(speeds,self.speed_gt[1:],csv=csv)
+            _ = utils.error_comparison_Speed_Vectors(speeds,self.speed_gt[1:],csv=csv)
         except:
             self.error.emit("Error with the Ground Truth file, doesn't have correct shape")
             self.ground_truth_error = True

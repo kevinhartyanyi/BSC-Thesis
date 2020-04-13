@@ -33,14 +33,14 @@ def fillImg(img, fill_colour=(26,26,27,255), size=(1920, 1080)):
     Creates new image with fill_colour and pastes the given onto it, returned image is size sized.
     
     Arguments:
-        img {[type]} -- [description]
+        img {PIL Image} -- Image to be filled
     
     Keyword Arguments:
-        fill_colour {tuple} -- [description] (default: {(26,26,27,255)})
-        size {tuple} -- [description] (default: {(1920, 1080)})
+        fill_colour {tuple} -- filling colour for the image (default: {(26,26,27,255)})
+        size {tuple} -- new size for the image (default: {(1920, 1080)})
     
     Returns:
-        [type] -- [description]
+        PIL Image -- resized and filled image
     """
     w, h = img.size
     if len(fill_colour) == 3:
@@ -54,8 +54,8 @@ def images_from_video(vid_path, out_path):
     """Saves every frame of a video to the given path.
     
     Arguments:
-        vid_path {string} -- path to video
-        out_path {string} -- path to save dir
+        vid_path {str} -- path to video
+        out_path {str} -- path to save dir
     
     Raises:
         ValueError: If video doesn't exist
@@ -77,8 +77,8 @@ def video_from_images(img_dir, out_dir, fps=30):
     """Creates a video based on the png files contained in the given path. Saves the video to out_dir.
     
     Arguments:
-        img_dir {string} -- path to image dir
-        out_dir {string} -- path to save dir
+        img_dir {str} -- path to image dir
+        out_dir {str} -- path to save dir
     
     Keyword Arguments:
         fps {int} -- the fps of the video (default: {30})

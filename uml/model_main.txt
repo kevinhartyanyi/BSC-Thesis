@@ -1,0 +1,107 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Serif
+skinparam defaultFontSize 20
+skinparam defaultFontColor #3a3934
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor #eefbd8
+    BorderColor DarkSlateGray
+}
+
+class cycleVid {
+    + container : list
+    + idx : int
+
+    + reset() : void
+    + get(str): str
+    + add(str, str): void
+    + current(): str
+    + currentType(): str
+    + down(): str
+    + up(): str    
+}
+
+class imageHolder {
+    + maxLen : int
+    + vidLen : object = None
+    + img_list : object = None
+    + current : object = None
+    + list_idx : int = 0
+    + fps : int
+    + width : int = 0
+    + height : int = 0
+    + cur_idx : int = -1
+    + img_dict : dictionary = {}
+    + threadpool: QThreadPool
+
+    + setup([str], int, int, str, int): PIL Image
+    + getCurrent(): PIL Image
+    + increment(): void
+    + changeFps(int): void
+    + getStartData(): Tuple(int, int, int)
+    + jump(int): PIL Image
+    + resize(int, int): PIL Image
+    + prepareImage(PIL Image): PIL Image
+    + loadImg(str, int): void
+    + load(int, int): void
+    + reset(): void
+    + prevImg(): PIL Image
+    + nextImg(): PIL Image
+}
+
+class Worker{
+    + finished: pyqtSignal
+    + intReady: pyqtSignal
+
+    + current_idx: int
+    + end_idx: int
+    + wait: float
+    + running: bool
+
+    + startCounting(): void
+    + stop(): void
+}
+
+class imageLoader {
+    + fn: object
+    + args: object
+    + kwargs: object
+    + signals: pyqtSignal
+
+    + run(): void    
+}
+
+class utils {
+    + resizeImg(PIL Image, int): PIL Image
+    + fillImg(PIL Image, (int, int, int, int), (int, int)): PIL Image
+    + images_from_video(str, str): void
+    + video_from_images(str, str, int): void
+}
+
+class VideoPlayer {
+    + {field} resizeSignal: pyqtSignal(int, int)
+
+    + resizeEvent(object): void
+}
+
+package "Qt" #DDDDDD {
+    class QObject << (Q,#bdf024) >>{
+    }
+    class QRunnable << (Q,#bdf024) >>{
+    }
+    class QLabel << (Q,#bdf024) >>{
+    }
+    QObject <|-- QRunnable
+    QObject <|-- QLabel
+}
+
+QLabel <|-- VideoPlayer
+
+QObject <|-- Worker
+QRunnable <|-- imageLoader
+
+imageLoader <-- imageHolder
+utils <-- imageHolder
+
+@enduml

@@ -265,7 +265,7 @@ class Dialog(QDialog, Ui_Dialog):
             file_filter {str} -- filter for file extensions (default: {"Video Files (*.mp4 *.avi *.mkv)"})
         
         Returns:
-            [str] -- path to file
+            str -- path to file
         """
         fname = QFileDialog.getOpenFileName(self, title, folder, file_filter)   
         

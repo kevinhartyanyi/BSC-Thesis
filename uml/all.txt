@@ -1,0 +1,468 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Serif
+skinparam defaultFontSize 20
+skinparam defaultFontColor #3a3934
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor #eefbd8
+    BorderColor DarkSlateGray
+}
+
+
+class LoggerText {
+    + {field} appendPlainText: pyqtSignal(str)
+    
+    + emit(object): void
+}
+
+class LogInfo {
+    
+}
+
+class LogInfoUI {
+
+}
+
+class MainWindowInfo {
+
+}
+
+class MainWindowInfoUI {
+
+}
+
+class MainWindowUI {
+
+}
+
+class MainWindow {
+    + MAX_LEN: int = 10
+    + worker: object = None
+    + user: None = None
+    + vid_player: VideoPlayer
+    + plot_player: VideoPlayer
+    + thread: object = None
+    + vid_opened: bool = False
+    + vid_running: bool = False
+    + fps_limit: int = 30
+    + images: object = None
+    + img_dir: object = None
+    + of_dir: object = None
+    + back_of_dir: object = None
+    + depth_dir: object = None
+    + created: object = None
+    + app: object
+    + cycle_vid: cycleVid
+    + cycle_plot: cycleVid
+    + image_holder: imageHolder
+    + plot_holder: imageHolder
+    + logInfo: LogInfo
+
+    + imageSetup(): void
+    + changeDescription(): void
+    + disableSetup(): void
+    + enableSetup(): void
+    + showInfo(): void
+    + showDialog(): void
+    + dialogAccept(): void
+    + dialogExit(): void
+    + setCreated(dictionary): void
+    + startSetup(): void
+    + changeUser(dictionary): void
+    + signalSetup(): void
+    + showLog(): void
+    + cycleToSelected(): void
+    + cyclePlotLeft(): void
+    + cyclePlotRight(): void
+    + changeFps(): void
+    + changeFrameTo(PIL Image, PIL Image): void 
+    + resizeVideo(int, int): void
+    + resizePlotVideo(int, int): void
+    + cycleUp(): void
+    + cycleDown(): void
+    + stopVideo(): void
+    + startVideo(): void
+    + openVideo(str, int, str): void
+    + jumpToFrame(): void
+    + prevFrame(): void
+    + nextFrame(): void
+    + changeVideoToNextFrame(): void
+    + changeVideoToPrevFrame(): void
+}
+
+package "Qt" #DDDDDD {
+    class QObject << (Q,#bdf024) >>{
+    }
+    class QMainWindow << (Q,#bdf024) >>{
+
+    }
+    class QDialog << (Q,#bdf024) >>{
+
+    }
+    class QRunnable << (Q,#bdf024) >>{
+    }
+    class QLabel << (Q,#bdf024) >>{
+    }
+    QObject <|-- QLabel
+    QObject <|-- QRunnable
+    QObject <|--QDialog
+    QObject <|--QMainWindow
+}
+
+package "logging" #DDDDDD {
+    class Handler{
+
+    }
+}
+
+QObject <|-- LoggerText
+Handler <|-- LoggerText
+
+LogInfoUI <|-- LogInfo
+QDialog <|-- LogInfo
+LoggerText <-- LogInfo
+
+QDialog <|-- MainWindowInfo
+MainWindowInfoUI <|-- MainWindowInfo
+
+MainWindowUI <|-- MainWindow
+MainWindowInfo <-- MainWindow
+LogInfo <-- MainWindow
+
+Qt <-- MainWindowUI
+Qt <-- MainWindowInfoUI
+Qt <-- LogInfoUI
+
+class VideoPlayer {
+    + {field} resizeSignal: pyqtSignal(int, int)
+
+    + resizeEvent(object): void
+}
+
+class Dialog {
+    + ui: Ui_Dialog
+    + dir: str
+    + user_file: str
+    + created: dictionary
+    + user: object = None
+    + thread: object = None
+    + progressBar: object = None
+    + progressAllBar: object = None
+    + progressLabel: object = None
+    + img_exist: bool = False
+    + params_dict: object = None
+    + of_exist: bool = False
+    + back_of_exist: bool = False
+    + depth_exist: bool = False
+    + gt_exist: bool = False
+    + create_super_pixel_label: bool = False
+    + no_error: bool = False
+    + object_detection_dir_exist: bool = False
+    + vid_name: object = None
+    + all_run: int = 1
+    + run_count: int = 1
+    + fps: int = 30
+    + fps_limit: int = 60
+    + low: float = 0.0
+    + high: float = 1.0
+    + run_dict: dictionary = {}
+    + super_pixel_method: str = ""
+    + app: object
+    
+    + signalSetup(): void
+    + showInfo(): void
+    + changeLow(): void
+    + changeHigh(): void
+    + changeLowHigh(QLineEdit, str): void
+    + changeSuperPixelMethod(int): void
+    + openGroundTruth(): void
+    + changeFps(): void
+    + splitPath(str): str
+    + openSave(): void
+    + checkFiles(): void
+    + runRequirements(): bool
+    + openVideo(): void
+    + openFile(str, str, str): str
+    + userSetup(): void
+    + loadUser(): void
+    + saveUser(): void
+    + errorChecks(): bool
+    + calculateError(str): void
+    + buildParamsDict(): void
+    + startRun(): void
+    + startCalcThread(): void
+    + progressUpdate(int): void
+    + finishThread(): void
+    + cleanThread(): void
+    + labelUpdate(dictionary): void
+    + showProgressBar(): void
+    + addAllProgressBar(): void
+    + buildCreatedDict(): void
+    + buildRunDict(): void
+    + setVidFrame(int): void
+    + buildRunDictMain(dictionary): void
+    + disableButtons(): void
+    + savePathJoin(str): str
+    + createDir(str): void
+    + createDirs(): void
+    + reCreateDir(str): void
+    + pickColour(): void
+}
+
+class DialogUI {
+
+}
+
+class DialogInfo {
+
+}
+
+class DialogInfoUI {
+
+}
+
+DialogUI <|-- Dialog
+QDialog <|-- Dialog
+DialogInfo <-- Dialog
+
+QDialog <|-- DialogInfo
+DialogInfoUI <|-- DialogInfo
+
+Qt <-- DialogUI
+Qt <-- DialogInfoUI
+
+Dialog <-- MainWindow
+
+
+
+
+class VelocityCalculator {
+    + read_depth: dictionary
+    + read_flow: object
+    + average: object
+    + calculate_shifted_labels: object
+    + fst_img_fn: str
+    + snd_img_fn: str
+    + fst_depth_fn: str
+    + snd_depth_fn: str
+    + label_fn: str
+    + flow_fn: str
+    + out_dir: str
+    + use_slic: bool
+    + n_sps: int
+    + visualize_results: bool
+    + back_flow: str
+    + high: float
+    + low: float
+    + super_pixel_method: str
+    + create_draw: bool
+    + create_velocity: bool
+
+    + calculate_velocity_and_orientation(): void
+}
+
+class utils {
+    + getResultDirs(): dictionary
+    + calc_angle_of_view(int, int, int): (int, int)
+    + calc_size(float, float, int): (int, int)
+    + calculate_shifted_labels(numpy array, float): numpy array
+    + calculate_velocity_and_orientation_vectors(numpy array, numpy array, numpy array, numpy array, numpy array): numpy array
+    + calculate_velocity_and_orientation_vectors_vectorised(numpy array, numpy array, numpy array, numpy array, numpy array, numpy array,): numpy array
+    + calc_bidi_errormap(numpy array, numpy array, float, bool): (numpy array, numpy array)
+    + draw_velocity_vectors(numpy array, numpy array, str, bool): numpy array
+    + save_as_image(str, numpy array, float, float): void
+    + read_depth(str, int, int): numpy array
+    + list_directory(str, str): [str]
+    + vector_distance(numpy array, numpy array, numpy array)
+    + reduce_sort(numpy array, float, float, float): numpy array
+    + vector_speedOF_Simple(numpy array, float, float): (float, numpy array)
+    + normalize(numpy array): numpy array
+    + average(numpy array, numpy array): numpy array
+    + error_comparison_Speed_Vectors(float, float, str, bool): float
+
+}
+
+class readFlowFile {
+
+}
+
+class computeColor {
+
+}
+
+readFlowFile <-- VelocityCalculator
+computeColor <-- VelocityCalculator
+utils <-- VelocityCalculator
+
+readFlowFile <-- utils
+computeColor <-- utils
+
+
+class cycleVid {
+    + container : list
+    + idx : int
+
+    + reset() : void
+    + get(str): str
+    + add(str, str): void
+    + current(): str
+    + currentType(): str
+    + down(): str
+    + up(): str    
+}
+
+class imageHolder {
+    + maxLen : int
+    + vidLen : object = None
+    + img_list : object = None
+    + current : object = None
+    + list_idx : int = 0
+    + fps : int
+    + width : int = 0
+    + height : int = 0
+    + cur_idx : int = -1
+    + img_dict : dictionary = {}
+    + threadpool: QThreadPool
+
+    + setup([str], int, int, str, int): PIL Image
+    + getCurrent(): PIL Image
+    + increment(): void
+    + changeFps(int): void
+    + getStartData(): Tuple(int, int, int)
+    + jump(int): PIL Image
+    + resize(int, int): PIL Image
+    + prepareImage(PIL Image): PIL Image
+    + loadImg(str, int): void
+    + load(int, int): void
+    + reset(): void
+    + prevImg(): PIL Image
+    + nextImg(): PIL Image
+}
+
+class Worker{
+    + finished: pyqtSignal
+    + intReady: pyqtSignal
+
+    + current_idx: int
+    + end_idx: int
+    + wait: float
+    + running: bool
+
+    + startCounting(): void
+    + stop(): void
+}
+
+class imageLoader {
+    + fn: object
+    + args: object
+    + kwargs: object
+    + signals: pyqtSignal
+
+    + run(): void    
+}
+
+class utils {
+    + resizeImg(PIL Image, int): PIL Image
+    + fillImg(PIL Image, (int, int, int, int), (int, int)): PIL Image
+    + images_from_video(str, str): void
+    + video_from_images(str, str, int): void
+}
+
+
+QObject <|-- Worker
+QRunnable <|-- imageLoader
+
+imageLoader <-- imageHolder
+utils <-- imageHolder
+
+
+class CalculationRunner {
+    + finished: pyqtSignal
+    + updateFin: pyqtSignal
+    + {field} labelUpdate: pyqtSignal(object)
+    + {field} update: pyqtSignal(int)
+    + {field} videoFrame: pyqtSignal(int)
+    + {field} error: pyqtSignal(int) 
+
+    + use_slic: bool = False
+    + visualize: bool = True
+    + vid_path: str
+    + high: float
+    + low: float
+    + speed_gt: numpy array
+    + n_sps: int = 100
+    + run_dict: dictionary
+    + out_dir: str
+    + plot_error_dir: str
+    + numbers_dir: str
+    + super_pixel_dir: str
+    + super_pixel_method: str
+    + of_dir: str
+    + of_model: str
+    + img_dir: str
+    + depth_dir: str
+    + depth_model: str
+    + back_of_dir: str
+    + plot_speed_dir: str
+    + plot_crash_dir: str
+    + send_video_frame: bool
+    + create_csv: bool
+    + create_draw: bool
+    + create_velocity: bool
+    + super_pixel_label_dir: str
+    + create_video_fps: bool
+    + optimize: bool
+    + yolo_weights: str
+    + yolo_v: str
+    + coco_names: str
+    + object_detection_dir: str
+    + ground_truth_error: bool = False
+    + video_frame: int = 0
+
+    + startThread(): void
+    + startCalc(int): int
+    + startOf(): void
+    + startObjectDetection(): void
+    + minFunc((int, int), int): (float, int)
+    + startOptimization(): void
+    + startMultiFunc(object, tuple): void
+    + startBackOf(): void
+    + startDepth(): void
+    + imagesFromVideo(str, str, str): void
+    + createSuperPixel(): void
+    + createSpeedPlot(): void
+    + createCrashPlot(): void
+    + createErrorPlot(): void
+    + createSpeedErrorPlot(): void
+    + checkRun(str, object): void
+    + createVid(str, str, str, int): void
+}
+
+QObject <|-- CalculationRunner
+
+utils <-- CalculationRunner
+VelocityCalculator <-- CalculationRunner
+
+namespace Model.Algorithms.Pwc #fbd982 {
+}
+
+namespace Model.Algorithms.Monodepth #fbd982 {
+}
+
+Model.Algorithms.Pwc <-- CalculationRunner
+Model.Algorithms.Monodepth <-- CalculationRunner
+
+
+
+VideoPlayer <-- MainWindow
+utils <-- MainWindow
+Worker <-- MainWindow
+imageHolder <-- MainWindow
+cycleVid <-- MainWindow
+
+CalculationRunner <-- Dialog
+
+QMainWindow <|-- MainWindow
+
+@enduml
