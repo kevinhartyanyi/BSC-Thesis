@@ -35,7 +35,6 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.setupUi(self)
         self.setWindowTitle("Process Video")
         self.dir = os.path.dirname(os.path.realpath(__file__))
-        self.user_file = os.path.join(os.getcwd(), ".userInfo.json") 
         self.created = {}
         self.user = None
         self.thread = None
@@ -63,6 +62,17 @@ class Dialog(QDialog, Ui_Dialog):
         self.app = app
         self.ui.b_info.setIconSize(QSize(50,50))
         self.ui.b_info.setIcon(QApplication.style().standardIcon(QStyle.SP_MessageBoxInformation))
+        homedir = os.path.expanduser('~')
+
+        if platform.system() == 'Windows':
+            datadir = os.sep.join([homedir, 'Analyser'])
+        else:
+            datadir = os.sep.join([homedir, '.analyser'])
+
+        if not os.path.exists(datadir):
+            os.makedirs(datadir)
+            
+        self.user_file = os.path.join(datadir, ".userInfo.json") 
 
         self.signalSetup()
         self.loadUser()
