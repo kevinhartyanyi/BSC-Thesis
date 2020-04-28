@@ -1,14 +1,14 @@
-from dialog import Dialog
+from View.Run.dialog import Dialog
 from main import MainWindow
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 import qdarkgraystyle
 import unittest
 from PyQt5.QtTest import QTest
 import os
-from speed.utils import list_directory
+from Model.Algorithms.utils import list_directory
 import time
 import shutil
-import calcRunner
+import Model.Run.calcRunner as calcRunner
 
 
 appctxt = ApplicationContext()
@@ -53,13 +53,13 @@ class RunTester(unittest.TestCase):
 
     def test_low_change(self):
         self.run.ui.t_low.setText("-1")
-        self.assertEqual(self.run.low, 0.309)
+        self.assertEqual(self.run.low, 0.0)
 
         self.run.ui.t_low.setText("2.2")
-        self.assertEqual(self.run.low, 0.309)
+        self.assertEqual(self.run.low, 0.0)
 
         self.run.ui.t_low.setText("ttt")
-        self.assertEqual(self.run.low, 0.309)
+        self.assertEqual(self.run.low, 0.0)
     
     def test_high_change(self):
         self.run.ui.t_high.setText("-1")
@@ -157,14 +157,12 @@ class RunTester(unittest.TestCase):
         
         result = os.path.join(self.run.user["Save"], "results")
         plot_speed = os.path.join(result, "plot_speed")
-        plot_error = os.path.join(result, "plot_error")
 
         self.run.checkFiles()
         self.run.disableButtons()
         self.run.createDirs()
 
         self.assertEqual(os.path.exists(plot_speed), True)
-        self.assertEqual(os.path.exists(plot_error), True)
         
 
     def prepare_run(self, empty=False):
@@ -199,17 +197,17 @@ class RunTester(unittest.TestCase):
         self.run.run_dict["Depth_Vid"] = {"Run": self.run.ui.c_depth.isChecked(), "Progress":ori_images, "Text":"Creating depth estimation video"}
 
         self.run.run_dict["Speed_Plot"] = {"Run": self.run.ui.c_speed_plot.isChecked(), "Progress":ori_images, "Text":"Creating plot for speed values"}
-        self.run.run_dict["Error_Plot"] = {"Run": self.run.ui.c_error_plot.isChecked() and self.gt_exist, "Progress":ori_images, "Text":"Creating plot for speed error"}
         self.run.run_dict["Crash_Plot"] = {"Run": self.run.ui.c_crash_plot.isChecked(), "Progress":ori_images, "Text":"Creating plot for time to crash"}
-
+        self.run.run_dict["Error_Plot"] = {"Run": self.run.ui.c_error_plot.isChecked() and self.run.gt_exist, "Progress":ori_images, "Text":"Creating plot for speed error"}
 
         self.run.run_dict["Speed_Plot_Video"] = {"Run": self.run.ui.c_speed_plot_video.isChecked(), "Progress":ori_images, "Text":"Creating speed plot video"}
-        self.run.run_dict["Error_Plot_Video"] = {"Run": self.run.ui.c_error_plot_video.isChecked() and self.gt_exist, "Progress":ori_images, "Text":"Creating error plot video"}
+        self.run.run_dict["Error_Plot_Video"] = {"Run": self.run.ui.c_error_plot_video.isChecked() and self.run.gt_exist, "Progress":ori_images, "Text":"Creating error plot video"}
         self.run.run_dict["Crash_Plot_Video"] = {"Run": self.run.ui.c_crash_plot_video.isChecked(), "Progress":ori_images, "Text":"Creating time to crash plot video"}
-
 
         self.run.run_dict["Super_Pixel_Video"] = {"Run": self.run.ui.combo_superpixel.currentIndex() != 0 and self.run.ui.c_super_pixel_video.isChecked(), "Progress":ori_images, "Text":"Creating super pixel video"}
         self.run.run_dict["Super_Pixel_Label"] = {"Run": self.run.create_super_pixel_label, "Progress":ori_images, "Text":"Creating {0} superpixel labels".format(self.run.super_pixel_method)}
+        
+        self.run.run_dict["Object_Detection"] = {"Run": (self.run.ui.c_object_detection.isChecked() or self.run.ui.c_crash_plot.isChecked()) and not self.run.object_detection_dir_exist, "Progress":ori_images, "Text":"Running Object Detection"}
 
         self.run.addAllProgressBar() 
         self.run.buildParamsDict()
