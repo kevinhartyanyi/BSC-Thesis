@@ -35,7 +35,9 @@ class Ui_MainWindow(object):
         self.b_info.setObjectName("b_info")
         self.horizontalLayout_3.addWidget(self.b_info)
         self.b_video_left = QtWidgets.QPushButton(self.verticalLayoutWidget_2)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.b_video_left.sizePolicy().hasHeightForWidth())
@@ -96,7 +98,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.b_plot_left = QtWidgets.QPushButton(self.layoutWidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.b_plot_left.sizePolicy().hasHeightForWidth())
@@ -108,7 +112,9 @@ class Ui_MainWindow(object):
         self.b_plot_left.setObjectName("b_plot_left")
         self.horizontalLayout.addWidget(self.b_plot_left)
         self.b_plot_right = QtWidgets.QPushButton(self.layoutWidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.b_plot_right.sizePolicy().hasHeightForWidth())
@@ -140,7 +146,9 @@ class Ui_MainWindow(object):
         self.t_fps.setObjectName("t_fps")
         self.horizontalLayout_2.addWidget(self.t_fps)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
-        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem = QtWidgets.QSpacerItem(
+            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
+        )
         self.verticalLayout.addItem(spacerItem)
         self.verticalLayout_4 = QtWidgets.QVBoxLayout()
         self.verticalLayout_4.setObjectName("verticalLayout_4")
@@ -161,7 +169,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout_4.addWidget(self.t_frame)
         self.verticalLayout_3.addLayout(self.horizontalLayout_4)
         self.verticalLayout_4.addLayout(self.verticalLayout_3)
-        spacerItem1 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem1 = QtWidgets.QSpacerItem(
+            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
+        )
         self.verticalLayout_4.addItem(spacerItem1)
         self.b_rerun = QtWidgets.QPushButton(self.layoutWidget1)
         font = QtGui.QFont()
@@ -245,13 +255,21 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.b_info.setText(_translate("MainWindow", "..."))
-        self.b_video_left.setToolTip(_translate("MainWindow", "Jump to the previous frame"))
+        self.b_video_left.setToolTip(
+            _translate("MainWindow", "Jump to the previous frame")
+        )
         self.b_video_left.setText(_translate("MainWindow", "Previous"))
-        self.b_video_up.setToolTip(_translate("MainWindow", "Change the selected video"))
+        self.b_video_up.setToolTip(
+            _translate("MainWindow", "Change the selected video")
+        )
         self.b_video_up.setText(_translate("MainWindow", "Up"))
-        self.b_video_right.setToolTip(_translate("MainWindow", "Jump to the next frame"))
+        self.b_video_right.setToolTip(
+            _translate("MainWindow", "Jump to the next frame")
+        )
         self.b_video_right.setText(_translate("MainWindow", "Next"))
-        self.l_description.setToolTip(_translate("MainWindow", "Description of the currently selected video"))
+        self.l_description.setToolTip(
+            _translate("MainWindow", "Description of the currently selected video")
+        )
         self.b_video_down.setToolTip(_translate("MainWindow", "Change Video"))
         self.b_video_down.setText(_translate("MainWindow", "Down"))
         self.b_plot_left.setToolTip(_translate("MainWindow", "Change plot"))
@@ -260,18 +278,27 @@ class Ui_MainWindow(object):
         self.b_plot_right.setText(_translate("MainWindow", "Next"))
         self.l_fps.setToolTip(_translate("MainWindow", "Frames per second"))
         self.l_fps.setText(_translate("MainWindow", "FPS:"))
-        self.t_fps.setToolTip(_translate("MainWindow", "Select video frame rate per second"))
+        self.t_fps.setToolTip(
+            _translate("MainWindow", "Select video frame rate per second")
+        )
         self.t_fps.setText(_translate("MainWindow", "30"))
         self.b_jump.setToolTip(_translate("MainWindow", "Jumpt to the selected frame"))
         self.b_jump.setText(_translate("MainWindow", "Jump to Frame:"))
-        self.t_frame.setToolTip(_translate("MainWindow", "Select the frame that you wish to jump to"))
+        self.t_frame.setToolTip(
+            _translate("MainWindow", "Select the frame that you wish to jump to")
+        )
         self.t_frame.setText(_translate("MainWindow", "0"))
         self.b_rerun.setToolTip(_translate("MainWindow", "Start a new run"))
         self.b_rerun.setText(_translate("MainWindow", "Run"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar"))
         self.actionPlay.setText(_translate("MainWindow", "Play"))
-        self.actionPlay.setToolTip(_translate("MainWindow", "<html><head/><body><p>Play the selected video, or stop it.</p></body></html>"))
+        self.actionPlay.setToolTip(
+            _translate(
+                "MainWindow",
+                "<html><head/><body><p>Play the selected video, or stop it.</p></body></html>",
+            )
+        )
         self.actionPlay.setShortcut(_translate("MainWindow", "Space"))
         self.actionOF.setText(_translate("MainWindow", "OF"))
         self.actionOF.setToolTip(_translate("MainWindow", "Jump to optical flow video"))
@@ -280,18 +307,30 @@ class Ui_MainWindow(object):
         self.actionNew_Run.setText(_translate("MainWindow", "New Run"))
         self.actionExit.setText(_translate("MainWindow", "Exit"))
         self.actionOriginal.setText(_translate("MainWindow", "Original"))
-        self.actionOriginal.setToolTip(_translate("MainWindow", "Jump to original video"))
+        self.actionOriginal.setToolTip(
+            _translate("MainWindow", "Jump to original video")
+        )
         self.actionBackOF.setText(_translate("MainWindow", "BackOF"))
-        self.actionBackOF.setToolTip(_translate("MainWindow", "Jump to backward optical flow video"))
+        self.actionBackOF.setToolTip(
+            _translate("MainWindow", "Jump to backward optical flow video")
+        )
         self.actionOFDirections.setText(_translate("MainWindow", "OFDirections"))
-        self.actionOFDirections.setToolTip(_translate("MainWindow", "Jump to optical flow directions video"))
+        self.actionOFDirections.setToolTip(
+            _translate("MainWindow", "Jump to optical flow directions video")
+        )
         self.actionMask.setText(_translate("MainWindow", "Mask"))
         self.actionMask.setToolTip(_translate("MainWindow", "Jump to speed mask video"))
         self.actionOFArrows.setText(_translate("MainWindow", "OFArrows"))
-        self.actionOFArrows.setToolTip(_translate("MainWindow", "Jump to optical flow arrows video"))
+        self.actionOFArrows.setToolTip(
+            _translate("MainWindow", "Jump to optical flow arrows video")
+        )
         self.actionSuperPixel.setText(_translate("MainWindow", "SuperPixel"))
-        self.actionSuperPixel.setToolTip(_translate("MainWindow", "Jump to super pixel video"))
+        self.actionSuperPixel.setToolTip(
+            _translate("MainWindow", "Jump to super pixel video")
+        )
         self.actionShow_Log.setText(_translate("MainWindow", "Show Log"))
         self.actionInformation.setText(_translate("MainWindow", "Information"))
         self.actionObjectDetection.setText(_translate("MainWindow", "ObjectDetection"))
-        self.actionObjectDetection.setToolTip(_translate("MainWindow", "Jump to object detection video"))
+        self.actionObjectDetection.setToolTip(
+            _translate("MainWindow", "Jump to object detection video")
+        )

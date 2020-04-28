@@ -39,7 +39,7 @@ def getResultDirs():
     results = {"Velocity": VL_DIR, "Mask": MASK_DIR}
     return results
 
-def calculate_shifted_labels(labels, avg_flow):
+def calculateShiftedLabels(labels, avg_flow):
     """
     Shift the given superpixel labels with the average optical flow 
     :param labels: superpixel labels
@@ -64,7 +64,7 @@ def calculate_shifted_labels(labels, avg_flow):
     return shifted_labels
 
 
-def calc_angle_of_view(focal_length, width, height):
+def calcAngleOfView(focal_length, width, height):
     """
     Calculate the horizontal and veritcal angle of view for a given region
     :param focal_length: focal length of the image
@@ -76,7 +76,7 @@ def calc_angle_of_view(focal_length, width, height):
     vertical_angle = 2 * np.degrees(np.tan((height / 2) / focal_length))
     return horizontal_angle, vertical_angle
 
-def calc_size(h_angle, v_angle, depth):
+def calcSize(h_angle, v_angle, depth):
     """
     Calculate the size of a given region
     :param h_angle: horizontal angle of view
@@ -92,7 +92,7 @@ def calc_size(h_angle, v_angle, depth):
 
     return width, height
 
-def calculate_velocity_and_orientation_vectors(labels, shifted_labels, avg_flow, 
+def calculateVelocityAndOrientationVectors(labels, shifted_labels, avg_flow, 
                                             avg_fst_depth, avg_shifted_depth):
     """
     Calculate the velocity and the oriention of each superpixel 
@@ -109,9 +109,9 @@ def calculate_velocity_and_orientation_vectors(labels, shifted_labels, avg_flow,
         sp_x, sp_y = np.unravel_index(np.argmax(labels == sp_id, axis=None), labels.shape)
         v, u = avg_flow[sp_x, sp_y]
 
-        h_angle, v_angle = calc_angle_of_view(width_to_focal[labels.shape[1]], u, v)
+        h_angle, v_angle = calcAngleOfView(width_to_focal[labels.shape[1]], u, v)
         depth = avg_fst_depth[sp_x, sp_y]
-        x, y = calc_size(h_angle, v_angle, depth)
+        x, y = calcSize(h_angle, v_angle, depth)
         x, y = (x * fps) * 3.6, (y * fps) * 3.6
 
         shifted_sp_x, shifted_sp_y = np.unravel_index(np.argmax(shifted_labels == sp_id, 
@@ -123,7 +123,7 @@ def calculate_velocity_and_orientation_vectors(labels, shifted_labels, avg_flow,
         orientation[labels == sp_id] = normalize((x, y, z))
     return velocity, orientation
 
-def calculate_velocity_and_orientation_vectors_vectorised(of_mask, next_position, prev_position, flow, 
+def calculateVelocityAndOrientationVectorsVectorised(of_mask, next_position, prev_position, flow, 
                                             fst_depth, snd_depth):
     """
     Calculate the velocity and the oriention of each superpixel 
@@ -164,9 +164,9 @@ def calculate_velocity_and_orientation_vectors_vectorised(of_mask, next_position
     """
     v = flow[:,:,0]
     u = flow[:,:,1]
-    h_angle, v_angle = calc_angle_of_view(width_to_focal[fst_depth.shape[1]], u, v)
+    h_angle, v_angle = calcAngleOfView(width_to_focal[fst_depth.shape[1]], u, v)
     depth = fst_depth
-    x, y = calc_size(h_angle, v_angle, depth)
+    x, y = calcSize(h_angle, v_angle, depth)
     x, y = (x * fps) * 3.6, (y * fps) * 3.6
 
     velocity[:,:,0] = y
@@ -174,7 +174,7 @@ def calculate_velocity_and_orientation_vectors_vectorised(of_mask, next_position
     velocity[:,:,2] = z
     return velocity#, orientation
 
-def calculate_velocity_and_orientation_vectors_vectorised_gt(flow, fst_depth, snd_depth):
+def calculateVelocityAndOrientationVectorsVectorised_gt(flow, fst_depth, snd_depth):
     """
     Calculate the velocity and the oriention of each superpixel 
     :param labels: original superpixel labels
@@ -192,9 +192,9 @@ def calculate_velocity_and_orientation_vectors_vectorised_gt(flow, fst_depth, sn
 
     v = flow[:,:,0]
     u = flow[:,:,1]
-    h_angle, v_angle = calc_angle_of_view(width_to_focal[fst_depth.shape[1]], u, v)
+    h_angle, v_angle = calcAngleOfView(width_to_focal[fst_depth.shape[1]], u, v)
     depth = fst_depth
-    x, y = calc_size(h_angle, v_angle, depth)
+    x, y = calcSize(h_angle, v_angle, depth)
     x, y = (x * fps) * 3.6, (y * fps) * 3.6
 
     velocity[:,:,0] = x
@@ -203,7 +203,7 @@ def calculate_velocity_and_orientation_vectors_vectorised_gt(flow, fst_depth, sn
     return velocity#, orientation
 
 # TODO np.meshgrid
-def calc_bidi_errormap(flowAB, flowBA, tau=1.0, consistent_flow=False):
+def calcBidiErrormap(flowAB, flowBA, tau=1.0, consistent_flow=False):
     """Calculates the inconsistent Optical Flow, and the transformation matrix given by the forward OF.
     
     Parameters
@@ -260,7 +260,7 @@ def calc_bidi_errormap(flowAB, flowBA, tau=1.0, consistent_flow=False):
     return bidi_map, next_positions , prev_positions
 
 
-def draw_velocity_vectors(img, disparities, max_spin_size=5.0, step_size=20, relative_disp=True, color=(0, 255, 0)):
+def drawVelocityVectors(img, disparities, max_spin_size=5.0, step_size=20, relative_disp=True, color=(0, 255, 0)):
     """
     Draw velocity vectors on the given image
     :param labels: superpixel labels
@@ -325,7 +325,7 @@ def draw_velocity_vectors(img, disparities, max_spin_size=5.0, step_size=20, rel
                 cv2.line(img, (cx, cy), (nx, ny), color, 1, cv2.LINE_AA, 0)
     return img
 
-def save_as_image(out_fn, data, min_val=None, max_val=None):
+def saveAsImage(out_fn, data, min_val=None, max_val=None):
     """
     Save the given matrix with the specified name using plasma colormap
     :param out_fn: name of the output image
@@ -337,7 +337,7 @@ def save_as_image(out_fn, data, min_val=None, max_val=None):
         min_val = -max_val
     plt.imsave(out_fn, data, cmap='plasma', vmin=min_val, vmax=max_val)
 
-def read_depth(depth_fn, width, height):
+def readDepth(depth_fn, width, height):
     """
     Read disparity map and converts it to depth map
     :param depth_fn: name of the depth file
@@ -352,7 +352,7 @@ def read_depth(depth_fn, width, height):
     #depth[depth < min_depth] = min_depth
     return depth
 
-def list_directory(dir_name, extension=None):
+def listDirectory(dir_name, extension=None):
     """
     List all files with the given extension in the specified directory.
     :param dir_name: name of the directory
@@ -379,20 +379,20 @@ def print_vectorsOF(x,y):
     print("X mean: " + str(np.mean(x)))
     print("Y mean: " + str(np.mean(y)))
 
-def vector_distance(x,y,z):
+def vectorDistance(x,y,z):
     x2 = np.power(x, 2)
     y2 = np.power(y, 2)
     z2 = np.power(z, 2)
     added = x2 + y2 + z2
     return np.sqrt(added)
 
-def vector_distanceOF(x,y):
+def vectorDistanceOF(x,y):
     x2 = np.power(x, 2)
     y2 = np.power(y, 2)
     added = x2 + y2
     return np.sqrt(added)
 
-def reduce_sort(vector, low=0.1,high=0.9, skip=None):
+def reduceSort(vector, low=0.1,high=0.9, skip=None):
     v_unique = np.sort(vector.flatten())
     if skip is not None:
         v_unique = v_unique[v_unique != skip]
@@ -413,8 +413,8 @@ def vector_speed(vectors, slc = 0):
     #disp_mask = np.logical_and(disp >= disp_unique[int(len(disp_unique) * md_low)],
     #    disp <= disp_unique[int(len(disp_unique) * md_high) - 1])
 
-    mask_y_thr = reduce_sort(y)
-    #mask_z_thr = reduce_sort(z,low=0.3,high=0.6) # 0.5 - 0.6: 26
+    mask_y_thr = reduceSort(y)
+    #mask_z_thr = reduceSort(z,low=0.3,high=0.6) # 0.5 - 0.6: 26
     only_good_of = z != 0
     z_negative = z < 0
 
@@ -437,7 +437,7 @@ def vector_speed(vectors, slc = 0):
 
     print("Left Calculated:")
     print_vectors(x_thr_left,y_thr_left,z_thr_left)
-    speed_left = vector_distance(x_thr_left,y_thr_left,z_thr_left)  
+    speed_left = vectorDistance(x_thr_left,y_thr_left,z_thr_left)  
     print("Speed Left Calculated: " + str(np.mean(speed_left)))
     print("")
 
@@ -449,7 +449,7 @@ def vector_speed(vectors, slc = 0):
 
     print("Right Calculated:")
     print_vectors(x_thr_right,y_thr_right,z_thr_right)
-    speed_right = vector_distance(x_thr_right,y_thr_right,z_thr_right)  
+    speed_right = vectorDistance(x_thr_right,y_thr_right,z_thr_right)  
     print("Speed Right Calculated: " + str(np.mean(speed_right)))
     print("")
 
@@ -464,10 +464,10 @@ def vector_speed(vectors, slc = 0):
     if slc == 0: 
         print("Calculated:")
         print_vectors(x_thr,y_thr,z_thr)
-        speed = vector_distance(x_thr,y_thr,z_thr)  
+        speed = vectorDistance(x_thr,y_thr,z_thr)  
         print("Speed Calculated: " + str(np.mean(speed)))
         print("")
-        speed_img = vector_distance(x,y,z)  
+        speed_img = vectorDistance(x,y,z)  
         return speed_img, mask_uni"""
     """
     if slc == 2: 
@@ -548,7 +548,7 @@ def vector_speedOF(vectors, slc = 0):
     #disp_mask = np.logical_and(disp >= disp_unique[int(len(disp_unique) * md_low)],
     #    disp <= disp_unique[int(len(disp_unique) * md_high) - 1])
 
-    mask_y_thr = reduce_sort(y)
+    mask_y_thr = reduceSort(y)
     only_good_of = x != 0
     x_negative = x < 0
 
@@ -571,7 +571,7 @@ def vector_speedOF(vectors, slc = 0):
 
     print("Left Calculated:")
     print_vectorsOF(x_thr_left,y_thr_left)
-    speed_left = vector_distanceOF(x_thr_left,y_thr_left)  
+    speed_left = vectorDistanceOF(x_thr_left,y_thr_left)  
     print("Speed Left Calculated: " + str(np.mean(speed_left)))
     print("")
 
@@ -582,7 +582,7 @@ def vector_speedOF(vectors, slc = 0):
 
     print("Right Calculated:")
     print_vectorsOF(x_thr_right,y_thr_right)
-    speed_right = vector_distanceOF(x_thr_right,y_thr_right)   
+    speed_right = vectorDistanceOF(x_thr_right,y_thr_right)   
     print("Speed Right Calculated: " + str(np.mean(speed_right)))
     print("")
 
@@ -592,7 +592,7 @@ def vector_speedOF(vectors, slc = 0):
     print("")
 
 
-    speed_img = vector_distanceOF(x,y)  
+    speed_img = vectorDistanceOF(x,y)  
     return speed_img, mask_uni
 
 
@@ -604,7 +604,7 @@ def vector_speedOF4Side(vectors, slc = 0):
     #disp_mask = np.logical_and(disp >= disp_unique[int(len(disp_unique) * md_low)],
     #    disp <= disp_unique[int(len(disp_unique) * md_high) - 1])
 
-    mask_y_thr = reduce_sort(y)
+    mask_y_thr = reduceSort(y)
     only_good_of = x != 0
     x_negative = x < 0
 
@@ -676,19 +676,19 @@ def vector_speedOF4Side(vectors, slc = 0):
     print("Speed Average: " + str(np.mean(speed_avg)))
     print("")
 
-    speed_img = vector_distanceOF(x,y)  
+    speed_img = vectorDistanceOF(x,y)  
     return speed_img, mask_uni
 
-def vector_speedOF_Simple(vectors, high=1, low=0):
+def vectorSpeedOFSimple(vectors, high=1, low=0):
     x = vectors[:,:,0]
     y = vectors[:,:,1]
 
-    #mask_y_thr = reduce_sort(y)
+    #mask_y_thr = reduceSort(y)
     only_good_of = x != 0
     #x_negative = x < 0
 
     mask_uni = only_good_of    
-    mask_y_thr = reduce_sort(y,low=low,high=high) # 0.5 - 0.6: 26
+    mask_y_thr = reduceSort(y,low=low,high=high) # 0.5 - 0.6: 26
 
     # Speed throwing
     """
@@ -699,8 +699,8 @@ def vector_speedOF_Simple(vectors, high=1, low=0):
     x_abs_0 = np.abs(x_0)
     y_abs_0 = np.abs(y_0)
     avg_speed_raw = np.divide(np.add(x_abs_0, y_abs_0), 2)
-    mask_speed_thr = reduce_sort(avg_speed_raw,low=low,high=high, skip=1000)
-    #save_as_image('speed_mask_test.png', mask_speed_thr, min_val=0, max_val=max_depth) 
+    mask_speed_thr = reduceSort(avg_speed_raw,low=low,high=high, skip=1000)
+    #saveAsImage('speed_mask_test.png', mask_speed_thr, min_val=0, max_val=max_depth) 
     mask_uni = np.logical_and(mask_speed_thr, only_good_of)
     """
 
@@ -1154,15 +1154,15 @@ def error_comparison_Speed_Vecors(speed_est, speed_gt, csv=None, visualize=True)
 
 def create_video_of_or_mono(path, data, mono=False):
     if mono:                      
-        #disp_fns = list_directory(data, extension='.npy')
-        #read_depth(disp_fns, width, height)
-        imgs = list_directory(data, extension='.png')
+        #disp_fns = listDirectory(data, extension='.npy')
+        #readDepth(disp_fns, width, height)
+        imgs = listDirectory(data, extension='.png')
         depth_img = []
         for file in imgs:
             depth_img.append(np.asarray(Image.open(file)))
         imageio.mimwrite(path, np.asarray(depth_img) , fps=30)
     else:                
-        flow_fns = list_directory(data, extension='.flo')
+        flow_fns = listDirectory(data, extension='.flo')
         flow = []
         for file in tqdm.tqdm(flow_fns):
             flow.append(computeColor.computeImg(readFlowFile.read(file)))
@@ -1227,7 +1227,7 @@ def create_speed_video_Speed_Vectors(vid_path, out_path, speed_simple, speed_gt,
         _, f_depth = vid_monodepth.read()
         #cv2.rectangle(f, (crop[0], crop[1]), (crop[0]+crop[2], crop[1]+crop[3]), (255, 255, 255), 2)
         frame_mask = mask[i] # 375 x 1242
-        #save_as_image(TMP_IMG + str(i) + '.png', frame_mask)
+        #saveAsImage(TMP_IMG + str(i) + '.png', frame_mask)
         frame_mask = np.expand_dims(frame_mask, axis=-1)
         z = np.zeros((1167, 2548, 3), dtype=np.uint8)
         if hd3 is False:

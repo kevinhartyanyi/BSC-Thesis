@@ -1,6 +1,7 @@
 import logging
 
-class cycleVid:
+
+class CycleVid:
     def __init__(self):
         super().__init__()
         self.container = []
@@ -30,8 +31,8 @@ class cycleVid:
                 re = vid
                 break
             self.idx += 1
-        assert re != None, ("Could not find cycleVid with name {0}".format(name))
-        
+        assert re != None, "Could not find CycleVid with name {0}".format(name)
+
         return re
 
     def add(self, name, vid_path):
@@ -51,7 +52,7 @@ class cycleVid:
             str -- path to the currently selected video
         """
         return self.container[self.idx][1]
-    
+
     def currentType(self):
         """Returns the name of the currently selected video
         
@@ -59,7 +60,7 @@ class cycleVid:
             str -- name of the currently selected video
         """
         return self.container[self.idx][0]
-    
+
     def down(self):
         """Cycle down on the container and return the path to the previous video
         
@@ -70,7 +71,7 @@ class cycleVid:
             self.idx -= 1
         else:
             self.idx = len(self.container) - 1
-            
+
         logging.info("Cycle: {0}".format(self.container[self.idx][0]))
         return self.container[self.idx][1]
 
@@ -84,12 +85,7 @@ class cycleVid:
             self.idx += 1
         else:
             self.idx = 0
-            
+
         logging.info("Cycle: {0}".format(self.container[self.idx][0]))
         logging.info("Cycle: {0}".format(self.idx, len(self.container)))
         return self.container[self.idx][1]
-    
-
-
-
-

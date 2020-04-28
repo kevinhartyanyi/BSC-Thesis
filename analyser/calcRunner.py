@@ -2,7 +2,7 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, QObject
 import time
 import speed.speed_vectors as speed
 import speed.utils as utils
-from speed.speed_vectors import calculate_velocity_and_orientation_wrapper
+from speed.speed_vectors import calculateVelocityAndOrientationWrapper
 import itertools
 import tqdm
 import multiprocessing
@@ -43,17 +43,17 @@ class CalculationRunner(QObject):
 
     @pyqtSlot()
     def startCalc(self):
-        img_fns = utils.list_directory(self.img_dir)
+        img_fns = utils.listDirectory(self.img_dir)
         fst_img_fns, snd_img_fns = img_fns, img_fns
 
-        disp_fns = utils.list_directory(self.disp_dir, extension='.npy')
+        disp_fns = utils.listDirectory(self.disp_dir, extension='.npy')
         fst_disp_fns, snd_disp_fns = disp_fns, disp_fns
-        flow_fns = utils.list_directory(self.flow_dir, extension='.flo')
-        back_flow = utils.list_directory(self.back_flow_dir, extension='.flo')
-        calculate_velocity = calculate_velocity_and_orientation_wrapper
+        flow_fns = utils.listDirectory(self.flow_dir, extension='.flo')
+        back_flow = utils.listDirectory(self.back_flow_dir, extension='.flo')
+        calculate_velocity = calculateVelocityAndOrientationWrapper
 
         if self.label_dir != None:
-            label_fns = utils.list_directory(self.label_dir)
+            label_fns = utils.listDirectory(self.label_dir)
 
             
             if len(label_fns) > len(flow_fns):
@@ -92,7 +92,7 @@ class CalculationRunner(QObject):
     @pyqtSlot()
     def startOf(self): # A slot takes no params
 
-        img_list = utils.list_directory(self.img_dir)
+        img_list = utils.listDirectory(self.img_dir)
         for ind in range(len(img_list) - 1):
             print("Running optical flow on:", img_list[ind], img_list[ind+1])
             flo_file = os.path.join(self.flow_dir,"{0}.flo".format(ind))

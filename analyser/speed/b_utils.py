@@ -23,7 +23,7 @@ max_depth = 80
 max_velocity = 60
 
 
-def list_directory(dir_name, extension=None):
+def listDirectory(dir_name, extension=None):
     """
     List all files with the given extension in the specified directory.
     :param dir_name: name of the directory
@@ -68,7 +68,7 @@ def read_boruvka_labels(label_fn, n_sps=-1):
     return labels
 
 
-def read_depth(depth_fn, width, height):
+def readDepth(depth_fn, width, height):
     """
     Read disparity map and converts it to depth map
     :param depth_fn: name of the depth file
@@ -159,7 +159,7 @@ def average_gt(data, labels):
     return avg
 
 
-def calc_angle_of_view(focal_length, width, height):
+def calcAngleOfView(focal_length, width, height):
     """
     Calculate the horizontal and veritcal angle of view for a given region
     :param focal_length: focal length of the image
@@ -172,7 +172,7 @@ def calc_angle_of_view(focal_length, width, height):
     return horizontal_angle, vertical_angle
 
 
-def calc_size(h_angle, v_angle, depth):
+def calcSize(h_angle, v_angle, depth):
     """
     Calculate the size of a given region
     :param h_angle: horizontal angle of view
@@ -201,7 +201,7 @@ def normalize(v):
     return v / norm
 
 """
-def draw_velocity_vectors(labels, velocity, img_fn, draw_boundaries=True):
+def drawVelocityVectors(labels, velocity, img_fn, draw_boundaries=True):
     
     Draw velocity vectors on the given image
     :param labels: superpixel labels
@@ -263,7 +263,7 @@ def draw_velocity_vectors(labels, velocity, img_fn, draw_boundaries=True):
             cv2.line(img, (cx, cy), (nx, ny), (0, 255, 0), 1, cv2.LINE_AA, 0)
     return img
 """
-def calculate_shifted_labels(labels, avg_flow):
+def calculateShiftedLabels(labels, avg_flow):
     """
     Shift the given superpixel labels with the average optical flow 
     :param labels: superpixel labels
@@ -288,7 +288,7 @@ def calculate_shifted_labels(labels, avg_flow):
     return shifted_labels
 
 
-def calculate_velocity_and_orientation_vectors(labels, shifted_labels, avg_flow, 
+def calculateVelocityAndOrientationVectors(labels, shifted_labels, avg_flow, 
                                                avg_fst_depth, avg_shifted_depth):
     """
     Calculate the velocity and the oriention of each superpixel 
@@ -305,9 +305,9 @@ def calculate_velocity_and_orientation_vectors(labels, shifted_labels, avg_flow,
         sp_x, sp_y = np.unravel_index(np.argmax(labels == sp_id, axis=None), labels.shape)
         v, u = avg_flow[sp_x, sp_y]
 
-        h_angle, v_angle = calc_angle_of_view(width_to_focal[labels.shape[1]], u, v)
+        h_angle, v_angle = calcAngleOfView(width_to_focal[labels.shape[1]], u, v)
         depth = avg_fst_depth[sp_x, sp_y]
-        x, y = calc_size(h_angle, v_angle, depth)
+        x, y = calcSize(h_angle, v_angle, depth)
         x, y = (x * fps) * 3.6, (y * fps) * 3.6
 
         shifted_sp_x, shifted_sp_y = np.unravel_index(np.argmax(shifted_labels == sp_id, 
@@ -320,7 +320,7 @@ def calculate_velocity_and_orientation_vectors(labels, shifted_labels, avg_flow,
     return velocity, orientation
 
 
-def save_as_image(out_fn, data, min_val=None, max_val=None):
+def saveAsImage(out_fn, data, min_val=None, max_val=None):
     """
     Save the given matrix with the specified name using plasma colormap
     :param out_fn: name of the output image

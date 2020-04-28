@@ -47,7 +47,7 @@ def fillImg(img, fill_colour=(26,26,27,255), size=(1920, 1080)):
     fd_img.paste(img, ((int((size[0] - w) / 2), int((size[1] - h) / 2))))
     return fd_img
 
-def images_from_video(vid_path, out_path):    
+def imagesFromVideo(vid_path, out_path):    
     if not os.path.exists(vid_path):
         raise ValueError('Input video file %s does not exist.' % vid_path)
 
@@ -61,7 +61,7 @@ def images_from_video(vid_path, out_path):
             
     cap.close()
 
-def video_from_images(img_dir, out_fn, fps=30):
+def videoFromImages(img_dir, out_fn, fps=30):
     onlyfiles = glob.glob(img_dir +"/*.png")
     onlyfiles = natsorted(onlyfiles)
 

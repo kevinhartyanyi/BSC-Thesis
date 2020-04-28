@@ -9,7 +9,7 @@ import calcRunner
 import os
 import shutil
 import speed.speed_vectors as speed
-from speed.utils import list_directory
+from speed.utils import listDirectory
 
 import speed.pwc.run as pwc
 
@@ -234,9 +234,9 @@ class Dialog(QDialog, Ui_Dialog):
         self.progressAllBar.setValue(1)
 
     def createRunDict(self):
-        self.run_dict["Of"] = {"Run": not self.of_exist, "Progress":len(list_directory(self.savePathJoin("Images"))), "Text":"Running optical flow"}
-        self.run_dict["Depth"] = {"Run": not self.depth_exist, "Progress":len(list_directory(self.savePathJoin("Images"))), "Text":"Running depth estimation"}
-        self.run_dict["Speed"] = {"Run": True, "Progress":len(list_directory(self.savePathJoin("Images"))), "Text":"Running speed estimation"}
+        self.run_dict["Of"] = {"Run": not self.of_exist, "Progress":len(listDirectory(self.savePathJoin("Images"))), "Text":"Running optical flow"}
+        self.run_dict["Depth"] = {"Run": not self.depth_exist, "Progress":len(listDirectory(self.savePathJoin("Images"))), "Text":"Running depth estimation"}
+        self.run_dict["Speed"] = {"Run": True, "Progress":len(listDirectory(self.savePathJoin("Images"))), "Text":"Running speed estimation"}
 
     def disableButtons(self):
         self.ui.b_run.setEnabled(False)

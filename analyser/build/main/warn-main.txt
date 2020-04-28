@@ -131,7 +131,7 @@ missing module named 'nose.plugins' - imported by numpy.testing._private.nosecla
 missing module named pytest - imported by numpy._pytesttester (delayed), numpy.testing._private.utils (delayed), scipy._lib._testutils (delayed), cupy.testing.attr (optional), matplotlib (delayed, optional), pandas.util._tester (delayed, optional), pandas.util.testing (delayed, conditional, optional), /home/kevin/Programming/BSC-Thesis/analyser/main.py (top-level)
 missing module named win32api - imported by distutils.msvccompiler (optional), /home/kevin/Programming/BSC-Thesis/analyser/main.py (top-level), pkg_resources._vendor.appdirs (delayed, conditional, optional)
 missing module named win32con - imported by distutils.msvccompiler (optional), /home/kevin/Programming/BSC-Thesis/analyser/main.py (top-level)
-missing module named multiprocessing.Pool - imported by multiprocessing (top-level), imageHolder (top-level)
+missing module named multiprocessing.Pool - imported by multiprocessing (top-level), ImageHolder (top-level)
 missing module named multiprocessing.RLock - imported by multiprocessing (delayed, conditional, optional), tqdm.std (delayed, conditional, optional)
 missing module named multiprocessing.SimpleQueue - imported by multiprocessing (top-level), concurrent.futures.process (top-level), /home/kevin/Programming/BSC-Thesis/analyser/main.py (top-level)
 missing module named multiprocessing.AuthenticationError - imported by multiprocessing (top-level), multiprocessing.connection (top-level), /home/kevin/Programming/BSC-Thesis/analyser/main.py (top-level)

@@ -1,4 +1,13 @@
-from PyQt5.QtWidgets import QDialog, QFileDialog, QColorDialog, QProgressBar, QLabel, QMessageBox, QApplication, QStyle
+from PyQt5.QtWidgets import (
+    QDialog,
+    QFileDialog,
+    QColorDialog,
+    QProgressBar,
+    QLabel,
+    QMessageBox,
+    QApplication,
+    QStyle,
+)
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, QThread, QSize
@@ -10,7 +19,7 @@ import Model.Run.calcRunner as calcRunner
 import os
 import re
 import shutil
-from Model.Algorithms.utils import list_directory, getResultDirs
+from Model.Algorithms.utils import listDirectory, getResultDirs
 import logging
 import cv2
 
@@ -25,6 +34,8 @@ SUPER_PIXEL_DIR = result_dir["SuperPixel"]
 PLOT_SPEED_DIR = result_dir["Plot_Speed"]
 PLOT_ERROR_DIR = result_dir["Plot_Error"]
 PLOT_CRASH_DIR = result_dir["Plot_Crash"]
+
+
 class Dialog(QDialog, Ui_Dialog):
     sendUser = pyqtSignal(object)
     sendCreated = pyqtSignal(object)
@@ -49,35 +60,37 @@ class Dialog(QDialog, Ui_Dialog):
         self.gt_exist = False
         self.create_super_pixel_label = False
         self.no_error = True
-        self.object_detection_dir_exist= False
+        self.object_detection_dir_exist = False
         self.vid_name = None
         self.all_run = 1
         self.run_count = 1
         self.fps = 30
         self.fps_limit = 60
         self.low = 0.0
-        self.high = 1.0 
+        self.high = 1.0
         self.run_dict = {}
-        self.super_pixel_method = ""        
+        self.super_pixel_method = ""
         self.app = app
-        self.ui.b_info.setIconSize(QSize(50,50))
-        self.ui.b_info.setIcon(QApplication.style().standardIcon(QStyle.SP_MessageBoxInformation))
-        homedir = os.path.expanduser('~')
+        self.ui.b_info.setIconSize(QSize(50, 50))
+        self.ui.b_info.setIcon(
+            QApplication.style().standardIcon(QStyle.SP_MessageBoxInformation)
+        )
+        homedir = os.path.expanduser("~")
 
-        if platform.system() == 'Windows':
-            datadir = os.sep.join([homedir, 'Analyser'])
+        if platform.system() == "Windows":
+            datadir = os.sep.join([homedir, "Analyser"])
         else:
-            datadir = os.sep.join([homedir, '.analyser'])
+            datadir = os.sep.join([homedir, ".analyser"])
 
         if not os.path.exists(datadir):
             os.makedirs(datadir)
-            
-        self.user_file = os.path.join(datadir, ".userInfo.json") 
+
+        self.user_file = os.path.join(datadir, ".userInfo.json")
 
         self.signalSetup()
         self.loadUser()
         self.userSetup()
-    
+
     def signalSetup(self):
         """
         Setup for signal connections
@@ -95,28 +108,30 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.c_error_plot.stateChanged.connect(self.checkFiles)
         self.ui.c_speed_plot.stateChanged.connect(self.checkFiles)
         self.ui.c_crash_plot.stateChanged.connect(self.checkFiles)
-        self.ui.combo_superpixel.currentIndexChanged.connect(self.changeSuperPixelMethod)
+        self.ui.combo_superpixel.currentIndexChanged.connect(
+            self.changeSuperPixelMethod
+        )
         self.ui.c_optimize.stateChanged.connect(self.checkFiles)
+        self.ui.c_draw.stateChanged.connect(self.checkFiles)
+        self.ui.c_velocity.stateChanged.connect(self.checkFiles)
         self.ui.c_object_detection.stateChanged.connect(self.checkFiles)
-    
+
     def showInfo(self):
         """Show information dialog
         """
         widget = DialogInfo(app=self.app, parent=self)
         widget.exec_()
 
-
     def changeLow(self):
         """Change the value of the low drop based on the text inside t_low
         """
         self.changeLowHigh(self.ui.t_low, t_type="low")
-        
+
     def changeHigh(self):
         """Change the value of the high drop based on the text inside t_high
         """
         self.changeLowHigh(self.ui.t_high, t_type="high")
 
-    
     def changeLowHigh(self, text_widget, t_type="low"):
         """Change the value of low/high drop
         
@@ -129,8 +144,8 @@ class Dialog(QDialog, Ui_Dialog):
         check = re.search("(0[.][0-9]+|1)", text_widget.text())
         if check and self.ui.t_low.text() != self.ui.t_high.text():
             num = check.group()
-            i_num = float(num)    
-            if t_type == "low":        
+            i_num = float(num)
+            if t_type == "low":
                 self.low = i_num
             else:
                 self.high = i_num
@@ -161,16 +176,20 @@ class Dialog(QDialog, Ui_Dialog):
         elif index == 4:
             self.super_pixel_method = "Watershed"
 
+        self.checkFiles()
+
     def openGroundTruth(self):
         """Open file with ground truth values for speed
         """
-        gt_dir = self.openFile(self.user["GT"], title="Load Ground Truth Data", 
-                                file_filter="Numpy Files (*.npy)")
+        gt_dir = self.openFile(
+            self.user["GT"],
+            title="Load Ground Truth Data",
+            file_filter="Numpy Files (*.npy)",
+        )
         if gt_dir != "":
             self.user["GT"] = gt_dir
             self.ui.l_ground_truth.setText("Load: " + self.splitPath(gt_dir)[-1])
         self.checkFiles()
-        
 
     def changeFps(self):
         """
@@ -181,7 +200,11 @@ class Dialog(QDialog, Ui_Dialog):
             num = check.group()
             fps = int(num)
             if fps > self.fps_limit:
-                logging.warning("Too big number for fps. Falling back to {0} fps.".format(self.fps_limit))
+                logging.warning(
+                    "Too big number for fps. Falling back to {0} fps.".format(
+                        self.fps_limit
+                    )
+                )
                 fps = self.fps_limit
             self.fps = fps
             self.ui.t_fps.setText(str(fps))
@@ -189,7 +212,6 @@ class Dialog(QDialog, Ui_Dialog):
             logging.info("Wrong Input For Fps")
             self.ui.t_fps.setText("30")
             self.fps = 30
-
 
     def splitPath(self, path):
         """Split the given path based on filesystem
@@ -205,7 +227,9 @@ class Dialog(QDialog, Ui_Dialog):
     def openSave(self):
         """Open directory to save results
         """
-        save_dir = QFileDialog.getExistingDirectory(self, "Select a folder", self.user["Save"], QFileDialog.ShowDirsOnly)
+        save_dir = QFileDialog.getExistingDirectory(
+            self, "Select a folder", self.user["Save"], QFileDialog.ShowDirsOnly
+        )
         if save_dir != "":
             self.user["Save"] = save_dir
             name_split = self.splitPath(save_dir)[-1]
@@ -219,15 +243,24 @@ class Dialog(QDialog, Ui_Dialog):
         """
         if self.user["Save"] != "":
             self.of_exist = os.path.exists(os.path.join(self.user["Save"], "Of"))
-            self.back_of_exist = os.path.exists(os.path.join(self.user["Save"], "Back_Of"))
+            self.back_of_exist = os.path.exists(
+                os.path.join(self.user["Save"], "Back_Of")
+            )
             self.img_exist = os.path.exists(os.path.join(self.user["Save"], "Images"))
             self.depth_exist = os.path.exists(os.path.join(self.user["Save"], "Depth"))
 
-            self.object_detection_dir_exist = os.path.exists(os.path.join(self.user["Save"], "ObjectDetection"))
+            self.object_detection_dir_exist = os.path.exists(
+                os.path.join(self.user["Save"], "ObjectDetection")
+            )
 
         self.gt_exist = self.user["GT"] != ""
 
-        self.create_super_pixel_label = (self.super_pixel_method != "" and not os.path.exists(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)))
+        self.create_super_pixel_label = (
+            self.super_pixel_method != ""
+            and not os.path.exists(
+                os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)
+            )
+        )
 
         self.ui.c_crash_plot_video.setEnabled(self.ui.c_crash_plot.isChecked())
         self.ui.t_low.setEnabled(not self.ui.c_optimize.isChecked())
@@ -236,14 +269,15 @@ class Dialog(QDialog, Ui_Dialog):
         self.ui.c_error_plot.setEnabled(self.gt_exist)
         self.ui.c_error_plot_video.setEnabled(self.ui.c_error_plot.isChecked())
         self.ui.c_speed_plot_video.setEnabled(self.ui.c_speed_plot.isChecked())
-        self.ui.c_super_pixel_video.setEnabled(self.ui.combo_superpixel.currentIndex() != 0)
-        self.ui.c_csv.setEnabled(self.ui.c_error_plot.isChecked())        
+        self.ui.c_super_pixel_video.setEnabled(
+            self.ui.combo_superpixel.currentIndex() != 0
+        )
+        self.ui.c_csv.setEnabled(self.ui.c_error_plot.isChecked())
 
         if self.runRequirements():
             self.ui.b_run.setEnabled(True)
         else:
             self.ui.b_run.setEnabled(False)
-    
 
     def runRequirements(self):
         """Basic requirements to start run
@@ -261,18 +295,18 @@ class Dialog(QDialog, Ui_Dialog):
         if fname != "":
             error_opening_video = False
 
-            cam = cv2.VideoCapture(fname) 
+            cam = cv2.VideoCapture(fname)
             logging.info("Opening video Check: {0}".format(fname))
-            
+
             currentframe = 0
-            ret,frame = cam.read() 
+            ret, frame = cam.read()
 
             if ret is False:
                 error_opening_video = True
-            # Release all space and windows once done 
-            cam.release() 
+            # Release all space and windows once done
+            cam.release()
             cv2.destroyAllWindows()
-            
+
             if error_opening_video:
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Information)
@@ -287,7 +321,9 @@ class Dialog(QDialog, Ui_Dialog):
                 self.ui.l_vid.setText("Load: " + self.vid_name)
                 self.checkFiles()
 
-    def openFile(self, folder, title="Open Video", file_filter="Video Files (*.mp4 *.avi *.mkv)"):
+    def openFile(
+        self, folder, title="Open Video", file_filter="Video Files (*.mp4 *.avi *.mkv)"
+    ):
         """Open QFileDialog with the given parameters, returns selected file
         
         Arguments:
@@ -300,10 +336,10 @@ class Dialog(QDialog, Ui_Dialog):
         Returns:
             str -- path to file
         """
-        fname = QFileDialog.getOpenFileName(self, title, folder, file_filter)   
-        
+        fname = QFileDialog.getOpenFileName(self, title, folder, file_filter)
+
         return fname[0]
-    
+
     def userSetup(self):
         """Label text setup if the user json is not empty
         """
@@ -316,19 +352,26 @@ class Dialog(QDialog, Ui_Dialog):
 
             if self.user["GT"] != "":
                 self.ui.l_ground_truth.setText(self.splitPath(self.user["GT"])[-1])
-            
+
             self.ui.l_colour.setText(self.user["Colour"])
-            
+
     def loadUser(self):
         """Load user file if exists, create empty otherwise
-        """ 
-        if(os.path.isfile(self.user_file)):
+        """
+        if os.path.isfile(self.user_file):
             logging.info("Found User File")
             with open(self.user_file, "r") as json_file:
-                self.user = json.load(json_file)            
+                self.user = json.load(json_file)
             self.checkFiles()
         else:
-            self.user = {"Save":"","Of":"","Depth":"","Video":"", "Colour":"#1a1a1b", "GT":""}
+            self.user = {
+                "Save": "",
+                "Of": "",
+                "Depth": "",
+                "Video": "",
+                "Colour": "#1a1a1b",
+                "GT": "",
+            }
             self.saveUser()
 
     def saveUser(self):
@@ -346,10 +389,7 @@ class Dialog(QDialog, Ui_Dialog):
         """
         stop_calculation = False
         found_error = False
-        errors = {
-            "Info": [],
-            "Critical": []
-        }
+        errors = {"Info": [], "Critical": []}
         error_types = []
         ori_images = 0
         of_images = 0
@@ -357,100 +397,246 @@ class Dialog(QDialog, Ui_Dialog):
         back_of_images = 0
 
         if os.path.exists(self.savePathJoin("Images")):
-            ori_images = len(list_directory(self.savePathJoin("Images"), extension="png"))
+            ori_images = len(
+                listDirectory(self.savePathJoin("Images"), extension="png")
+            )
         # Check image folder
         if self.img_exist and not os.path.exists(self.savePathJoin("Images")):
             if os.path.exists(self.user["Video"]):
-                errors["Info"].append("Images folder {0} doesn't exist -> Recreate it and recalculate optical flow and depth estimations".format(self.savePathJoin("Images")))
+                errors["Info"].append(
+                    "Images folder {0} doesn't exist -> Recreate it and recalculate optical flow and depth estimations".format(
+                        self.savePathJoin("Images")
+                    )
+                )
                 error_types.append("NoImages")
             else:
                 stop_calculation = True
-                errors["Critical"].append(("Images folder {0} and video file {1} don't exist -> Stopping run".format(self.savePathJoin("Images"), self.user["Video"])))
+                errors["Critical"].append(
+                    (
+                        "Images folder {0} and video file {1} don't exist -> Stopping run".format(
+                            self.savePathJoin("Images"), self.user["Video"]
+                        )
+                    )
+                )
         elif self.img_exist and os.path.exists(self.user["Video"]):
-            errors["Info"].append("Both the video {0} and Images folder {1} exist -> using Images folder by default".format(self.user["Video"], self.savePathJoin("Images")))
+            errors["Info"].append(
+                "Both the video {0} and Images folder {1} exist -> using Images folder by default".format(
+                    self.user["Video"], self.savePathJoin("Images")
+                )
+            )
         elif not self.img_exist and not os.path.isfile(self.user["Video"]):
             stop_calculation = True
-            errors["Critical"].append(("Images folder {0} and video file {1} don't exist -> Stopping run".format(self.savePathJoin("Images"), self.user["Video"])))
+            errors["Critical"].append(
+                (
+                    "Images folder {0} and video file {1} don't exist -> Stopping run".format(
+                        self.savePathJoin("Images"), self.user["Video"]
+                    )
+                )
+            )
 
         # Check video file
         if self.user["Video"] != "" and not os.path.isfile(self.user["Video"]):
             if os.path.exists(self.savePathJoin("Images")):
-                errors["Info"].append(("Video file {0} doesn't exist -> Using images in the Images folder instead".format(self.user["Video"])))
+                errors["Info"].append(
+                    (
+                        "Video file {0} doesn't exist -> Using images in the Images folder instead".format(
+                            self.user["Video"]
+                        )
+                    )
+                )
             else:
                 stop_calculation = True
-                errors["Critical"].append(("Images folder {0} and video file {1} don't exist -> Stopping run".format(self.savePathJoin("Images"), self.user["Video"])))
-        elif os.path.isfile(self.user["Video"]) and os.path.exists(self.savePathJoin("Images")):
+                errors["Critical"].append(
+                    (
+                        "Images folder {0} and video file {1} don't exist -> Stopping run".format(
+                            self.savePathJoin("Images"), self.user["Video"]
+                        )
+                    )
+                )
+        elif os.path.isfile(self.user["Video"]) and os.path.exists(
+            self.savePathJoin("Images")
+        ):
             pass
 
         # Check optical flow
         if self.of_exist and not os.path.exists(self.savePathJoin("Of")):
-            errors["Info"].append(("Optical flow folder {0} doesn't exist -> Recalculating optical flow".format(self.savePathJoin("Of"))))
+            errors["Info"].append(
+                (
+                    "Optical flow folder {0} doesn't exist -> Recalculating optical flow".format(
+                        self.savePathJoin("Of")
+                    )
+                )
+            )
             error_types.append("NoOf")
         elif self.of_exist:
-            of_images = len(list_directory(self.savePathJoin("Of"), extension="png"))
+            of_images = len(listDirectory(self.savePathJoin("Of"), extension="png"))
             if of_images != ori_images - 1 and ori_images != 0:
-                errors["Info"].append(("Optical flow image number {0} doesn't match video image number {1} - 1 -> Recalculating optical flow".format(of_images, ori_images)))
+                errors["Info"].append(
+                    (
+                        "Optical flow image number {0} doesn't match video image number {1} - 1 -> Recalculating optical flow".format(
+                            of_images, ori_images
+                        )
+                    )
+                )
                 error_types.append("NoOf")
 
         # Check backward optical flow
         if self.back_of_exist and not os.path.exists(self.savePathJoin("Back_Of")):
-            errors["Info"].append(("Backward optical flow folder {0} doesn't exist -> Recalculating backward optical flow".format(self.savePathJoin("Back_Of"))))
+            errors["Info"].append(
+                (
+                    "Backward optical flow folder {0} doesn't exist -> Recalculating backward optical flow".format(
+                        self.savePathJoin("Back_Of")
+                    )
+                )
+            )
             error_types.append("NoOf")
         elif self.back_of_exist:
-            back_of_images = len(list_directory(self.savePathJoin("Back_Of"), extension="png"))
+            back_of_images = len(
+                listDirectory(self.savePathJoin("Back_Of"), extension="png")
+            )
             if back_of_images != of_images:
-                errors["Info"].append(("Backward optical flow image number {0} doesn't match optical flow image number {1} -> Recalculating backward optical flow".format(back_of_images, of_images)))
+                errors["Info"].append(
+                    (
+                        "Backward optical flow image number {0} doesn't match optical flow image number {1} -> Recalculating backward optical flow".format(
+                            back_of_images, of_images
+                        )
+                    )
+                )
                 error_types.append("NoOf")
 
         # Check depth estimation
         if self.depth_exist and not os.path.exists(self.savePathJoin("Depth")):
-            errors["Info"].append(("Depth folder {0} doesn't exist -> Recalculating depth".format(self.savePathJoin("Depth"))))
+            errors["Info"].append(
+                (
+                    "Depth folder {0} doesn't exist -> Recalculating depth".format(
+                        self.savePathJoin("Depth")
+                    )
+                )
+            )
             error_types.append("NoDepth")
         elif self.depth_exist:
-            depth_images = len(list_directory(self.savePathJoin("Depth"), extension="png"))
+            depth_images = len(
+                listDirectory(self.savePathJoin("Depth"), extension="png")
+            )
             if depth_images != ori_images and ori_images != 0:
-                errors["Info"].append(("Depth image number {0} doesn't match video image number {1} -> Recalculating depth".format(depth_images, ori_images)))
+                errors["Info"].append(
+                    (
+                        "Depth image number {0} doesn't match video image number {1} -> Recalculating depth".format(
+                            depth_images, ori_images
+                        )
+                    )
+                )
                 error_types.append("NoDepth")
-                
+
         # Check ground truth
         if self.gt_exist and not os.path.isfile(self.user["GT"]):
-            errors["Info"].append(("Ground Truth file {0} doesn't exist -> File won't be used".format(self.user["GT"])))
+            errors["Info"].append(
+                (
+                    "Ground Truth file {0} doesn't exist -> File won't be used".format(
+                        self.user["GT"]
+                    )
+                )
+            )
             error_types.append("NoGT")
 
         # Check super pixel labels
-        if self.super_pixel_method != "" and os.path.exists(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)) \
-        and ori_images != 0 and len(list_directory(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method), extension=".npy")) != ori_images:
-            errors["Info"].append(("Super pixel label number {0} doesn't match image number {1} -> Recalculating super pixel labels".format(len(list_directory(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method), extension=".npy")),
-            ori_images)))
+        if (
+            self.super_pixel_method != ""
+            and os.path.exists(
+                os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)
+            )
+            and ori_images != 0
+            and len(
+                listDirectory(
+                    os.path.join(
+                        self.savePathJoin("Super_Pixel"), self.super_pixel_method
+                    ),
+                    extension=".npy",
+                )
+            )
+            != ori_images
+        ):
+            errors["Info"].append(
+                (
+                    "Super pixel label number {0} doesn't match image number {1} -> Recalculating super pixel labels".format(
+                        len(
+                            listDirectory(
+                                os.path.join(
+                                    self.savePathJoin("Super_Pixel"),
+                                    self.super_pixel_method,
+                                ),
+                                extension=".npy",
+                            )
+                        ),
+                        ori_images,
+                    )
+                )
+            )
             error_types.append("LabelError")
 
         # Check object detection
-        if self.ui.c_object_detection.isChecked() and os.path.exists(self.savePathJoin("ObjectDetection")):
-            if len(list_directory(self.savePathJoin("ObjectDetection"), extension=".png")) != ori_images:
-                errors["Info"].append("Object Detection image number {0} doesn't match image number of video {1} -> Recalculating object detection".format(len(list_directory(self.savePathJoin("ObjectDetection"), extension=".png")),
-                ori_images))
+        if self.ui.c_object_detection.isChecked() and os.path.exists(
+            self.savePathJoin("ObjectDetection")
+        ):
+            if (
+                len(
+                    listDirectory(
+                        self.savePathJoin("ObjectDetection"), extension=".png"
+                    )
+                )
+                != ori_images
+            ):
+                errors["Info"].append(
+                    "Object Detection image number {0} doesn't match image number of video {1} -> Recalculating object detection".format(
+                        len(
+                            listDirectory(
+                                self.savePathJoin("ObjectDetection"), extension=".png"
+                            )
+                        ),
+                        ori_images,
+                    )
+                )
                 error_types.append("ObDetError")
-            elif len(list_directory(self.savePathJoin("ObjectDetection"), extension=".npy")) != ori_images:
-                errors["Info"].append("Object Detection numpy array number {0} doesn't match image number of video {1} -> Recalculating object detection".format(len(list_directory(self.savePathJoin("ObjectDetection"), extension=".npy")),
-                ori_images))
+            elif (
+                len(
+                    listDirectory(
+                        self.savePathJoin("ObjectDetection"), extension=".npy"
+                    )
+                )
+                != ori_images
+            ):
+                errors["Info"].append(
+                    "Object Detection numpy array number {0} doesn't match image number of video {1} -> Recalculating object detection".format(
+                        len(
+                            listDirectory(
+                                self.savePathJoin("ObjectDetection"), extension=".npy"
+                            )
+                        ),
+                        ori_images,
+                    )
+                )
                 error_types.append("ObDetError")
 
         answer = ""
         if len(errors["Info"]) > 0 and len(errors["Critical"]) == 0:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Information)
-            msg.setText("Some calculations might not run the way you expect them.\nIn show details check the right side of the arrows to see what will happen.")
+            msg.setText(
+                "Some calculations might not run the way you expect them.\nIn show details check the right side of the arrows to see what will happen."
+            )
             msg.setWindowTitle("Information")
             all_info = ""
             for info in errors["Info"]:
                 all_info += info + "\n\n"
             msg.setDetailedText(all_info)
             msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Abort)
-            answer = msg.exec_()            
+            answer = msg.exec_()
         elif len(errors["Critical"]) > 0:
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Critical)
-            msg.setText("Found critical error\nCouldn't start run, see show details for more information")
+            msg.setText(
+                "Found critical error\nCouldn't start run, see show details for more information"
+            )
             msg.setWindowTitle("Critical Error")
             all_info = ""
             for info in errors["Critical"]:
@@ -459,8 +645,7 @@ class Dialog(QDialog, Ui_Dialog):
             msg.setStandardButtons(QMessageBox.Abort)
             answer = msg.exec_()
 
-
-        if (answer != int("0x00040000", 16)):
+        if answer != int("0x00040000", 16):
             for ty in error_types:
                 logging.info("Solve error: {0}".format(ty))
                 if ty == "NoImage":
@@ -478,13 +663,16 @@ class Dialog(QDialog, Ui_Dialog):
                     self.user["GT"] = ""
                 elif ty == "LabelError":
                     self.create_super_pixel_label = True
-                    shutil.rmtree(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method))
+                    shutil.rmtree(
+                        os.path.join(
+                            self.savePathJoin("Super_Pixel"), self.super_pixel_method
+                        )
+                    )
                 elif ty == "ObDetError":
                     self.object_detection_dir_exist = False
                     shutil.rmtree(self.savePathJoin("ObjectDetection"))
 
-
-        return (answer == int("0x00040000", 16) or stop_calculation)
+        return answer == int("0x00040000", 16) or stop_calculation
 
     def calculateError(self, errorMessage):
         """Called if there were errors while calculating the results, creates QMessageBox
@@ -493,7 +681,9 @@ class Dialog(QDialog, Ui_Dialog):
             errorMessage {str} -- error message to be shown in the QMessageBox
         """
         self.no_error = False
-        QMessageBox.warning(self, "Found Error", errorMessage, QMessageBox.Ok, QMessageBox.Ok)
+        QMessageBox.warning(
+            self, "Found Error", errorMessage, QMessageBox.Ok, QMessageBox.Ok
+        )
 
     def buildParamsDict(self):
         """Build parameter dictionary to forward parameters for the calcRunner class
@@ -507,9 +697,15 @@ class Dialog(QDialog, Ui_Dialog):
             "high": self.high,
             "low": self.low,
             "run_dict": self.run_dict,
-            "of_model": self.app.get_resource(os.path.join("of_models", "network-default.pytorch")),
-            "depth_model": self.app.get_resource(os.path.join("depth_models", "model_city2kitti.meta")),
-            "yolo_weights": self.app.get_resource(os.path.join("yolo", "yolov3.weights")),
+            "of_model": self.app.get_resource(
+                os.path.join("of_models", "network-default.pytorch")
+            ),
+            "depth_model": self.app.get_resource(
+                os.path.join("depth_models", "model_city2kitti.meta")
+            ),
+            "yolo_weights": self.app.get_resource(
+                os.path.join("yolo", "yolov3.weights")
+            ),
             "yolo_v": self.app.get_resource(os.path.join("yolo", "yolov3.cfg")),
             "coco_names": self.app.get_resource(os.path.join("yolo", "coco.names")),
             "object_detection_dir": self.savePathJoin("ObjectDetection"),
@@ -527,7 +723,9 @@ class Dialog(QDialog, Ui_Dialog):
             "create_velocity": self.ui.c_velocity.isChecked(),
             "create_video_fps": int(self.ui.t_fps.text()),
             "optimize_params": self.ui.c_optimize.isChecked(),
-            "super_pixel_label_dir": os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)
+            "super_pixel_label_dir": os.path.join(
+                self.savePathJoin("Super_Pixel"), self.super_pixel_method
+            ),
         }
 
     def startRun(self):
@@ -537,13 +735,13 @@ class Dialog(QDialog, Ui_Dialog):
         if self.errorChecks():
             logging.info("Error Check Failed")
             return
-        
+
         self.disableButtons()
         self.sendUser.emit(self.user)
         logging.info("Start Run Class")
         self.createDirs()
         self.buildRunDict()
-        
+
     def startCalcThread(self):
         """Starting calculations on another thread
         """
@@ -570,7 +768,7 @@ class Dialog(QDialog, Ui_Dialog):
         Arguments:
             value {int} -- current progress
         """
-        self.progressBar.setValue(value)        
+        self.progressBar.setValue(value)
         logging.info("Update progressbar to: {0}".format(self.run_count))
         if self.progressAllBar is not None:
             self.run_count += 1
@@ -580,7 +778,7 @@ class Dialog(QDialog, Ui_Dialog):
         """Clean up after calculations thread finished
         """
         logging.info("Fin Thread")
-        self.buildCreatedDict()    
+        self.buildCreatedDict()
         self.cleanThread()
         self.accept()
 
@@ -615,20 +813,26 @@ class Dialog(QDialog, Ui_Dialog):
         self.progressLabel.setText("Hello")
         self.ui.layout_v.addWidget(self.progressLabel)
 
-        self.progressBar = QProgressBar(self) # Progress bar created
-        self.progressBar.setRange(0,0)
+        self.progressBar = QProgressBar(self)  # Progress bar created
+        self.progressBar.setRange(0, 0)
         self.ui.layout_v.addWidget(self.progressBar)
 
     def addAllProgressBar(self):
         """Adds the progress bar which tracks the progress of all calculations
         """
-        all_run = sum([self.run_dict[key]["Progress"] for key in self.run_dict if self.run_dict[key]["Run"]])
+        all_run = sum(
+            [
+                self.run_dict[key]["Progress"]
+                for key in self.run_dict
+                if self.run_dict[key]["Run"]
+            ]
+        )
         logging.info("All run: {0}".format(all_run))
-        self.progressAllBar = QProgressBar(self) # Progress bar created
+        self.progressAllBar = QProgressBar(self)  # Progress bar created
         self.progressAllBar.setMinimum(1)
         self.progressAllBar.setMaximum(all_run)
         self.ui.layout_v.addWidget(self.progressAllBar)
-        self.progressAllBar.setValue(1)        
+        self.progressAllBar.setValue(1)
 
     def buildCreatedDict(self):
         """Build dictionary containing the created plots (if there's any).
@@ -649,12 +853,16 @@ class Dialog(QDialog, Ui_Dialog):
         self.showProgressBar()
         ori_images = 0
         if self.img_exist:
-            ori_images = len(list_directory(self.savePathJoin("Images")))
+            ori_images = len(listDirectory(self.savePathJoin("Images")))
             self.buildRunDictMain(ori_images)
-        else:            
-            self.run_dict["Video"] = {"Run": True, "Progress":ori_images, "Text":"Preparing video"}
+        else:
+            self.run_dict["Video"] = {
+                "Run": True,
+                "Progress": ori_images,
+                "Text": "Preparing video",
+            }
             self.buildParamsDict()
-            self.params_dict["send_video_frame"] = True            
+            self.params_dict["send_video_frame"] = True
 
             self.progressLabel.setText("Create images from video")
 
@@ -682,37 +890,110 @@ class Dialog(QDialog, Ui_Dialog):
         else:
             self.buildRunDictMain(ori_images)
 
-    def buildRunDictMain(self, ori_images):        
+    def buildRunDictMain(self, ori_images):
         """Build dictionary with all calculations
         Dictionary fields:
             -Run: {bool} true if needs to be calculated, false otherwise
             -Progress: {int} the amount of steps to complete the calculation (used to update the progressbar)
             -Text: {str} the text to be showed in the progressbar label's when the calculation is running   
         """
-        self.run_dict["Of"] = {"Run": not self.of_exist, "Progress":ori_images, "Text":"Running optical flow"}
-        self.run_dict["Back_Of"] = {"Run": not self.back_of_exist, "Progress":ori_images, "Text":"Running back optical flow"}
-        self.run_dict["Depth"] = {"Run": not self.depth_exist, "Progress":ori_images, "Text":"Running depth estimation"}
-        self.run_dict["Speed"] = {"Run": True, "Progress":ori_images, "Text":"Running speed estimation"}
-        self.run_dict["Optimization"] = {"Run": self.ui.c_optimize.isChecked(), "Progress":ori_images*9, "Text":"Running parameter optimization"}
+        self.run_dict["Of"] = {
+            "Run": not self.of_exist,
+            "Progress": ori_images,
+            "Text": "Running optical flow",
+        }
+        self.run_dict["Back_Of"] = {
+            "Run": not self.back_of_exist,
+            "Progress": ori_images,
+            "Text": "Running back optical flow",
+        }
+        self.run_dict["Depth"] = {
+            "Run": not self.depth_exist,
+            "Progress": ori_images,
+            "Text": "Running depth estimation",
+        }
+        self.run_dict["Speed"] = {
+            "Run": True,
+            "Progress": ori_images,
+            "Text": "Running speed estimation",
+        }
+        self.run_dict["Optimization"] = {
+            "Run": self.ui.c_optimize.isChecked(),
+            "Progress": ori_images * 9,
+            "Text": "Running parameter optimization",
+        }
 
-        self.run_dict["Of_Vid"] = {"Run": self.ui.c_of.isChecked(), "Progress":ori_images, "Text":"Creating optical flow video"}
-        self.run_dict["Back_Of_Vid"] = {"Run": self.ui.c_back_of.isChecked(), "Progress":ori_images, "Text":"Creating backward optical flow video"}
-        self.run_dict["Depth_Vid"] = {"Run": self.ui.c_depth.isChecked(), "Progress":ori_images, "Text":"Creating depth estimation video"}
+        self.run_dict["Of_Vid"] = {
+            "Run": self.ui.c_of.isChecked(),
+            "Progress": ori_images,
+            "Text": "Creating optical flow video",
+        }
+        self.run_dict["Back_Of_Vid"] = {
+            "Run": self.ui.c_back_of.isChecked(),
+            "Progress": ori_images,
+            "Text": "Creating backward optical flow video",
+        }
+        self.run_dict["Depth_Vid"] = {
+            "Run": self.ui.c_depth.isChecked(),
+            "Progress": ori_images,
+            "Text": "Creating depth estimation video",
+        }
 
-        self.run_dict["Speed_Plot"] = {"Run": self.ui.c_speed_plot.isChecked(), "Progress":ori_images, "Text":"Creating plot for speed values"}
-        self.run_dict["Crash_Plot"] = {"Run": self.ui.c_crash_plot.isChecked(), "Progress":ori_images, "Text":"Creating plot for time to crash"}
-        self.run_dict["Error_Plot"] = {"Run": self.ui.c_error_plot.isChecked() and self.gt_exist, "Progress":ori_images, "Text":"Creating plot for speed error"}
+        self.run_dict["Speed_Plot"] = {
+            "Run": self.ui.c_speed_plot.isChecked(),
+            "Progress": ori_images,
+            "Text": "Creating plot for speed values",
+        }
+        self.run_dict["Crash_Plot"] = {
+            "Run": self.ui.c_crash_plot.isChecked(),
+            "Progress": ori_images,
+            "Text": "Creating plot for time to crash",
+        }
+        self.run_dict["Error_Plot"] = {
+            "Run": self.ui.c_error_plot.isChecked() and self.gt_exist,
+            "Progress": ori_images,
+            "Text": "Creating plot for speed error",
+        }
 
-        self.run_dict["Speed_Plot_Video"] = {"Run": self.ui.c_speed_plot_video.isChecked(), "Progress":ori_images, "Text":"Creating speed plot video"}
-        self.run_dict["Error_Plot_Video"] = {"Run": self.ui.c_error_plot_video.isChecked() and self.gt_exist, "Progress":ori_images, "Text":"Creating error plot video"}
-        self.run_dict["Crash_Plot_Video"] = {"Run": self.ui.c_crash_plot_video.isChecked(), "Progress":ori_images, "Text":"Creating time to crash plot video"}
+        self.run_dict["Speed_Plot_Video"] = {
+            "Run": self.ui.c_speed_plot_video.isChecked(),
+            "Progress": ori_images,
+            "Text": "Creating speed plot video",
+        }
+        self.run_dict["Error_Plot_Video"] = {
+            "Run": self.ui.c_error_plot_video.isChecked() and self.gt_exist,
+            "Progress": ori_images,
+            "Text": "Creating error plot video",
+        }
+        self.run_dict["Crash_Plot_Video"] = {
+            "Run": self.ui.c_crash_plot_video.isChecked(),
+            "Progress": ori_images,
+            "Text": "Creating time to crash plot video",
+        }
 
-        self.run_dict["Super_Pixel_Video"] = {"Run": self.ui.combo_superpixel.currentIndex() != 0 and self.ui.c_super_pixel_video.isChecked(), "Progress":ori_images, "Text":"Creating super pixel video"}
-        self.run_dict["Super_Pixel_Label"] = {"Run": self.create_super_pixel_label, "Progress":ori_images, "Text":"Creating {0} superpixel labels".format(self.super_pixel_method)}
-        
-        self.run_dict["Object_Detection"] = {"Run": (self.ui.c_object_detection.isChecked() or self.ui.c_crash_plot.isChecked()) and not self.object_detection_dir_exist, "Progress":ori_images, "Text":"Running Object Detection"}
+        self.run_dict["Super_Pixel_Video"] = {
+            "Run": self.ui.combo_superpixel.currentIndex() != 0
+            and self.ui.c_super_pixel_video.isChecked(),
+            "Progress": ori_images,
+            "Text": "Creating super pixel video",
+        }
+        self.run_dict["Super_Pixel_Label"] = {
+            "Run": self.create_super_pixel_label,
+            "Progress": ori_images,
+            "Text": "Creating {0} superpixel labels".format(self.super_pixel_method),
+        }
 
-        self.addAllProgressBar()        
+        self.run_dict["Object_Detection"] = {
+            "Run": (
+                self.ui.c_object_detection.isChecked()
+                or self.ui.c_crash_plot.isChecked()
+            )
+            and not self.object_detection_dir_exist,
+            "Progress": ori_images,
+            "Text": "Running Object Detection",
+        }
+
+        self.addAllProgressBar()
         self.buildParamsDict()
         self.saveUser()
         self.startCalcThread()
@@ -770,19 +1051,25 @@ class Dialog(QDialog, Ui_Dialog):
         logging.info("Creating Directories")
 
         if not self.img_exist:
-            self.reCreateDir(self.savePathJoin("Images")) 
+            self.reCreateDir(self.savePathJoin("Images"))
         if not self.of_exist:
-            self.reCreateDir(self.savePathJoin("Of")) 
+            self.reCreateDir(self.savePathJoin("Of"))
         if not self.back_of_exist:
-            self.reCreateDir(self.savePathJoin("Back_Of")) 
+            self.reCreateDir(self.savePathJoin("Back_Of"))
         if not self.depth_exist:
             self.reCreateDir(self.savePathJoin("Depth"))
-        if not self.object_detection_dir_exist and (self.ui.c_object_detection.isChecked() or self.ui.c_crash_plot.isChecked()):
+        if not self.object_detection_dir_exist and (
+            self.ui.c_object_detection.isChecked() or self.ui.c_crash_plot.isChecked()
+        ):
             self.reCreateDir(self.savePathJoin("ObjectDetection"))
-        if self.super_pixel_method != "" and not os.path.exists(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)):
-            os.makedirs(os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method))
+        if self.super_pixel_method != "" and not os.path.exists(
+            os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)
+        ):
+            os.makedirs(
+                os.path.join(self.savePathJoin("Super_Pixel"), self.super_pixel_method)
+            )
 
-        self.reCreateDir(RESULTS)    
+        self.reCreateDir(RESULTS)
         self.reCreateDir(NP_DIR)
         self.reCreateDir(MASK_DIR)
 

@@ -19,16 +19,17 @@ def resizeImg(img, new_width, new_height):
     """
     w, h = img.size
     width = new_width
-    pwidth = (new_width/float(w))
-    height = int((float(h)*float(pwidth)))
-    if(height > new_height):
+    pwidth = new_width / float(w)
+    height = int((float(h) * float(pwidth)))
+    if height > new_height:
         height = new_height
-        pheight = (height/float(h))
-        width = int((float(w)*float(pheight)))
-    img = img.resize((width,height), Image.ANTIALIAS)
+        pheight = height / float(h)
+        width = int((float(w) * float(pheight)))
+    img = img.resize((width, height), Image.ANTIALIAS)
     return img
 
-def fillImg(img, fill_colour=(26,26,27,255), size=(1920, 1080)):
+
+def fillImg(img, fill_colour=(26, 26, 27, 255), size=(1920, 1080)):
     """
     Creates new image with fill_colour and pastes the given onto it, returned image is size sized.
     
@@ -46,11 +47,12 @@ def fillImg(img, fill_colour=(26,26,27,255), size=(1920, 1080)):
     if len(fill_colour) == 3:
         A = 255
         fill_colour = fill_colour + (A,)
-    fd_img = Image.new('RGBA', size, fill_colour)
+    fd_img = Image.new("RGBA", size, fill_colour)
     fd_img.paste(img, ((int((size[0] - w) / 2), int((size[1] - h) / 2))))
     return fd_img
 
-def images_from_video(vid_path, out_path):   
+
+def imagesFromVideo(vid_path, out_path):
     """Saves every frame of a video to the given path.
     
     Arguments:
@@ -61,19 +63,20 @@ def images_from_video(vid_path, out_path):
         ValueError: If video doesn't exist
     """
     if not os.path.exists(vid_path):
-        raise ValueError('Input video file %s does not exist.' % vid_path)
+        raise ValueError("Input video file %s does not exist." % vid_path)
 
     cap = skvideo.io.FFmpegReader(vid_path)
     frame_nr, _, _, _ = cap.getShape()
 
     with tqdm.tqdm(total=frame_nr) as pbar:
-        for i,frame in enumerate(cap.nextFrame()):
-            Image.fromarray(frame).save(out_path + '/' + str(i) + '.png')
+        for i, frame in enumerate(cap.nextFrame()):
+            Image.fromarray(frame).save(out_path + "/" + str(i) + ".png")
             pbar.update()
-            
+
     cap.close()
 
-def video_from_images(img_dir, out_dir, fps=30):
+
+def videoFromImages(img_dir, out_dir, fps=30):
     """Creates a video based on the png files contained in the given path. Saves the video to out_dir.
     
     Arguments:
@@ -83,11 +86,11 @@ def video_from_images(img_dir, out_dir, fps=30):
     Keyword Arguments:
         fps {int} -- the fps of the video (default: {30})
     """
-    onlyfiles = glob.glob(img_dir +"/*.png")
+    onlyfiles = glob.glob(img_dir + "/*.png")
     onlyfiles = natsorted(onlyfiles)
 
-    fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
-    
+    fourcc = cv2.VideoWriter_fourcc("M", "J", "P", "G")
+
     img = cv2.imread(onlyfiles[0])
     vid_out = cv2.VideoWriter(out_dir, fourcc, fps, (img.shape[1], img.shape[0]))
 

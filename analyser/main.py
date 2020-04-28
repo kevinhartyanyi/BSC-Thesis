@@ -12,8 +12,8 @@ import utils
 import speed.utils as sutils
 import worker
 import vid
-import imageHolder
-import cycleVid
+import ImageHolder
+import CycleVid
 import skvideo.io
 import sys
 import re
@@ -44,8 +44,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.back_of_dir = None
         self.depth_dir = None
         self.app = app
-        self.cycle_vid = cycleVid.cycleVid()      
-        self.image_holder = imageHolder.imageHolder(self.MAX_LEN, self.fps_limit)
+        self.cycle_vid = CycleVid.CycleVid()      
+        self.image_holder = ImageHolder.ImageHolder(self.MAX_LEN, self.fps_limit)
         self.ui.t_fps.setText(str(self.fps_limit))
         #self.vid_player.setScaledContents(True)        
         self.signalSetup()  

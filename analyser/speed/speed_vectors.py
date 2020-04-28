@@ -130,13 +130,13 @@ def run(img_dir, depth_dir, of_dir, of_back_dir, save_dir, speed_gt=None, high=1
     high=high, low=low, visualize = True)
     
     
-    #speeds_dir = utils.list_directory(OUT_PATH, extension='speed.npy')
+    #speeds_dir = utils.listDirectory(OUT_PATH, extension='speed.npy')
     #speeds_dir = natsorted(speeds_dir)
     #speeds = []
     #for s in speeds_dir:
     #    speeds.append(np.load(s))
     #
-    #speeds_mask = utils.list_directory(OUT_PATH, extension='mask.npy')
+    #speeds_mask = utils.listDirectory(OUT_PATH, extension='mask.npy')
     #speeds_mask = natsorted(speeds_mask)
     #masks = []
 #
@@ -194,7 +194,7 @@ def run(img_dir, depth_dir, of_dir, of_back_dir, save_dir, speed_gt=None, high=1
                 for vid_id in TRAIN_VIDEOS:
                     vid = Video(vid_id)
 
-                    speeds_dir = utils.list_directory(OUT_PATH, extension='speed.npy')
+                    speeds_dir = utils.listDirectory(OUT_PATH, extension='speed.npy')
                     for s in speeds_dir:
                         os.remove(s)
 
@@ -206,7 +206,7 @@ def run(img_dir, depth_dir, of_dir, of_back_dir, save_dir, speed_gt=None, high=1
                     
                     speed_gt = vid.gt
                     
-                    speeds_dir = utils.list_directory(OUT_PATH, extension='speed.npy')
+                    speeds_dir = utils.listDirectory(OUT_PATH, extension='speed.npy')
                     speeds_dir = natsorted(speeds_dir)
                     speeds = []
                     for s in speeds_dir:
@@ -239,8 +239,8 @@ def run(img_dir, depth_dir, of_dir, of_back_dir, save_dir, speed_gt=None, high=1
     #utils.concat_video3(vid.video, vid.pwc_video, vid.hd3_video, "pwc_hd3.mp4")
     flow = "pwc"
 
-    speeds_dir = utils.list_directory(OUT_PATH, extension='speed.npy')
-    mask_dir = utils.list_directory(OUT_PATH, extension='mask.npy')
+    speeds_dir = utils.listDirectory(OUT_PATH, extension='speed.npy')
+    mask_dir = utils.listDirectory(OUT_PATH, extension='mask.npy')
     for s in speeds_dir:
         os.remove(s)
     for s in mask_dir:
@@ -256,13 +256,13 @@ def run(img_dir, depth_dir, of_dir, of_back_dir, save_dir, speed_gt=None, high=1
     speed_gt = vid.gt
     print("GT: " + str(speed_gt[0]))
     
-    speeds_dir = utils.list_directory(OUT_PATH, extension='speed.npy')
+    speeds_dir = utils.listDirectory(OUT_PATH, extension='speed.npy')
     speeds_dir = natsorted(speeds_dir)
     speeds = []
     for s in speeds_dir:
         speeds.append(np.load(s))
     
-    speeds_mask = utils.list_directory(OUT_PATH, extension='mask.npy')
+    speeds_mask = utils.listDirectory(OUT_PATH, extension='mask.npy')
     speeds_mask = natsorted(speeds_mask)
     masks = []
 
@@ -291,10 +291,10 @@ def run(img_dir, depth_dir, of_dir, of_back_dir, save_dir, speed_gt=None, high=1
 class VelocityCalculator(object):
     def __init__(self,fst_img_fn, snd_img_fn, fst_depth_fn, snd_depth_fn, 
                 label_fn, flow_fn, back_flow, out_dir, use_slic, n_sps, visualize_results=True, high=1, low=0, vid_name=''):
-        self.read_depth = utils.read_depth
+        self.readDepth = utils.readDepth
         self.read_flow = readFlowFile.read
         self.average = utils.average
-        self.calculate_shifted_labels = utils.calculate_shifted_labels
+        self.calculateShiftedLabels = utils.calculateShiftedLabels
         
         self.fst_img_fn = fst_img_fn
         self.snd_img_fn = snd_img_fn
@@ -322,8 +322,8 @@ class VelocityCalculator(object):
             height, width, _ = fst_img.shape
             
             # Read disparity maps
-            fst_depth = self.read_depth(self.fst_depth_fn, width, height)
-            snd_depth = self.read_depth(self.snd_depth_fn, width, height)
+            fst_depth = self.readDepth(self.fst_depth_fn, width, height)
+            snd_depth = self.readDepth(self.snd_depth_fn, width, height)
 
             flow = self.read_flow(self.flow_fn)
 
@@ -332,7 +332,7 @@ class VelocityCalculator(object):
 
             # Calculate the velocity and the orientation
             velocity = \
-                utils.calculate_velocity_and_orientation_vectors_vectorised_gt(
+                utils.calculateVelocityAndOrientationVectorsVectorised_gt(
                                                                 flow, 
                                                                 fst_depth, 
                                                                 snd_depth)
@@ -354,16 +354,16 @@ class VelocityCalculator(object):
                 # Save speed vectors as image
                 masked_speed = speed
                 masked_speed[~speed_mask] = 0
-                utils.save_as_image(base_fn + '_speed.png', speed, min_val=0, max_val=utils.max_depth) 
-                utils.save_as_image(base_fn + '_speed_masked.png', masked_speed, min_val=0, max_val=utils.max_depth) 
+                utils.saveAsImage(base_fn + '_speed.png', speed, min_val=0, max_val=utils.max_depth) 
+                utils.saveAsImage(base_fn + '_speed_masked.png', masked_speed, min_val=0, max_val=utils.max_depth) 
                 # Save velocity vectors as image
                 for idx, file_id in enumerate(['x', 'y', 'z']):
-                    utils.save_as_image('{}_{}.png'.format(base_fn, file_id), 
+                    utils.saveAsImage('{}_{}.png'.format(base_fn, file_id), 
                                         velocity[:, :, idx], max_val=utils.max_velocity)
                 # Save depth vectors as image
                 for file_id, data in zip(['d1', 'd2'],
                                         [fst_depth, snd_depth]):
-                    utils.save_as_image('{}_{}.png'.format(base_fn, file_id), 
+                    utils.saveAsImage('{}_{}.png'.format(base_fn, file_id), 
                                         data, min_val=0, max_val=utils.max_depth)
                 # Save optical flow as image
                 cv2.imwrite(base_fn + '_flow.png', computeColor.computeImg(flow))
@@ -385,9 +385,9 @@ class VelocityCalculator(object):
             height, width, _ = fst_img.shape
             
             # Read disparity maps
-            fst_depth = self.read_depth(self.fst_depth_fn, width, height)
+            fst_depth = self.readDepth(self.fst_depth_fn, width, height)
             avg_fst_depth = self.average(fst_depth, labels)
-            snd_depth = self.read_depth(self.snd_depth_fn, width, height)
+            snd_depth = self.readDepth(self.snd_depth_fn, width, height)
             
             # Read optical flow
             flow = self.read_flow(self.flow_fn)
@@ -396,12 +396,12 @@ class VelocityCalculator(object):
             avg_flow[:, :, 1] = self.average(flow[:, :, 1], labels)
 
             # Shift labels and depth values respect to the average optical flow
-            shifted_labels = self.calculate_shifted_labels(labels, avg_flow)
+            shifted_labels = self.calculateShiftedLabels(labels, avg_flow)
             avg_shifted_depth = self.average(snd_depth, shifted_labels)
 
             # Calculate the velocity and the orientation
             velocity, orientation = \
-                utils.calculate_velocity_and_orientation_vectors(labels, shifted_labels, 
+                utils.calculateVelocityAndOrientationVectors(labels, shifted_labels, 
                                                                 avg_flow, 
                                                                 avg_fst_depth, 
                                                                 avg_shifted_depth)
@@ -420,16 +420,16 @@ class VelocityCalculator(object):
                 velocity[velocity < -utils.max_velocity] = -utils.max_velocity
                 # Save velocity vectors as image
                 for idx, file_id in enumerate(['x', 'y', 'z']):
-                    utils.save_as_image('{}_{}.png'.format(base_fn, file_id), 
+                    utils.saveAsImage('{}_{}.png'.format(base_fn, file_id), 
                                         velocity[:, :, idx], max_val=utils.max_velocity)
                 # Save depth vectors as image
                 for file_id, data in zip(['d1', 'd2', 'd1_avg', 'd2_avg'],
                                         [fst_depth, snd_depth, 
                                         avg_fst_depth, avg_fst_depth]):
-                    utils.save_as_image('{}_{}.png'.format(base_fn, file_id), 
+                    utils.saveAsImage('{}_{}.png'.format(base_fn, file_id), 
                                         data, min_val=utils.min_depth, max_val=utils.max_depth)
                 # Speed
-                utils.save_as_image(base_fn + '_speed.png', speed, min_val=0, max_val=utils.max_depth)  
+                utils.saveAsImage(base_fn + '_speed.png', speed, min_val=0, max_val=utils.max_depth)  
                 # Save optical flow as image
                 cv2.imwrite(base_fn + '_flow.png', computeColor.computeImg(flow))
                 # Save the final image
@@ -445,9 +445,9 @@ class VelocityCalculator(object):
             height, width, _ = fst_img.shape
             
             # Read disparity maps
-            fst_depth = self.read_depth(self.fst_depth_fn, width, height)
+            fst_depth = self.readDepth(self.fst_depth_fn, width, height)
             #avg_fst_depth = self.average(fst_depth, labels)
-            snd_depth = self.read_depth(self.snd_depth_fn, width, height)
+            snd_depth = self.readDepth(self.snd_depth_fn, width, height)
             # Read optical flow
             flow = self.read_flow(self.flow_fn)
             back_flow = self.read_flow(self.back_flow)
@@ -456,14 +456,14 @@ class VelocityCalculator(object):
             #avg_flow[:, :, 1] = self.average(flow[:, :, 1], labels)
 
             # Shift labels and depth values respect to the average optical flow
-            #shifted_labels = self.calculate_shifted_labels(labels, avg_flow) #TODO: replace
+            #shifted_labels = self.calculateShiftedLabels(labels, avg_flow) #TODO: replace
             #avg_shifted_depth = self.average(snd_depth, shifted_labels)
 
             #base_fn = os.path.join(self.out_dir, 
             #                    os.path.splitext(os.path.basename(self.flow_fn))[0])
             
 
-            of_mask, next_position, prev_position = utils.calc_bidi_errormap(flow, back_flow, tau=0.8)
+            of_mask, next_position, prev_position = utils.calcBidiErrormap(flow, back_flow, tau=0.8)
             good_flow = flow.copy()
             good_flow_snd = flow.copy()
             good_flow[of_mask] = 0
@@ -485,7 +485,7 @@ class VelocityCalculator(object):
             back[prev_position[..., 0], prev_position[..., 1]] = snd_mono
 
             incons_img = np.tile(255*of_mask[..., None], (1, 1, 3)).astype(np.uint8)
-            incons_img = utils.draw_velocity_vectors(incons_img, next_position, relative_disp=False, color=(0, 0, 255))
+            incons_img = utils.drawVelocityVectors(incons_img, next_position, relative_disp=False, color=(0, 0, 255))
             
             tmp = snd_mono - fst_mono
 
@@ -495,7 +495,7 @@ class VelocityCalculator(object):
 
             # Calculate the velocity and the orientation
             velocity = \
-                utils.calculate_velocity_and_orientation_vectors_vectorised(of_mask,next_position, prev_position, 
+                utils.calculateVelocityAndOrientationVectorsVectorised(of_mask,next_position, prev_position, 
                                                                 flow, 
                                                                 fst_depth, 
                                                                 snd_depth)
@@ -519,7 +519,7 @@ class VelocityCalculator(object):
             #speed, speed_mask = utils.vector_speedOF(velocity, 0) # Speed calculation
             #speed, speed_mask = utils.vector_speedOF4Side(velocity, 0) # Speed calculation
             
-            speed, speed_mask = utils.vector_speedOF_Simple(velocity,low=self.low,high=self.high) # Speed calculation
+            speed, speed_mask = utils.vectorSpeedOFSimple(velocity,low=self.low,high=self.high) # Speed calculation
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_speed.npy'), speed)
             np.save(os.path.join(base_fn, NP_DIR, img_num + '_mask.npy'), speed_mask)
 
@@ -527,14 +527,14 @@ class VelocityCalculator(object):
             #image = image + abs(image.min())
             #image *= 255.0/image.max()
             plt.imsave(os.path.join(base_fn, VL_DIR, img_num + '_velocity.png'), image.astype('uint8'))
-            #utils.save_as_image(base_fn + '_velocity.png', image, min_val=0, max_val=utils.max_depth) 
+            #utils.saveAsImage(base_fn + '_velocity.png', image, min_val=0, max_val=utils.max_depth) 
 
 
             # Visualize the results if needed
             if self.visualize_results:
-                utils.save_as_image(os.path.join(base_fn, OTHER_DIR, img_num + '_snd_mono_2.png'), snd_mono_2, min_val=0, max_val=utils.max_depth) 
-                utils.save_as_image(os.path.join(base_fn, OTHER_DIR, img_num + '_back.png'), back, min_val=0, max_val=utils.max_depth) 
-                utils.save_as_image(os.path.join(base_fn, OTHER_DIR, img_num + '_fst_zeros.png'), fst_zeros, min_val=0, max_val=utils.max_depth) 
+                utils.saveAsImage(os.path.join(base_fn, OTHER_DIR, img_num + '_snd_mono_2.png'), snd_mono_2, min_val=0, max_val=utils.max_depth) 
+                utils.saveAsImage(os.path.join(base_fn, OTHER_DIR, img_num + '_back.png'), back, min_val=0, max_val=utils.max_depth) 
+                utils.saveAsImage(os.path.join(base_fn, OTHER_DIR, img_num + '_fst_zeros.png'), fst_zeros, min_val=0, max_val=utils.max_depth) 
                 #velocity[velocity > utils.max_velocity] = utils.max_velocity
                 #velocity[velocity < -utils.max_velocity] = -utils.max_velocity
                 
@@ -542,25 +542,25 @@ class VelocityCalculator(object):
                 #masked_speed = speed
                 #masked_speed[~speed_mask] = 0
                 
-                utils.save_as_image(os.path.join(base_fn, MASK_DIR, img_num + '_speed_masked.png'), speed_mask*50, min_val=0, max_val=utils.max_depth) 
+                utils.saveAsImage(os.path.join(base_fn, MASK_DIR, img_num + '_speed_masked.png'), speed_mask*50, min_val=0, max_val=utils.max_depth) 
                 return #! Doesn't work after this
-                utils.save_as_image(base_fn + OTHER_DIR + img_num + '_speed.png', speed, min_val=0, max_val=utils.max_depth) 
+                utils.saveAsImage(base_fn + OTHER_DIR + img_num + '_speed.png', speed, min_val=0, max_val=utils.max_depth) 
                 
                 # Save velocity vectors as image
                 for idx, file_id in enumerate(['x', 'y', 'z']):
-                    utils.save_as_image('{}_{}.png'.format(base_fn + OTHER_DIR + img_num, file_id), 
+                    utils.saveAsImage('{}_{}.png'.format(base_fn + OTHER_DIR + img_num, file_id), 
                                         velocity[:, :, idx], max_val=utils.max_velocity)
                 # Save depth vectors as image
                 """for file_id, data in zip(['d1', 'd2'],
                                         [fst_depth, snd_depth]):
-                    utils.save_as_image('{}_{}.png'.format(base_fn + OTHER_DIR + img_num, file_id), 
+                    utils.saveAsImage('{}_{}.png'.format(base_fn + OTHER_DIR + img_num, file_id), 
                                         data, min_val=0, max_val=utils.max_depth)"""
                 # Save optical flow as image
                 cv2.imwrite(base_fn + OTHER_DIR + img_num + '_flow.png', computeColor.computeImg(flow))
                 cv2.imwrite(base_fn + OTHER_DIR + img_num + '_backflow.png', computeColor.computeImg(back_flow))
-                utils.save_as_image(base_fn + OTHER_DIR + img_num + '_of_mask.png', incons_img, min_val=0, max_val=utils.max_depth)
-                utils.save_as_image(base_fn + OTHER_DIR + img_num + '_fst_mono.png', fst_mono, min_val=0, max_val=utils.max_depth)
-                utils.save_as_image(base_fn + OTHER_DIR + img_num + '_snd_mono.png', snd_mono, min_val=0, max_val=utils.max_depth)
+                utils.saveAsImage(base_fn + OTHER_DIR + img_num + '_of_mask.png', incons_img, min_val=0, max_val=utils.max_depth)
+                utils.saveAsImage(base_fn + OTHER_DIR + img_num + '_fst_mono.png', fst_mono, min_val=0, max_val=utils.max_depth)
+                utils.saveAsImage(base_fn + OTHER_DIR + img_num + '_snd_mono.png', snd_mono, min_val=0, max_val=utils.max_depth)
 
                 cv2.imwrite(base_fn + OTHER_DIR + img_num + '_flow_good_fst.png', computeColor.computeImg(good_flow))
                 cv2.imwrite(base_fn + OTHER_DIR + img_num + '_flow_good_snd.png', computeColor.computeImg(good_flow_snd))
@@ -573,15 +573,15 @@ class GTVelocityCalculator(VelocityCalculator):
     def __init__(self, *args):
         super(GTVelocityCalculator, self).__init__(*args)
         
-        self.read_depth = utils.read_gt_depth
+        self.readDepth = utils.read_gt_depth
         self.read_flow = utils.read_gt_flow
         self.average = utils.average_gt
-        self.calculate_shifted_labels = lambda labels, avg_flow: labels 
+        self.calculateShiftedLabels = lambda labels, avg_flow: labels 
 
 
 def visualize(out_fn, labels, velocity, z_fn, fst_img, snd_img, 
             fst_depth_fn, snd_depth_fn, flow_fn):
-    #img = utils.draw_velocity_vectors(labels, velocity, z_fn)
+    #img = utils.drawVelocityVectors(labels, velocity, z_fn)
 
     fst_depth = cv2.imread(fst_depth_fn, cv2.IMREAD_COLOR)
     snd_depth = cv2.imread(snd_depth_fn, cv2.IMREAD_COLOR)
@@ -592,7 +592,7 @@ def visualize(out_fn, labels, velocity, z_fn, fst_img, snd_img,
     cv2.imwrite(out_fn, np.concatenate([first_col, snd_col], axis=1))
 
 
-def calculate_velocity_and_orientation_wrapper(params):
+def calculateVelocityAndOrientationWrapper(params):
     velocity_calculator = VelocityCalculator(*params)
     velocity_calculator.calculate_velocity_and_orientation()
 
@@ -624,27 +624,27 @@ def main(vid_name, img_dir, disp_dir, flow_dir, back_flow_dir,label_dir, disp2_d
     
     #fst_img_fns, snd_img_fns = out_dir + "Test1.png", out_dir + "Test2.png"
 
-    img_fns = utils.list_directory(img_dir)
+    img_fns = utils.listDirectory(img_dir)
     fst_img_fns, snd_img_fns = img_fns, img_fns
 
     if disp2_dir is None:
-        disp_fns = utils.list_directory(disp_dir, extension='.npy')
+        disp_fns = utils.listDirectory(disp_dir, extension='.npy')
         fst_disp_fns, snd_disp_fns = disp_fns, disp_fns
-        flow_fns = utils.list_directory(flow_dir, extension='.flo')
-        back_flow = utils.list_directory(back_flow_dir, extension='.flo')
-        calculate_velocity = calculate_velocity_and_orientation_wrapper
+        flow_fns = utils.listDirectory(flow_dir, extension='.flo')
+        back_flow = utils.listDirectory(back_flow_dir, extension='.flo')
+        calculate_velocity = calculateVelocityAndOrientationWrapper
     else:
         assert os.path.isdir(disp2_dir)
-        fst_disp_fns = utils.list_directory(disp_dir, extension='.png')
-        snd_disp_fns = utils.list_directory(disp2_dir, extension='.png')
-        flow_fns = utils.list_directory(flow_dir, extension='.png')
+        fst_disp_fns = utils.listDirectory(disp_dir, extension='.png')
+        snd_disp_fns = utils.listDirectory(disp2_dir, extension='.png')
+        flow_fns = utils.listDirectory(flow_dir, extension='.png')
         back_flow = "N"
         calculate_velocity = calculate_gt_velocity_and_orientation_wrapper
     
     if use_slic:
-        label_fns = utils.list_directory(label_dir, extension='.pgm')
+        label_fns = utils.listDirectory(label_dir, extension='.pgm')
     else:
-        label_fns = utils.list_directory(label_dir)
+        label_fns = utils.listDirectory(label_dir)
 
     
     if len(label_fns) > len(flow_fns):

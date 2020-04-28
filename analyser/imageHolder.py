@@ -1,7 +1,7 @@
 from collections import deque
 import utils
 from PIL import Image
-import imageLoader
+import ImageLoader
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -10,7 +10,7 @@ import time
 
 
 
-class imageHolder:
+class ImageHolder:
 
     def __init__(self, maxSize, fps):
         super().__init__()
@@ -118,7 +118,7 @@ class imageHolder:
         self.current = img
         print("Loading...", start, load_len)
         for i in range(start, load_len):
-            worker = imageLoader.Worker(self.loadImg, self.img_list[self.list_idx], self.list_idx % self.maxLen) # Any other args, kwargs are passed to the run function
+            worker = ImageLoader.Worker(self.loadImg, self.img_list[self.list_idx], self.list_idx % self.maxLen) # Any other args, kwargs are passed to the run function
             self.threadpool.start(worker) 
             self.list_idx += 1
 
@@ -145,7 +145,7 @@ class imageHolder:
         cur = self.list_idx % self.maxLen
         if cur not in self.img_dict:
             print("Warning: Not in dictionary. Returning previous image")
-            worker = imageLoader.Worker(self.loadImg, self.img_list[self.list_idx], cur) # Any other args, kwargs are passed to the run function
+            worker = ImageLoader.Worker(self.loadImg, self.img_list[self.list_idx], cur) # Any other args, kwargs are passed to the run function
             self.threadpool.start(worker) 
             self.list_idx += 1
             return self.current
@@ -154,7 +154,7 @@ class imageHolder:
         self.current = img    
 
         if self.list_idx < self.vidLen: # Load new image
-            worker = imageLoader.Worker(self.loadImg, self.img_list[self.list_idx], cur) # Any other args, kwargs are passed to the run function
+            worker = ImageLoader.Worker(self.loadImg, self.img_list[self.list_idx], cur) # Any other args, kwargs are passed to the run function
             self.threadpool.start(worker) 
             self.list_idx += 1
         else:

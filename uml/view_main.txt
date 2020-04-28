@@ -53,10 +53,10 @@ class MainWindow {
     + depth_dir: object = None
     + created: object = None
     + app: object
-    + cycle_vid: cycleVid
-    + cycle_plot: cycleVid
-    + image_holder: imageHolder
-    + plot_holder: imageHolder
+    + cycle_vid: CycleVid
+    + cycle_plot: CycleVid
+    + image_holder: ImageHolder
+    + plot_holder: ImageHolder
     + logInfo: LogInfo
 
     + imageSetup(): void

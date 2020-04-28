@@ -11,8 +11,8 @@ import Model.Main.utils as utils
 import Model.Algorithms.utils as sutils
 from PyQt5.QtCore import pyqtSlot
 import Model.Main.worker as worker
-import Model.Main.imageHolder as imageHolder
-import Model.Main.cycleVid as cycleVid
+import Model.Main.ImageHolder as ImageHolder
+import Model.Main.CycleVid as CycleVid
 import skvideo.io
 import sys
 import re
@@ -24,7 +24,6 @@ import logging
 
 
 class MainWindow(QtWidgets.QMainWindow):
-
     def __init__(self, app, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.ui = Ui_MainWindow()
@@ -35,9 +34,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.user = None
         self.vid_player = videoPlayer.VideoPlayer()
         self.vid_player.setToolTip("Video player")
-        self.ui.layout_vid.insertWidget(1, self.vid_player) # Insert video player into layout
+        self.ui.layout_vid.insertWidget(
+            1, self.vid_player
+        )  # Insert video player into layout
         self.plot_player = videoPlayer.VideoPlayer()
-        self.plot_player.setToolTip("Plot player")        
+        self.plot_player.setToolTip("Plot player")
         self.ui.layout_plot.insertWidget(1, self.plot_player)
         self.thread = None
         self.vid_opened = False
@@ -50,17 +51,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.depth_dir = None
         self.created = None
         self.app = app
-        self.cycle_vid = cycleVid.cycleVid() 
-        self.cycle_plot = cycleVid.cycleVid()  
-        self.image_holder = imageHolder.imageHolder(self.MAX_LEN, self.fps_limit)
-        self.plot_holder = imageHolder.imageHolder(self.MAX_LEN, self.fps_limit)
-        self.ui.t_fps.setText(str(self.fps_limit))    
+        self.cycle_vid = CycleVid.CycleVid()
+        self.cycle_plot = CycleVid.CycleVid()
+        self.image_holder = ImageHolder.ImageHolder(self.MAX_LEN, self.fps_limit)
+        self.plot_holder = ImageHolder.ImageHolder(self.MAX_LEN, self.fps_limit)
+        self.ui.t_fps.setText(str(self.fps_limit))
         self.logInfo = LogInfo(parent=self)
         logging.info("Start App")
         self.imageSetup()
-        self.signalSetup()  
+        self.signalSetup()
         self.disableSetup()
-    
+
     def imageSetup(self):
         """Load the button images and display them as an icon
         """
@@ -68,37 +69,63 @@ class MainWindow(QtWidgets.QMainWindow):
         right_arrow = QtGui.QPixmap(self.app.get_resource("right_arrow.png"))
         up_arrow = QtGui.QPixmap(self.app.get_resource("up_arrow.png"))
         down_arrow = QtGui.QPixmap(self.app.get_resource("down_arrow.png"))
-        self.ui.b_video_left.setIcon(QtGui.QIcon(self.app.get_resource("left_arrow.png")))
-        self.ui.b_video_right.setIcon(QtGui.QIcon(self.app.get_resource("right_arrow.png")))
+        self.ui.b_video_left.setIcon(
+            QtGui.QIcon(self.app.get_resource("left_arrow.png"))
+        )
+        self.ui.b_video_right.setIcon(
+            QtGui.QIcon(self.app.get_resource("right_arrow.png"))
+        )
         self.ui.b_video_up.setIcon(QtGui.QIcon(self.app.get_resource("up_arrow.png")))
-        self.ui.b_video_down.setIcon(QtGui.QIcon(self.app.get_resource("down_arrow.png")))
-        self.ui.b_plot_left.setIcon(QtGui.QIcon(self.app.get_resource("left_arrow.png")))
-        self.ui.b_plot_right.setIcon(QtGui.QIcon(self.app.get_resource("right_arrow.png")))
+        self.ui.b_video_down.setIcon(
+            QtGui.QIcon(self.app.get_resource("down_arrow.png"))
+        )
+        self.ui.b_plot_left.setIcon(
+            QtGui.QIcon(self.app.get_resource("left_arrow.png"))
+        )
+        self.ui.b_plot_right.setIcon(
+            QtGui.QIcon(self.app.get_resource("right_arrow.png"))
+        )
 
-        self.ui.b_info.setIconSize(QSize(50,50))
-        self.ui.b_info.setIcon(QApplication.style().standardIcon(QStyle.SP_MessageBoxInformation))
+        self.ui.b_info.setIconSize(QSize(50, 50))
+        self.ui.b_info.setIcon(
+            QApplication.style().standardIcon(QStyle.SP_MessageBoxInformation)
+        )
 
     def changeDescription(self):
         """Change the video description based on the current video
         """
         vid_type = self.cycle_vid.currentType()
-        
+
         if vid_type == "original":
             self.ui.l_description.setText("The original video")
         elif vid_type == "of":
-            self.ui.l_description.setText("Optical flow (motion of image objects between two consecutive frames)")
+            self.ui.l_description.setText(
+                "Optical flow (motion of image objects between two consecutive frames)"
+            )
         elif vid_type == "back_of":
-            self.ui.l_description.setText("Backward optical flow (optical flow with reversed frames)")
+            self.ui.l_description.setText(
+                "Backward optical flow (optical flow with reversed frames)"
+            )
         elif vid_type == "depth":
-            self.ui.l_description.setText("Depth estimation (darker means farther, brighter means closer)")
+            self.ui.l_description.setText(
+                "Depth estimation (darker means farther, brighter means closer)"
+            )
         elif vid_type == "velocity":
-            self.ui.l_description.setText("Optical flow directions with colours (after throwing away the inconsistent optical flow)")
+            self.ui.l_description.setText(
+                "Optical flow directions with colours (after throwing away the inconsistent optical flow)"
+            )
         elif vid_type == "mask":
-            self.ui.l_description.setText("Speed mask (the coloured pixels are used in the speed estimation)")
+            self.ui.l_description.setText(
+                "Speed mask (the coloured pixels are used in the speed estimation)"
+            )
         elif vid_type == "draw":
-            self.ui.l_description.setText("Optical flow directions with arrows (after throwing away the inconsistent optical flow)")
+            self.ui.l_description.setText(
+                "Optical flow directions with arrows (after throwing away the inconsistent optical flow)"
+            )
         elif vid_type == "super_pixel":
-            self.ui.l_description.setText("Speed values in the super pixel segmentations")
+            self.ui.l_description.setText(
+                "Speed values in the super pixel segmentations"
+            )
         elif vid_type == "object_detection":
             self.ui.l_description.setText("Object detection with YOLO model")
 
@@ -184,10 +211,10 @@ class MainWindow(QtWidgets.QMainWindow):
         if len(created) == 0:
             self.created = None
             return
-        
+
         self.ui.b_plot_left.setEnabled(True)
         self.ui.b_plot_right.setEnabled(True)
-        
+
         for key in created:
             if created[key] != "":
                 self.cycle_plot.add(key, created[key])
@@ -196,12 +223,12 @@ class MainWindow(QtWidgets.QMainWindow):
     def startSetup(self):
         """Setup paths for data, load images into video players
         """
-        self.img_dir = os.path.join(self.user["Save"], "Images") 
-        self.of_dir = os.path.join(self.user["Save"], "Of") 
-        self.back_of_dir = os.path.join(self.user["Save"], "Back_Of") 
+        self.img_dir = os.path.join(self.user["Save"], "Images")
+        self.of_dir = os.path.join(self.user["Save"], "Of")
+        self.back_of_dir = os.path.join(self.user["Save"], "Back_Of")
         self.depth_dir = os.path.join(self.user["Save"], "Depth")
         self.obj_det_dir = os.path.join(self.user["Save"], "ObjectDetection")
-        
+
         results = sutils.getResultDirs()
         velocity = os.path.join(self.user["Save"], results["Velocity"])
         mask = os.path.join(self.user["Save"], results["Mask"])
@@ -224,7 +251,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.cycle_vid.add("draw", draw)
             self.ui.actionOFArrows.setEnabled(True)
         if os.path.exists(super_pixel):
-            self.cycle_vid.add("super_pixel", super_pixel)       
+            self.cycle_vid.add("super_pixel", super_pixel)
             self.ui.actionSuperPixel.setEnabled(True)
         if os.path.exists(self.obj_det_dir):
             self.cycle_vid.add("object_detection", self.obj_det_dir)
@@ -289,21 +316,38 @@ class MainWindow(QtWidgets.QMainWindow):
         if text == "OF":
             self.openVideo(self.cycle_vid.get("of"), n_frame=self.image_holder.cur_idx)
         elif text == "Depth":
-            self.openVideo(self.cycle_vid.get("depth"), n_frame=self.image_holder.cur_idx)
+            self.openVideo(
+                self.cycle_vid.get("depth"), n_frame=self.image_holder.cur_idx
+            )
         elif text == "Original":
-            self.openVideo(self.cycle_vid.get("original"), n_frame=self.image_holder.cur_idx)
+            self.openVideo(
+                self.cycle_vid.get("original"), n_frame=self.image_holder.cur_idx
+            )
         elif text == "BackOF":
-            self.openVideo(self.cycle_vid.get("back_of"), n_frame=self.image_holder.cur_idx)
+            self.openVideo(
+                self.cycle_vid.get("back_of"), n_frame=self.image_holder.cur_idx
+            )
         elif text == "OFDirections":
-            self.openVideo(self.cycle_vid.get("velocity"), n_frame=self.image_holder.cur_idx)
+            self.openVideo(
+                self.cycle_vid.get("velocity"), n_frame=self.image_holder.cur_idx
+            )
         elif text == "OFArrows":
-            self.openVideo(self.cycle_vid.get("draw"), n_frame=self.image_holder.cur_idx)
+            self.openVideo(
+                self.cycle_vid.get("draw"), n_frame=self.image_holder.cur_idx
+            )
         elif text == "Mask":
-            self.openVideo(self.cycle_vid.get("mask"), n_frame=self.image_holder.cur_idx)
+            self.openVideo(
+                self.cycle_vid.get("mask"), n_frame=self.image_holder.cur_idx
+            )
         elif text == "SuperPixel":
-            self.openVideo(self.cycle_vid.get("super_pixel"), n_frame=self.image_holder.cur_idx)
+            self.openVideo(
+                self.cycle_vid.get("super_pixel"), n_frame=self.image_holder.cur_idx
+            )
         elif text == "ObjectDetection":
-            self.openVideo(self.cycle_vid.get("object_detection"), n_frame=self.image_holder.cur_idx)
+            self.openVideo(
+                self.cycle_vid.get("object_detection"),
+                n_frame=self.image_holder.cur_idx,
+            )
         self.changeDescription()
 
     def cyclePlotLeft(self):
@@ -314,7 +358,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def cyclePlotRight(self):
         """Change plot (cycle right in the plot_holder)
         """
-        self.openVideo(plot_dir=self.cycle_plot.down(), n_frame=self.plot_holder.cur_idx)
+        self.openVideo(
+            plot_dir=self.cycle_plot.down(), n_frame=self.plot_holder.cur_idx
+        )
 
     def changeFrameText(self):
         """Check if the text typed into frame line edit is correct, if so then store the value as int
@@ -325,7 +371,11 @@ class MainWindow(QtWidgets.QMainWindow):
             frame = int(num)
             maxF = self.image_holder.vidLen - 1
             if frame > maxF:
-                logging.warning("Too big number for frame. Falling back to max {0} frame.".format(maxF))
+                logging.warning(
+                    "Too big number for frame. Falling back to max {0} frame.".format(
+                        maxF
+                    )
+                )
                 frame = maxF
             self.ui.t_frame.setText(str(frame))
         else:
@@ -341,7 +391,11 @@ class MainWindow(QtWidgets.QMainWindow):
             num = check.group()
             fps = int(num)
             if fps > self.fps_limit:
-                logging.warning("Too big number for fps. Falling back to {} fps.".format(self.fps_limit))
+                logging.warning(
+                    "Too big number for fps. Falling back to {} fps.".format(
+                        self.fps_limit
+                    )
+                )
                 fps = self.fps_limit
             self.image_holder.changeFps(fps)
             self.ui.t_fps.setText(str(fps))
@@ -373,7 +427,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.vid_opened:
             img = self.image_holder.resize(width, height)
             self.changeFrameTo(img)
-    
+
     def resizePlotVideo(self, width, height):
         """Resize the image inside plot player
         
@@ -409,7 +463,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.worker.stop()
             self.thread.quit()
             self.thread.wait()
-            logging.info("Enable Play Button")         
+            logging.info("Enable Play Button")
             self.ui.actionPlay.setEnabled(True)
             self.ui.b_video_left.setEnabled(True)
             self.ui.b_video_right.setEnabled(True)
@@ -420,12 +474,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.t_fps.setEnabled(True)
             self.ui.t_frame.setEnabled(True)
 
-    def startVideo(self): 
+    def startVideo(self):
         """
         Starts video playing, or stops it if it is running.
         Starts video from the beginning if it is at it's end.
         Creates new worker thread for video playing.
-        """    
+        """
         if self.vid_running:
             self.stopVideo()
         else:
@@ -478,25 +532,29 @@ class MainWindow(QtWidgets.QMainWindow):
         img = None
         if img_dir is not None:
             self.vid_opened = True
-            self.images = sutils.list_directory(img_dir, extension=".png")
+            self.images = sutils.listDirectory(img_dir, extension=".png")
             width = self.vid_player.width()
             height = self.vid_player.height()
-            img = self.image_holder.setup(self.images, width, height, colour=self.user["Colour"], n_frame=n_frame)
-        
+            img = self.image_holder.setup(
+                self.images, width, height, colour=self.user["Colour"], n_frame=n_frame
+            )
+
         plot_img = None
         if plot_dir != None:
-            plots = sutils.list_directory(plot_dir, extension=".png")
+            plots = sutils.listDirectory(plot_dir, extension=".png")
             logging.info("Plots: {0}".format(len(plots)))
             width = self.plot_player.width()
             height = self.plot_player.height()
-            plot_img = self.plot_holder.setup(plots, width, height, colour=self.user["Colour"], n_frame=n_frame)
+            plot_img = self.plot_holder.setup(
+                plots, width, height, colour=self.user["Colour"], n_frame=n_frame
+            )
         self.changeFrameTo(img, plot_img)
 
     def jumpToFrame(self):
         """Jumps to the frame that was given in the frame line edit (t_frame) by the user
         """
         n_frame = int(self.ui.t_frame.text())
-        logging.info("Jumping to frame: {0}".format(n_frame)) 
+        logging.info("Jumping to frame: {0}".format(n_frame))
         self.image_holder.cur_idx = n_frame
         img = self.image_holder.jump(n_frame)
         plot_img = None
@@ -512,12 +570,14 @@ class MainWindow(QtWidgets.QMainWindow):
         Returns:
             (PIL Image, PIL Image) -- Tuple: video image and plot image (plot image is None if there are no plots)
         """
-        assert self.image_holder.cur_idx >= 0, ("Calling prevFrame at the beginning of video")
+        assert (
+            self.image_holder.cur_idx >= 0
+        ), "Calling prevFrame at the beginning of video"
 
-        img = self.image_holder.prevImg()  
+        img = self.image_holder.prevImg()
         plot_img = None
         if self.created != None:
-            plot_img = self.plot_holder.prevImg()      
+            plot_img = self.plot_holder.prevImg()
 
         return img, plot_img
 
@@ -529,13 +589,15 @@ class MainWindow(QtWidgets.QMainWindow):
         Returns:
             (PIL Image, PIL Image) -- Tuple: video image and plot image (plot image is None if there are no plots)
         """
-        assert self.vid_opened, ("Calling nextFrame before opening the video")
-        assert self.image_holder.cur_idx < self.image_holder.vidLen - 1, ("Calling nextFrame at the end of video")
+        assert self.vid_opened, "Calling nextFrame before opening the video"
+        assert (
+            self.image_holder.cur_idx < self.image_holder.vidLen - 1
+        ), "Calling nextFrame at the end of video"
 
-        img = self.image_holder.nextImg()  
+        img = self.image_holder.nextImg()
         plot_img = None
         if self.created != None:
-            plot_img = self.plot_holder.nextImg()      
+            plot_img = self.plot_holder.nextImg()
 
         return img, plot_img
 
@@ -559,5 +621,3 @@ class MainWindow(QtWidgets.QMainWindow):
         if cur - 1 >= 0:
             img, plot_img = self.prevFrame()
             self.changeFrameTo(img, plot_img)
-
-

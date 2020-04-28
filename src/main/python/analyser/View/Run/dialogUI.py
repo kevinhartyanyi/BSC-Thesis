@@ -36,7 +36,9 @@ class Ui_Dialog(object):
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.b_save = QtWidgets.QPushButton(Dialog)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.b_save.sizePolicy().hasHeightForWidth())
@@ -59,7 +61,9 @@ class Ui_Dialog(object):
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.b_vid = QtWidgets.QPushButton(Dialog)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.b_vid.sizePolicy().hasHeightForWidth())
@@ -82,10 +86,14 @@ class Ui_Dialog(object):
         self.horizontalLayout_9 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_9.setObjectName("horizontalLayout_9")
         self.b_ground_truth = QtWidgets.QPushButton(Dialog)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.b_ground_truth.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.b_ground_truth.sizePolicy().hasHeightForWidth()
+        )
         self.b_ground_truth.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily("GE Inspira")
@@ -104,7 +112,9 @@ class Ui_Dialog(object):
         self.verticalLayout_5.addLayout(self.horizontalLayout_9)
         self.verticalLayout_9.addLayout(self.verticalLayout_5)
         self.horizontalLayout_10.addLayout(self.verticalLayout_9)
-        spacerItem = QtWidgets.QSpacerItem(30, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem = QtWidgets.QSpacerItem(
+            30, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
+        )
         self.horizontalLayout_10.addItem(spacerItem)
         self.verticalLayout_17 = QtWidgets.QVBoxLayout()
         self.verticalLayout_17.setObjectName("verticalLayout_17")
@@ -174,7 +184,9 @@ class Ui_Dialog(object):
         self.verticalLayout_8.setObjectName("verticalLayout_8")
         self.verticalLayout_6 = QtWidgets.QVBoxLayout()
         self.verticalLayout_6.setObjectName("verticalLayout_6")
-        spacerItem1 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem1 = QtWidgets.QSpacerItem(
+            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
+        )
         self.verticalLayout_6.addItem(spacerItem1)
         self.label_4 = QtWidgets.QLabel(Dialog)
         font = QtGui.QFont()
@@ -201,7 +213,9 @@ class Ui_Dialog(object):
         self.verticalLayout_16.addLayout(self.verticalLayout_13)
         self.verticalLayout_15 = QtWidgets.QVBoxLayout()
         self.verticalLayout_15.setObjectName("verticalLayout_15")
-        spacerItem2 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem2 = QtWidgets.QSpacerItem(
+            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
+        )
         self.verticalLayout_15.addItem(spacerItem2)
         self.l_other = QtWidgets.QLabel(Dialog)
         font = QtGui.QFont()
@@ -224,7 +238,9 @@ class Ui_Dialog(object):
         self.horizontalLayout_7 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_7.setObjectName("horizontalLayout_7")
         self.b_colour = QtWidgets.QPushButton(Dialog)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.b_colour.sizePolicy().hasHeightForWidth())
@@ -273,7 +289,9 @@ class Ui_Dialog(object):
         self.c_object_detection.setObjectName("c_object_detection")
         self.verticalLayout_17.addWidget(self.c_object_detection)
         self.horizontalLayout_10.addLayout(self.verticalLayout_17)
-        spacerItem3 = QtWidgets.QSpacerItem(30, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem3 = QtWidgets.QSpacerItem(
+            30, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
+        )
         self.horizontalLayout_10.addItem(spacerItem3)
         self.verticalLayout_19 = QtWidgets.QVBoxLayout()
         self.verticalLayout_19.setObjectName("verticalLayout_19")
@@ -378,7 +396,9 @@ class Ui_Dialog(object):
         self.verticalLayout_14.setObjectName("verticalLayout_14")
         self.verticalLayout_3 = QtWidgets.QVBoxLayout()
         self.verticalLayout_3.setObjectName("verticalLayout_3")
-        spacerItem4 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem4 = QtWidgets.QSpacerItem(
+            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
+        )
         self.verticalLayout_3.addItem(spacerItem4)
         self.label_3 = QtWidgets.QLabel(Dialog)
         font = QtGui.QFont()
@@ -420,7 +440,9 @@ class Ui_Dialog(object):
         self.layout_v = QtWidgets.QVBoxLayout()
         self.layout_v.setObjectName("layout_v")
         self.b_run = QtWidgets.QPushButton(Dialog)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.b_run.sizePolicy().hasHeightForWidth())
@@ -445,47 +467,105 @@ class Ui_Dialog(object):
         self.label_5.setText(_translate("Dialog", "Data Save/Load"))
         self.b_save.setToolTip(_translate("Dialog", "Save path for results"))
         self.b_save.setText(_translate("Dialog", "Save Path"))
-        self.l_save.setToolTip(_translate("Dialog", "Path where the results will be saved"))
+        self.l_save.setToolTip(
+            _translate("Dialog", "Path where the results will be saved")
+        )
         self.b_vid.setToolTip(_translate("Dialog", "Video you wish to analyse"))
         self.b_vid.setText(_translate("Dialog", "Open Video"))
         self.l_vid.setToolTip(_translate("Dialog", "Path of the chosen video"))
-        self.b_ground_truth.setToolTip(_translate("Dialog", "Ground truth speed data for the video"))
+        self.b_ground_truth.setToolTip(
+            _translate("Dialog", "Ground truth speed data for the video")
+        )
         self.b_ground_truth.setText(_translate("Dialog", "Load Ground Truth"))
-        self.l_ground_truth.setToolTip(_translate("Dialog", "Path of the chosen ground truth speed file"))
+        self.l_ground_truth.setToolTip(
+            _translate("Dialog", "Path of the chosen ground truth speed file")
+        )
         self.label_6.setToolTip(_translate("Dialog", "Parameters for the calculations"))
         self.label_6.setText(_translate("Dialog", "Run Parameters"))
-        self.c_optimize.setToolTip(_translate("Dialog", "Parameter optimization with grid search"))
+        self.c_optimize.setToolTip(
+            _translate("Dialog", "Parameter optimization with grid search")
+        )
         self.c_optimize.setText(_translate("Dialog", "Optimize parameters"))
         self.label_7.setToolTip(_translate("Dialog", "Drop values from the top"))
         self.label_7.setText(_translate("Dialog", "Low Cut"))
-        self.t_low.setToolTip(_translate("Dialog", "Value between 0.0 - 1.0 (represents the percentage to drop)"))
+        self.t_low.setToolTip(
+            _translate(
+                "Dialog", "Value between 0.0 - 1.0 (represents the percentage to drop)"
+            )
+        )
         self.t_low.setText(_translate("Dialog", "0.0"))
         self.label_8.setToolTip(_translate("Dialog", "Drop values from the bottom"))
         self.label_8.setText(_translate("Dialog", "High Cut"))
-        self.t_high.setToolTip(_translate("Dialog", "Value between 0.0 - 1.0 (represents the percentage to drop)"))
+        self.t_high.setToolTip(
+            _translate(
+                "Dialog", "Value between 0.0 - 1.0 (represents the percentage to drop)"
+            )
+        )
         self.t_high.setText(_translate("Dialog", "1.0"))
-        self.label_4.setToolTip(_translate("Dialog", "Select superpixel segmentation (if selected then instead of indiviual pixels the results will be calculated with superpixels)"))
+        self.label_4.setToolTip(
+            _translate(
+                "Dialog",
+                "Select superpixel segmentation (if selected then instead of indiviual pixels the results will be calculated with superpixels)",
+            )
+        )
         self.label_4.setText(_translate("Dialog", "Superpixel segmentation"))
-        self.combo_superpixel.setToolTip(_translate("Dialog", "Superpixel segmentation methods"))
+        self.combo_superpixel.setToolTip(
+            _translate("Dialog", "Superpixel segmentation methods")
+        )
         self.combo_superpixel.setItemText(0, _translate("Dialog", "Nothing"))
-        self.combo_superpixel.setItemText(1, _translate("Dialog", "Felzenszwalb’s efficient graph based segmentation"))
-        self.combo_superpixel.setItemText(2, _translate("Dialog", "Quickshift image segmentation"))
-        self.combo_superpixel.setItemText(3, _translate("Dialog", "SLIC - K-Means based image segmentation"))
-        self.combo_superpixel.setItemText(4, _translate("Dialog", "Compact watershed segmentation of gradient images"))
+        self.combo_superpixel.setItemText(
+            1, _translate("Dialog", "Felzenszwalb’s efficient graph based segmentation")
+        )
+        self.combo_superpixel.setItemText(
+            2, _translate("Dialog", "Quickshift image segmentation")
+        )
+        self.combo_superpixel.setItemText(
+            3, _translate("Dialog", "SLIC - K-Means based image segmentation")
+        )
+        self.combo_superpixel.setItemText(
+            4, _translate("Dialog", "Compact watershed segmentation of gradient images")
+        )
         self.l_other.setToolTip(_translate("Dialog", "Other options"))
         self.l_other.setText(_translate("Dialog", "Other"))
-        self.c_csv.setToolTip(_translate("Dialog", "Save the comparison between the calculated speed and the ground truth speed in a csv file"))
+        self.c_csv.setToolTip(
+            _translate(
+                "Dialog",
+                "Save the comparison between the calculated speed and the ground truth speed in a csv file",
+            )
+        )
         self.c_csv.setText(_translate("Dialog", "Create CSV from Speed Error"))
-        self.b_colour.setToolTip(_translate("Dialog", "Filling colour around the video"))
+        self.b_colour.setToolTip(
+            _translate("Dialog", "Filling colour around the video")
+        )
         self.b_colour.setText(_translate("Dialog", "Image Fill Colour"))
-        self.l_colour.setToolTip(_translate("Dialog", "The currently selected colours hex code"))
-        self.c_draw.setToolTip(_translate("Dialog", "Calculate optical flow arrows (you can view them in the video player)"))
+        self.l_colour.setToolTip(
+            _translate("Dialog", "The currently selected colours hex code")
+        )
+        self.c_draw.setToolTip(
+            _translate(
+                "Dialog",
+                "Calculate optical flow arrows (you can view them in the video player)",
+            )
+        )
         self.c_draw.setText(_translate("Dialog", "Calculate optical flow arrows"))
-        self.c_velocity.setToolTip(_translate("Dialog", "Calculate optical flow directions with colours (you can view them in the video player)"))
-        self.c_velocity.setText(_translate("Dialog", "Create optical flow directions with colours"))
-        self.c_object_detection.setToolTip(_translate("Dialog", "Run Object Detection on video"))
-        self.c_object_detection.setText(_translate("Dialog", "Calculate Object Detection"))
-        self.label.setToolTip(_translate("Dialog", "Select the videos you wish to create"))
+        self.c_velocity.setToolTip(
+            _translate(
+                "Dialog",
+                "Calculate optical flow directions with colours (you can view them in the video player)",
+            )
+        )
+        self.c_velocity.setText(
+            _translate("Dialog", "Create optical flow directions with colours")
+        )
+        self.c_object_detection.setToolTip(
+            _translate("Dialog", "Run Object Detection on video")
+        )
+        self.c_object_detection.setText(
+            _translate("Dialog", "Calculate Object Detection")
+        )
+        self.label.setToolTip(
+            _translate("Dialog", "Select the videos you wish to create")
+        )
         self.label.setText(_translate("Dialog", "Create Video"))
         self.label_2.setToolTip(_translate("Dialog", "Frame per second"))
         self.label_2.setText(_translate("Dialog", "Fps"))
@@ -493,7 +573,9 @@ class Ui_Dialog(object):
         self.t_fps.setText(_translate("Dialog", "30"))
         self.c_of.setToolTip(_translate("Dialog", "Video of optical flow"))
         self.c_of.setText(_translate("Dialog", "Optical Flow"))
-        self.c_back_of.setToolTip(_translate("Dialog", "Video of backward optical flow"))
+        self.c_back_of.setToolTip(
+            _translate("Dialog", "Video of backward optical flow")
+        )
         self.c_back_of.setText(_translate("Dialog", "Back Optical Flow"))
         self.c_depth.setToolTip(_translate("Dialog", "Video of depth estimation"))
         self.c_depth.setText(_translate("Dialog", "Depth"))
@@ -501,17 +583,30 @@ class Ui_Dialog(object):
         self.c_error_plot_video.setText(_translate("Dialog", "Error Plot"))
         self.c_speed_plot_video.setToolTip(_translate("Dialog", "Video of speed plot"))
         self.c_speed_plot_video.setText(_translate("Dialog", "Speed Plot"))
-        self.c_super_pixel_video.setToolTip(_translate("Dialog", "Video of superpixel segmentation"))
+        self.c_super_pixel_video.setToolTip(
+            _translate("Dialog", "Video of superpixel segmentation")
+        )
         self.c_super_pixel_video.setText(_translate("Dialog", "Super Pixel"))
-        self.c_crash_plot_video.setToolTip(_translate("Dialog", "Video of Time to Crash"))
+        self.c_crash_plot_video.setToolTip(
+            _translate("Dialog", "Video of Time to Crash")
+        )
         self.c_crash_plot_video.setText(_translate("Dialog", "Time to Crash Plot"))
-        self.label_3.setToolTip(_translate("Dialog", "Select the plots you wish to create"))
+        self.label_3.setToolTip(
+            _translate("Dialog", "Select the plots you wish to create")
+        )
         self.label_3.setText(_translate("Dialog", "Create Plot"))
         self.c_speed_plot.setToolTip(_translate("Dialog", "Plot the calculated speed"))
         self.c_speed_plot.setText(_translate("Dialog", "Speed Plot"))
-        self.c_error_plot.setToolTip(_translate("Dialog", "Plot the error between the calculated speed and the ground truth speed"))
+        self.c_error_plot.setToolTip(
+            _translate(
+                "Dialog",
+                "Plot the error between the calculated speed and the ground truth speed",
+            )
+        )
         self.c_error_plot.setText(_translate("Dialog", "Error Plot"))
-        self.c_crash_plot.setToolTip(_translate("Dialog", "Plot time to crash based on speed and depth"))
+        self.c_crash_plot.setToolTip(
+            _translate("Dialog", "Plot time to crash based on speed and depth")
+        )
         self.c_crash_plot.setText(_translate("Dialog", "Time to Crash Plot"))
         self.b_run.setToolTip(_translate("Dialog", "Start the calculation"))
         self.b_run.setText(_translate("Dialog", "Run"))

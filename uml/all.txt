@@ -53,10 +53,10 @@ class MainWindow {
     + depth_dir: object = None
     + created: object = None
     + app: object
-    + cycle_vid: cycleVid
-    + cycle_plot: cycleVid
-    + image_holder: imageHolder
-    + plot_holder: imageHolder
+    + cycle_vid: CycleVid
+    + cycle_plot: CycleVid
+    + image_holder: ImageHolder
+    + plot_holder: ImageHolder
     + logInfo: LogInfo
 
     + imageSetup(): void
@@ -238,10 +238,10 @@ Dialog <-- MainWindow
 
 
 class VelocityCalculator {
-    + read_depth: dictionary
+    + readDepth: dictionary
     + read_flow: object
     + average: object
-    + calculate_shifted_labels: object
+    + calculateShiftedLabels: object
     + fst_img_fn: str
     + snd_img_fn: str
     + fst_depth_fn: str
@@ -264,22 +264,22 @@ class VelocityCalculator {
 
 class utils {
     + getResultDirs(): dictionary
-    + calc_angle_of_view(int, int, int): (int, int)
-    + calc_size(float, float, int): (int, int)
-    + calculate_shifted_labels(numpy array, float): numpy array
-    + calculate_velocity_and_orientation_vectors(numpy array, numpy array, numpy array, numpy array, numpy array): numpy array
-    + calculate_velocity_and_orientation_vectors_vectorised(numpy array, numpy array, numpy array, numpy array, numpy array, numpy array,): numpy array
-    + calc_bidi_errormap(numpy array, numpy array, float, bool): (numpy array, numpy array)
-    + draw_velocity_vectors(numpy array, numpy array, str, bool): numpy array
-    + save_as_image(str, numpy array, float, float): void
-    + read_depth(str, int, int): numpy array
-    + list_directory(str, str): [str]
-    + vector_distance(numpy array, numpy array, numpy array)
-    + reduce_sort(numpy array, float, float, float): numpy array
-    + vector_speedOF_Simple(numpy array, float, float): (float, numpy array)
+    + calcAngleOfView(int, int, int): (int, int)
+    + calcSize(float, float, int): (int, int)
+    + calculateShiftedLabels(numpy array, float): numpy array
+    + calculateVelocityAndOrientationVectors(numpy array, numpy array, numpy array, numpy array, numpy array): numpy array
+    + calculateVelocityAndOrientationVectorsVectorised(numpy array, numpy array, numpy array, numpy array, numpy array, numpy array,): numpy array
+    + calcBidiErrormap(numpy array, numpy array, float, bool): (numpy array, numpy array)
+    + drawVelocityVectors(numpy array, numpy array, str, bool): numpy array
+    + saveAsImage(str, numpy array, float, float): void
+    + readDepth(str, int, int): numpy array
+    + listDirectory(str, str): [str]
+    + vectorDistance(numpy array, numpy array, numpy array)
+    + reduceSort(numpy array, float, float, float): numpy array
+    + vectorSpeedOFSimple(numpy array, float, float): (float, numpy array)
     + normalize(numpy array): numpy array
     + average(numpy array, numpy array): numpy array
-    + error_comparison_Speed_Vectors(float, float, str, bool): float
+    + errorComparisonSpeedVectors(float, float, str, bool): float
 
 }
 
@@ -299,7 +299,7 @@ readFlowFile <-- utils
 computeColor <-- utils
 
 
-class cycleVid {
+class CycleVid {
     + container : list
     + idx : int
 
@@ -312,7 +312,7 @@ class cycleVid {
     + up(): str    
 }
 
-class imageHolder {
+class ImageHolder {
     + maxLen : int
     + vidLen : object = None
     + img_list : object = None
@@ -353,7 +353,7 @@ class Worker{
     + stop(): void
 }
 
-class imageLoader {
+class ImageLoader {
     + fn: object
     + args: object
     + kwargs: object
@@ -365,16 +365,16 @@ class imageLoader {
 class utils {
     + resizeImg(PIL Image, int): PIL Image
     + fillImg(PIL Image, (int, int, int, int), (int, int)): PIL Image
-    + images_from_video(str, str): void
-    + video_from_images(str, str, int): void
+    + imagesFromVideo(str, str): void
+    + videoFromImages(str, str, int): void
 }
 
 
 QObject <|-- Worker
-QRunnable <|-- imageLoader
+QRunnable <|-- ImageLoader
 
-imageLoader <-- imageHolder
-utils <-- imageHolder
+ImageLoader <-- ImageHolder
+utils <-- ImageHolder
 
 
 class CalculationRunner {
@@ -458,8 +458,8 @@ Model.Algorithms.Monodepth <-- CalculationRunner
 VideoPlayer <-- MainWindow
 utils <-- MainWindow
 Worker <-- MainWindow
-imageHolder <-- MainWindow
-cycleVid <-- MainWindow
+ImageHolder <-- MainWindow
+CycleVid <-- MainWindow
 
 CalculationRunner <-- Dialog
 

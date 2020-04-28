@@ -9,7 +9,7 @@ skinparam class {
     BorderColor DarkSlateGray
 }
 
-class cycleVid {
+class CycleVid {
     + container : list
     + idx : int
 
@@ -22,7 +22,7 @@ class cycleVid {
     + up(): str    
 }
 
-class imageHolder {
+class ImageHolder {
     + maxLen : int
     + vidLen : object = None
     + img_list : object = None
@@ -63,7 +63,7 @@ class Worker{
     + stop(): void
 }
 
-class imageLoader {
+class ImageLoader {
     + fn: object
     + args: object
     + kwargs: object
@@ -75,8 +75,8 @@ class imageLoader {
 class utils {
     + resizeImg(PIL Image, int): PIL Image
     + fillImg(PIL Image, (int, int, int, int), (int, int)): PIL Image
-    + images_from_video(str, str): void
-    + video_from_images(str, str, int): void
+    + imagesFromVideo(str, str): void
+    + videoFromImages(str, str, int): void
 }
 
 class VideoPlayer {
@@ -99,9 +99,9 @@ package "Qt" #DDDDDD {
 QLabel <|-- VideoPlayer
 
 QObject <|-- Worker
-QRunnable <|-- imageLoader
+QRunnable <|-- ImageLoader
 
-imageLoader <-- imageHolder
-utils <-- imageHolder
+ImageLoader <-- ImageHolder
+utils <-- ImageHolder
 
 @enduml

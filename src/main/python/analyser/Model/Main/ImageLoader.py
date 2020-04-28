@@ -2,6 +2,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
+
 class WorkerSignals(QObject):
     result = pyqtSignal(object)
 
@@ -14,7 +15,7 @@ class Worker(QRunnable):
         self.fn = fn
         self.args = args
         self.kwargs = kwargs
-        self.signals = WorkerSignals()          
+        self.signals = WorkerSignals()
 
     @pyqtSlot()
     def run(self):
@@ -22,4 +23,3 @@ class Worker(QRunnable):
         """
         result = self.fn(*self.args, **self.kwargs)
         self.signals.result.emit(result)  # Return the result of the processing
-    
